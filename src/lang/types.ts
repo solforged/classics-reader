@@ -90,6 +90,11 @@ export interface LanguagePack {
   fold(text: string): string;
   /** Search key: fold() reduced further so a query typed without diacritics matches. */
   searchKey(text: string): string;
+  /**
+   * Rewrites a search key using neighbouring characters, without changing its length; searchKey() applies it. The
+   * search page builds keys a character at a time (to map matches back to the text) and applies it afterwards.
+   */
+  searchContext?(key: string): string;
   /** English labels for a UD morphology string (src/lib/morph.ts). */
   describeMorph(morph: string, options?: { tableLabel?: string }): MorphLabel;
   /** Dictionaries in display order. */

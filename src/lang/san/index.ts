@@ -2,13 +2,14 @@ import type { LanguagePack } from "../types";
 import { DICTIONARIES } from "./dictionaries";
 import { describeMorph } from "./morph";
 import { iastToDevanagari } from "./script";
-import { fold, searchKey } from "./spelling";
+import { fold, searchContext, searchKey } from "./spelling";
 
 export const sanskrit: LanguagePack = {
   code: "sa-Latn",
   name: "Sanskrit",
   fold,
   searchKey,
+  searchContext,
   describeMorph,
   dictionaries: DICTIONARIES,
   scriptLabel: "IAST",

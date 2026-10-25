@@ -58,7 +58,8 @@ sandhi or in a compound (*parayopetāste*) opens one card per word, each with it
 grammar and entry from the DCS dictionary. Of the thirteen written forms DCS leaves unannotated (Besant's
 extra speaker captions, *vidhīyate* at 2.67, four words in chapter 13), all but *tajjyotis* show
 *candidate* analyses that DCS gives the same form elsewhere. Search ignores IAST diacritics (`sraddha` finds *śraddhā*)
-and accepts Devanagari (`श्रद्धा` finds *śraddhā* too), in the search page and the lexicon filter.
+and accepts Devanagari (`श्रद्धा` finds *śraddhā* too), in the search page and the lexicon filter. It treats
+anusvāra and a class nasal before a stop as the same letter (`saṃjaya` finds *sañjaya*).
 The top-bar toggle shows the Sanskrit in Devanagari on every page (`src/lang/san/script.ts`,
 `src/scripts/script.ts`); text is still stored, searched and linked in IAST. Credits are in
 `src/components/sources/Gita.astro`.

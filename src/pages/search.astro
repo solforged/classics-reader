@@ -70,7 +70,7 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
       for (let j = 0; j < k.length; j++) map.push(i);
       key += k;
     }
-    return { key, map };
+    return { key: lang.searchContext ? lang.searchContext(key) : key, map };
   }
 
   let index: Promise<Indexed[]> | undefined;
