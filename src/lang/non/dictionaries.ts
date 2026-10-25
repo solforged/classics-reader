@@ -1,6 +1,17 @@
 // The Old Norse dictionaries, in word-panel order. scripts/build-data.ts writes their entries under these ids.
 import { parseMorph } from "../../lib/morph";
 import type { Dictionary } from "../types";
+import type { DictHit } from "../../lib/dict";
+
+/** Suffix senses in Zoëga, separate from the ordinary words a, at, and gi. */
+export function suffixEntry(lemma: string): DictHit | undefined {
+  const gloss = lemma === "-a" || lemma === "-at"
+    ? "Negative verbal suffix, <i>not</i>."
+    : lemma === "-gi"
+      ? "A suffix used especially with negative, but also with positive and indefinite force; -ki after t or s."
+      : undefined;
+  return gloss ? { entries: { zoega: [{ head: lemma, sections: [{ senses: [{ gloss }] }] }] } } : undefined;
+}
 
 const ZOEGA_ABBREVIATIONS: Record<string, string> = {
   "e-m": "einhverjum — someone or something (dative)",

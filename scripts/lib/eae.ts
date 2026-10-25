@@ -98,10 +98,12 @@ class LineBuilder {
   }
 }
 
-function wordAnalysis(w: El, table: AnalysisTable, surface: string): number[] {
+function wordAnalysis(w: El, table: AnalysisTable, surface: string, word?: string): number[] {
   const lemma = w.getAttribute("lemma");
   const msa = w.getAttributeNS(ME, "msa") || w.getAttribute("me:msa") || "";
-  if (lemma) return [table.add([lemma.normalize("NFC"), menotaToUd(msa), "e"])];
+  if (lemma) return [table.add(word !== undefined
+    ? [lemma.normalize("NFC"), menotaToUd(msa), "e", word]
+    : [lemma.normalize("NFC"), menotaToUd(msa), "e"])];
   return table.lookup(surface);
 }
 
@@ -119,11 +121,15 @@ function walkInline(el: El, line: LineBuilder, table: AnalysisTable) {
     } else if (name === "seg" && c.getAttribute("type") === "enc") {
       // Enclitic group: one graphic word made of several grammatical words (vild+u).
       let first = true;
-      for (const w of Array.from(c.getElementsByTagNameNS(TEI, "w")) as El[]) {
+      const words = Array.from(c.getElementsByTagNameNS(TEI, "w")) as El[];
+      for (const [i, w] of words.entries()) {
         const norm = normOf(w);
         if (!norm) continue;
         const text = textOf(norm);
-        line.word(text, wordAnalysis(w, table, text), w.getAttribute("type") === "supplied", !first);
+        // A zero-width following word is fused into this segment; its independent surface is not supplied.
+        const next = words[i + 1] && normOf(words[i + 1]!);
+        const word = next && !textOf(next) ? "" : text;
+        line.word(text, wordAnalysis(w, table, text, word), w.getAttribute("type") === "supplied", !first);
         first = false;
       }
     } else if (name === "choice") {

@@ -2,7 +2,7 @@
 import { lang, shardOf } from "../lang";
 import type { DictHit } from "../lib/dict";
 import { dictionaryHtml } from "../lib/entry";
-import { expandMorph, parseMorph } from "../lib/morph";
+import { expandMorph, formatMorph, parseMorph } from "../lib/morph";
 import { selectParadigm, type Paradigm } from "../lib/paradigm";
 import { applyScript, sourceText } from "./script";
 
@@ -143,10 +143,14 @@ function paradigms(lemma: string): Promise<Paradigm[]> {
 function readingsHtml(readings: ClientAnalysis[]): string {
   const seen = new Set<string>();
   // An ambiguous reading ("Case=Acc,Nom") lists as one reading per value, so it merges with readings it overlaps.
-  const unique = readings.flatMap((reading) => expandMorph(reading[1])).map((morph) => ({
-    morph: lang.describeMorph(morph),
-    features: new Map(Object.entries(parseMorph(morph).feats).map(([name, values]) => [name, values.join(",")])),
-  })).filter(({ morph }) => {
+  const unique = readings.flatMap((reading) => expandMorph(reading[1])).map((morph) => {
+    const parsed = parseMorph(morph);
+    return {
+      morph: lang.describeMorph(morph),
+      upos: parsed.upos,
+      features: new Map(Object.entries(parsed.feats).map(([name, values]) => [name, values.join(",")])),
+    };
+  }).filter(({ morph }) => {
     const key = `${morph.pos}:${morph.form}`;
     if (seen.has(key)) return false;
     seen.add(key);
@@ -165,22 +169,11 @@ function readingsHtml(readings: ClientAnalysis[]): string {
   }
   const severalClasses = new Set(unique.map((reading) => reading.morph.pos)).size > 1;
   const forms = groups.map((group) => {
-    const words = group.map((reading) => reading.morph.form.split(" "));
-    const first = words[0]!;
-    let prefix = 0;
-    let suffix = 0;
-    if (words.length > 1) {
-      while (prefix < first.length && words.every((w) => w[prefix] === first[prefix])) prefix++;
-      while (
-        suffix < first.length - prefix &&
-        words.every((w) => w[w.length - 1 - suffix] === first[first.length - 1 - suffix])
-      ) suffix++;
-    }
-    const alternatives = words.map((w) => w.slice(prefix, suffix ? -suffix : undefined).join(" "));
-    const joined = alternatives.length > 1
-      ? `${alternatives.slice(0, -1).join(", ")} or ${alternatives.at(-1)}`
-      : alternatives[0]!;
-    const form = [...first.slice(0, prefix), joined, ...first.slice(first.length - suffix)].filter(Boolean).join(" ");
+    const keys = new Set(group.flatMap((reading) => [...reading.features.keys()]));
+    const feats = Object.fromEntries([...keys].map((key) => [
+      key, [...new Set(group.flatMap((reading) => reading.features.get(key)?.split(",") ?? []))],
+    ]));
+    const form = lang.describeMorph(formatMorph({ upos: group[0]!.upos, feats })).form;
     return `${severalClasses ? `${group[0]!.morph.pos}: ` : ""}${form}`;
   }).filter(Boolean);
   const first = forms[0] ? `<p class="form">${esc(forms[0])}</p>` : "";
@@ -275,13 +268,25 @@ async function showWord(el: HTMLElement) {
     const paradigm = tables && selectParadigm(tableRecords.get(lemma) ?? [], lemma, tables.kind(morph, lemma));
     if (tables && paradigm) {
       const highlight = readings.flatMap((reading) => tables.cells(reading[1], reading[0]));
+      // An enclitic group's segments are fragments (vild + u for vildu), so its spelling is not noted.
+      const segments = [...new Set(readings.map((reading) => reading[5]).filter(Boolean))];
+      const form = enclitic ? undefined : segments.length === 1 ? segments[0] : word;
       block.querySelector(".paradigm-slot")!.outerHTML =
         `<details class="paradigm-details"${index === 0 ? " open" : ""}><summary>${tables.heading(paradigm.kind)}</summary>`
-        + tables.html(paradigm, { id: `word-paradigm-${index}`, highlight }) + "</details>";
+        + tables.html(paradigm, { id: `word-paradigm-${index}`, highlight, form }) + "</details>";
     } else {
       block.querySelector(".paradigm-slot")!.remove();
     }
-    const content = dictionaryHtml(hits.get(lemma), { morph, work: slug, parts, properNoun: source === "n" });
+    if (paradigm?.label) {
+      const props = [...new Set(readings.flatMap((reading) =>
+        lang.describeMorph(reading[1], { tableLabel: paradigm.label }).props))];
+      const area = block.querySelector<HTMLElement>(".props");
+      if (area) {
+        area.textContent = props.join(" · ");
+        area.hidden = !props.length;
+      }
+    }
+    const content = dictionaryHtml(hits.get(lemma), { lemma, morph, work: slug, parts, properNoun: source === "n" });
     block.querySelector(".dict-slot")!.outerHTML = `<div class="dict">${content}</div>`;
   });
   applyScript(body);

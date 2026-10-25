@@ -31,8 +31,8 @@ export interface EnUnit {
 export type AnalysisSource = "e" | "a" | "w" | "n";
 /**
  * [lemma, UD morphology (src/lib/morph.ts) or "", source, word]. `word` is the word as the edition segments it, when
- * one written form joins several words (Sanskrit sandhi and compounds): the token's edition analyses are then its
- * words in order.
+ * one written form joins several words (Norse enclitics, Sanskrit sandhi and compounds): the token's edition
+ * analyses are then its words in order. An empty word marks an independent surface the edition does not supply.
  */
 export type Analysis = [lemma: string, morph: string, source: AnalysisSource, word?: string];
 

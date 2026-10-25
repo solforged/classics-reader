@@ -133,11 +133,11 @@ export function imperativeStem(stem: string): string {
   return stem.replace(/nd$/, "tt").replace(/ld$/, "lt");
 }
 
-/** Middle -sk after a stem: s + sk → sk, dental + sk → zk, doubled l/n/r simplify before sk. */
+/** Middle -sk after a stem: s + sk → sk and dental + sk → zk. */
 export function withSk(stem: string): string {
   if (stem.endsWith("s")) return `${stem}k`;
   if (/[ðdt]$/.test(stem)) return `${stem.replace(/[ðdt]+$/, "")}zk`.replace(/zzk$/, "zk");
-  return `${stem.replace(/([lnr])\1$/, "$1")}sk`;
+  return `${stem}sk`;
 }
 
 /** Weak dental clusters: ð + d → dd; doubled g/k/p/s/r simplify before a different dental. */

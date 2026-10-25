@@ -1,5 +1,5 @@
 import type { LanguagePack } from "../types";
-import { DICTIONARIES } from "./dictionaries";
+import { DICTIONARIES, suffixEntry } from "./dictionaries";
 import { describeMorph } from "./morph";
 import { morphCells, paradigmKind } from "./paradigm";
 import { fold, searchKey } from "./spelling";
@@ -12,6 +12,7 @@ export const oldNorse: LanguagePack = {
   searchKey,
   describeMorph,
   dictionaries: DICTIONARIES,
+  dictionaryEntry: suffixEntry,
   tables: {
     kind: paradigmKind,
     cells: morphCells,

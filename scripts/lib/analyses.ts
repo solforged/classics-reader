@@ -32,6 +32,14 @@ const DIPLOMATIC_STEPS: [RegExp, string][] = [
   [/au/g, "ö"],
 ];
 
+/** Later -st/-zt corresponds to middle -sk/-zk, including dental and geminate assimilation. */
+const MIDDLE_STEPS: [RegExp, string][] = [
+  [/st$/, "sk"],
+  [/zt$/, "zk"],
+  [/[ðdt]st$/, "zk"],
+  [/([lnr])\1st$/, "$1sk"],
+];
+
 /** Alternative lookup keys: each rule alone, then all rules applied in sequence. */
 export function spellingVariants(key: string, diplomatic: boolean): string[] {
   const steps = diplomatic ? [...DIPLOMATIC_STEPS, ...NORMAL_STEPS] : NORMAL_STEPS;
@@ -43,6 +51,12 @@ export function spellingVariants(key: string, diplomatic: boolean): string[] {
     cur = cur.replace(re, to);
     if (cur !== key) out.add(cur);
   }
+  for (const variant of [key, ...out]) {
+    for (const [re, to] of MIDDLE_STEPS) {
+      const middle = variant.replace(re, to);
+      if (middle !== variant) out.add(middle);
+    }
+  }
   return [...out];
 }
 
@@ -51,6 +65,8 @@ const deaccent = (k: string) => k.normalize("NFD").replace(/\p{M}/gu, "").normal
 interface IndexedAnalysis {
   analysis: Analysis;
   count: number;
+  /** Survived the exact key's attestation filter before a diplomatic merger. */
+  exact?: boolean;
 }
 
 export class FormIndex {
@@ -59,7 +75,7 @@ export class FormIndex {
   private bare = new Map<string, Set<string>>();
 
   add(form: string, a: Analysis) {
-    const k = fold(form);
+    const k = fold(form.replace(/ǿ/g, "œ"));
     if (!k) return;
     // The clitic flag describes a particular occurrence, not the form.
     const analysis: Analysis = [a[0], withoutFeature(a[1], "Clitic"), a[2]];
@@ -83,16 +99,19 @@ export class FormIndex {
 
   private hit(k: string, diplomatic: boolean): Map<string, IndexedAnalysis> | undefined {
     const h = this.forms.get(k);
-    if (h || !diplomatic) return h;
+    if (!diplomatic) return h;
     const keys = this.bare.get(deaccent(k));
-    if (!keys) return undefined;
+    if (!keys) return h;
     const merged = new Map<string, IndexedAnalysis>();
-    for (const key of keys) {
-      for (const [id, a] of this.forms.get(key)!) {
+    const keepExact = h && ![...h.values()].some((a) => a.analysis[2] !== "w");
+    for (const key of new Set([k, deaccent(k), ...keys])) {
+      for (const [id, a] of this.forms.get(key) ?? []) {
         const prev = merged.get(id);
-        if (!prev) merged.set(id, { ...a });
+        const exact = key === k && !!keepExact;
+        if (!prev) merged.set(id, { ...a, exact });
         else {
           prev.count += a.count;
+          prev.exact ||= exact;
           if (prev.analysis[2] === "w" && a.analysis[2] !== "w") prev.analysis = a.analysis;
         }
       }
@@ -101,10 +120,14 @@ export class FormIndex {
   }
 
   get(surface: string, diplomatic = false): Analysis[] {
-    const k = fold(surface);
+    const k = fold(surface.replace(/ǿ/g, "œ"));
     for (const key of [k, ...spellingVariants(k, diplomatic)]) {
       const h = this.hit(key, diplomatic);
-      if (h) return rank([...h.values()]);
+      if (!h) continue;
+      // A middle spelling bridge must never create nominal readings for an unrelated -st word.
+      const middle = /(?:st|zt|z)$/.test(k) && /(?:sk|zk)$/.test(key);
+      const list = [...h.values()].filter((a) => !middle || /^VERB\b.*\bVoice=Mid\b/.test(a.analysis[1]));
+      if (list.length) return rank(list, diplomatic);
     }
     return [];
   }
@@ -114,12 +137,18 @@ export class FormIndex {
   }
 }
 
-/** Most frequent attested readings first; Wiktionary candidates only when none are attested. */
-function rank(list: IndexedAnalysis[]): Analysis[] {
-  const attested = list.filter((a) => a.analysis[2] !== "w");
-  return (attested.length ? attested.sort((a, b) => b.count - a.count) : list)
-    .slice(0, 8)
-    .map((a) => a.analysis);
+/** Attested readings lead; diplomatic mergers preserve exact candidates without flooding them with unattested ones. */
+function rank(list: IndexedAnalysis[], diplomatic: boolean): Analysis[] {
+  const attested = list.filter((a) => a.analysis[2] !== "w").sort((a, b) => b.count - a.count);
+  const candidates = attested.length
+    ? [...attested, ...(diplomatic ? list.filter((a) => a.analysis[2] === "w" && a.exact) : [])] : list;
+  const seen = new Set<string>();
+  return candidates.filter(({ analysis }) => {
+    const id = `${analysis[0]}\t${withoutFeature(analysis[1], "InflClass")}`;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  }).slice(0, 8).map((a) => a.analysis);
 }
 
 /** Per-work analysis table; ids index into Work.analyses. */

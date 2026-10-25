@@ -31,12 +31,22 @@ See `src/components/sources/Edda.astro` (served at `/sources/`) for full credits
 Codex Regius words use the edition's own annotation. Other texts get *candidate*
 analyses: spellings the edition annotates elsewhere (most frequent first), then
 Wiktionary inflection tables, then Bellows's name index for capitalized words.
+Lookup bridges the prose's middle-voice *-st* to Wiktionary's *-sk*, and Bugge's
+unaccented manuscript spellings match accented and unaccented forms alike.
 About 80–93% of those words get a candidate.
 
 Dictionary lookup bridges the edition's spellings to the dictionaries' headwords
 (*loft*/*lopt*, *ǿði*/*œði*) and splits unlisted compounds into listed parts
 (`scripts/build-data.ts`). The panel renders Zoëga's entries as numbered senses and
-opens the homograph section that fits the reading (`src/lib/entry.ts`).
+opens the homograph section that fits the reading (`src/lib/entry.ts`). Enclitic
+suffixes (*-a*, *-at*, *-gi*) get their own short entries rather than the folded
+homograph *a*/*at*/*gi*.
+
+Inflection tables count each word of an enclitic group by its own written part,
+so *skulu*'s table lists *skal* for *skalat*, not the whole written form. Verb
+tables open the block holding the clicked form, decline past participles where
+Wiktionary gives the participle's table, and note the text's spelling when the
+table spells the form differently (*skoðask*, here *skoðast*).
 
 ## The Gītā Reader
 

@@ -4,7 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { WORKS, type WorkDef } from "./catalog";
 import { Concordance, Outputs, ROOT, statsLine } from "./core/outputs";
-import { zoegaFits, zoegaGrammarPattern } from "../src/lang/non/dictionaries";
+import { suffixEntry, zoegaFits, zoegaGrammarPattern } from "../src/lang/non/dictionaries";
 import { fold } from "../src/lang/non/spelling";
 import type { DictEntry as PrintedEntry, DictHit } from "../src/lib/dict";
 import { parseMorph } from "../src/lib/morph";
@@ -435,7 +435,8 @@ for (const lemma of usedLemmas) {
   if (!fold(lemma)) continue;
   const morph = lemmaMorph.get(lemma) ?? "";
   const hit = dictionaryHit(lemma, morph);
-  let gloss = dictionaryGloss(hit);
+  const suffix = suffixEntry(lemma)?.entries.zoega?.[0]?.sections[0]?.senses?.[0]?.gloss;
+  let gloss = suffix ? suffix.replace(/<[^>]+>/g, "") : dictionaryGloss(hit);
   const proper = parseMorph(morph).upos === "PROPN";
   const n = proper ? names.glosses(lemma) : [];
   if (n.length) {

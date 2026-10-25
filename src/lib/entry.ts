@@ -115,6 +115,8 @@ function entriesHtml(dict: Dictionary, articles: Article[], morph?: string): str
 }
 
 export interface DictionaryOptions {
+  /** Exact lemma, for pack-specific senses that share a dictionary lookup key. */
+  lemma?: string;
   /** The reading's UD morphology, to open the homograph section that fits it. */
   morph?: string;
   /** Current work slug, to prefer names entries that cite it. */
@@ -126,6 +128,7 @@ export interface DictionaryOptions {
 
 /** Source blocks shared by the reader panel and build-time lemma pages. */
 export function dictionaryHtml(hit: DictHit | undefined, options: DictionaryOptions = {}): string {
+  if (options.lemma) hit = lang.dictionaryEntry?.(options.lemma) ?? hit;
   if (!hit) return `<p class="wp-empty">No dictionary entry found.</p>`;
   const blocks: string[] = [];
   const common: string[] = [];

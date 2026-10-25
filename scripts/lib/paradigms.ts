@@ -91,8 +91,15 @@ function taggedCells(kind: ParadigmKind, tags: string[]): string[] {
   const persons: string[] = PERSONS.filter(([tag]) => tags.includes(tag)).map(([, code]) => code);
   const keys = new Set<string>();
   if (kind === "verb") {
-    // A verb entry can also contain the adjective declension of its past participle.
-    if (cases.length) return [];
+    if (cases.length) {
+      if (!tags.includes("participle") || !tags.includes("past") || tags.includes("mediopassive")) return [];
+      const mode = tags.includes("weak") || tags.includes("definite") ? "pp_wk" : "pp_str";
+      for (const c of cases) for (const n of numbers) {
+        const ending = n === "p" && /[dg]/.test(c) ? [""] : genders;
+        for (const g of ending) keys.add(`${mode}|${c}${n}${g}`);
+      }
+      return [...keys];
+    }
     const modes = tags.includes("mediopassive") ? ["mpass"] : ["act"];
     for (const mode of modes) {
       if (tags.includes("infinitive")) keys.add(`${mode}|infinitive`);
@@ -206,6 +213,10 @@ export function extract(entry: WiktEntry): Candidate | undefined {
         const voice = mode || (verbTables > 1 ? "mpass" : "act");
         addForms(cells, `${voice}|${code}`, args["1"] ?? "");
       }
+      if (name === "non-decl-cell" && (mode === "str" || mode === "wk") && /^[nadg][sp][mfn]?$/.test(code)) {
+        const nominal = /^[dg]p/.test(code) ? code.slice(0, 2) : code;
+        addForms(cells, `pp_${mode}|${nominal}`, args["1"] ?? "");
+      }
     } else if (kind !== "personal" && name === "non-decl-cell") {
       if (kind === "noun" && /^[nadg][sp][id]$/.test(code)) addForms(cells, `|${code}`, args["1"] ?? "");
       else if ((kind === "adj" || kind === "pron") && /^[nadg][sp][mfn]?$/.test(code)) {
@@ -223,15 +234,20 @@ export function extract(entry: WiktEntry): Candidate | undefined {
   let formTables = 0;
   let formStrength = "";
   for (const form of entry.forms ?? []) {
-    // Tagged forms lose voice and adjective strength; explicit tables preserve those distinctions.
-    if (kind === "verb" && verbTables || kind === "adj" && adjectiveTables) break;
+    // Explicit conjugation tables preserve voice; case-tagged participles add their own declension cells.
+    if (kind === "adj" && adjectiveTables) break;
     let tags = form.tags ?? [];
-    if (kind === "adj" && tags.includes("table-tags")) formStrength = form.form === "weak" ? "weak" : "strong";
-    if (kind === "adj" && formStrength && !tags.includes("weak") && !tags.includes("strong")) {
+    const declined = kind === "verb" && tags.includes("participle") && tags.includes("past")
+      && CASES.some(([tag]) => tags.includes(tag));
+    if ((kind === "adj" || kind === "verb" && form.source === "declension") && tags.includes("table-tags")) {
+      formStrength = form.form === "weak" ? "weak" : "strong";
+    }
+    if (kind === "verb" && verbTables && !declined) continue;
+    if ((kind === "adj" || declined) && formStrength && !tags.includes("weak") && !tags.includes("strong")) {
       tags = [...tags, formStrength];
     }
     if (kind === "verb" && form.source === "conjugation" && tags.includes("infinitive")) formTables++;
-    if (kind === "verb" && formTables > 1) tags = [...tags, "mediopassive"];
+    if (kind === "verb" && formTables > 1 && !declined) tags = [...tags, "mediopassive"];
     for (const key of taggedCells(kind, tags)) addForms(cells, key, form.form);
   }
   if (!Object.keys(cells).length) return undefined;
@@ -245,7 +261,7 @@ interface NameUsage {
   plural: boolean;
 }
 
-/** Collects only lemmas used by the reader; attestation is counted once per reading and displayed word piece. */
+/** Collects only lemmas used by the reader; attestation counts each grammatical word, without attached clitics. */
 export class ParadigmBuilder {
   private readonly readings = new Map<string, Map<ParadigmKind, Paradigm["attested"]>>();
   private readonly personalAttested: Paradigm["attested"] = {};
@@ -278,13 +294,16 @@ export class ParadigmBuilder {
 
   attest(surface: string, analyses: Analysis[]): void {
     const seen = new Set<string>();
-    for (const [lemma, morph, source] of analyses) {
+    for (const [lemma, morph, source, word] of analyses) {
       if (source !== "e") continue;
+      // Some clitic annotations supply no independent surface; the graphic word is not a safe substitute.
+      if (word === "" || (word === undefined && morph.includes("Clitic=Yes"))) continue;
       const kind = paradigmKind(morph, lemma);
       const attested = kind && this.readings.get(lemma)?.get(kind);
       if (!attested) continue;
       // Capitals at the start of a line or sentence are not part of a common word's form.
-      const form = /^\p{Lu}/u.test(lemma) ? surface : surface.toLowerCase();
+      const own = word ?? surface;
+      const form = /^\p{Lu}/u.test(lemma) ? own : own.toLowerCase();
       // A syncretic annotation ("Case=Acc,Dat") attests the form in each of its cells.
       for (const cell of morphCells(morph, lemma)) {
         const key = `${lemma}\t${kind}\t${cell}`;
@@ -324,6 +343,19 @@ export class ParadigmBuilder {
           const entries = index.get(key) ?? [];
           if (!entries.includes(candidate)) entries.push(candidate);
           index.set(key, entries);
+        }
+      }
+    }
+    // The dump keeps many participle declensions under their own headword (koma → kominn).
+    for (const candidates of exact.values()) for (const candidate of candidates) {
+      if (candidate.kind !== "verb") continue;
+      for (const form of candidate.cells["act|past_part"] ?? []) {
+        for (const participle of exact.get(fold(form)) ?? []) {
+          if (participle.kind !== "verb") continue;
+          for (const [key, forms] of Object.entries(participle.cells)) {
+            if (!/^pp_(?:str|wk)\|/.test(key)) continue;
+            for (const value of forms) addForms(candidate.cells, key, value);
+          }
         }
       }
     }
@@ -375,8 +407,11 @@ export class ParadigmBuilder {
         if (named) out.push({ lemma, kind, ...named, attested: marks, source: "name" });
         else {
           const generated = zoegaFor && !proper ? generate(lemma, kind, attested, zoegaFor) : undefined;
+          // The citation-form marker duplicates a declined participle's nominal cell, not a second attestation.
+          const cells = Object.keys(attested);
+          const distinct = cells.filter((cell) => cell !== "act|past_part" || !cells.some((key) => key.startsWith("pp_")));
           if (generated) out.push({ lemma, kind, ...generated, attested: marks, source: "zoega" });
-          else if (Object.keys(attested).length >= 2) {
+          else if (distinct.length >= 2) {
             out.push({ lemma, kind, cells: {}, attested: marks, source: "edition" });
           }
         }

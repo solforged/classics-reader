@@ -48,12 +48,17 @@ function wordClass(upos: string, has: (name: string, value: string) => boolean):
   }
 }
 
-export function describeMorph(morph: string): MorphLabel {
+export function describeMorph(morph: string, options: { tableLabel?: string } = {}): MorphLabel {
   const { upos, feats } = parseMorph(morph);
   const has = (name: string, value: string) => feats[name]?.includes(value) ?? false;
   /** Label of a feature; an ambiguous one lists its values ("accusative, dative or genitive"). */
   const v = (name: string) => {
-    const labels = (feats[name] ?? []).map((value) => VALUE[name]?.[value] ?? "").filter(Boolean);
+    const order = Object.keys(VALUE[name] ?? {});
+    const values = [...(feats[name] ?? [])].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    const labels = values.map((value) => VALUE[name]?.[value] ?? "").filter(Boolean);
+    if (name === "Person" && labels.length > 1) {
+      return `${labels.map((label) => label.replace(" person", "")).join(" or ")} person`;
+    }
     return labels.length > 1 ? `${labels.slice(0, -1).join(", ")} or ${labels.at(-1)}` : (labels[0] ?? "");
   };
   const noun = upos === "NOUN" || upos === "PROPN";
@@ -61,12 +66,12 @@ export function describeMorph(morph: string): MorphLabel {
   const form: string[] = [];
   if (upos === "VERB") {
     const participle = has("VerbForm", "Part");
-    if (has("VerbForm", "Inf")) form.push("infinitive");
-    if (participle) form.push(v("Tense") === "past" ? "past participle" : "present participle");
-    if (!participle) form.push(v("Person"), v("Number"), v("Tense"), v("Mood"));
-    else form.push(v("Gender"), v("Case"), v("Number"));
-    form.push(v("Voice"));
-    if (feats.InflClass) props.push(`${v("InflClass")} verb`);
+    const middle = has("Voice", "Mid") ? "middle" : "";
+    if (has("VerbForm", "Inf")) form.push(v("Tense"), middle, "infinitive");
+    else if (participle) {
+      form.push(v("Tense") || "present", middle, "participle", v("Gender"), v("Case"), v("Number"));
+    } else form.push(v("Person"), v("Number"), v("Tense"), v("Mood"), middle);
+    if (feats.InflClass && !options.tableLabel) props.push(`${v("InflClass")} verb`);
   } else {
     if (noun) props.push(v("Gender"));
     else form.push(v("Degree"), v("Gender"));

@@ -16,7 +16,10 @@ const { stat } = Astro.props as { stat: LemmaStat };
 const dict = dictionaryEntry(stat.lemma);
 const parts = new Map(dict?.parts?.map((part) => [part, dictionaryEntry(part)]));
 const tableSet = lang.tables;
-const tables = tableSet ? paradigms(stat.lemma) : [];
+// A folded spelling match only counts as the lemma's table when its kind fits (-at is not the noun at).
+const tableKind = tableSet?.kind(stat.morph, stat.lemma);
+const tables = tableSet
+  ? paradigms(stat.lemma).filter((table) => table.lemma === stat.lemma || table.kind === tableKind) : [];
 const pos = lang.describeMorph(stat.morph).pos;
 const order = new Map(WORKS.map((w, i) => [w.slug, i]));
 const byWork = Object.entries(stat.works).sort((a, b) => order.get(a[0])! - order.get(b[0])!);
@@ -38,7 +41,7 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
     </p>
 
     <section class="dict" set:html={dictionaryHtml(dict, {
-      parts, fullTitles: true, properNoun: parseMorph(stat.morph).upos === "PROPN",
+      lemma: stat.lemma, parts, fullTitles: true, properNoun: parseMorph(stat.morph).upos === "PROPN",
     })} />
 
     {

@@ -4,12 +4,14 @@
 // 4–5 and 6 have smaller samples but supply all four principal parts; their remaining endings are regular.
 // The rare -sta/-pta/-nda notes repeat the stem's final cluster and use the same validated dental-suffix endings.
 // Unknown/defective notes, unresolved d/ð and consonant-cluster variants, i-presents, reduplication and ambiguous
-// homographs are deliberately refused. Middle -að passed separately (119/120); all other middle rules are disabled.
-// Validation compares only available cells, folding ǿ as œ first, and skips tables lacking core finite forms.
+// homographs are deliberately refused. Middle finite forms clear 95% per pattern; class 6 remains disabled.
+// Weak middle participles are enabled only for -að, -da and -nda; class-2 middle imperatives remain disabled.
+// Validation compares every available generated cell, folding ǿ as œ first, and requires core finite forms.
 import type { DictEntry } from "../../../src/lib/dict";
 import { fold } from "../../../src/lang/non/spelling";
 import type { Paradigm } from "../../../src/lib/paradigm";
 import { dictionaryHeadword } from "../lexicon";
+import { spellingVariants } from "../analyses";
 import { grammarNotes, type Generated, type GrammarNote } from "./zoega";
 import { dentalCluster, iUmlaut, imperativeStem, verbUEnding, withPastT, withR, withSk } from "./phonology";
 
@@ -129,29 +131,61 @@ function active(word: string, p: Parts): Cells {
   return cells;
 }
 
-/** Only weak -að passed the independent middle-voice gate; other classes remain active-only. */
-function middle(cells: Cells): void {
+/** Middle cells derived from active partners; uncertain participles and class-2 imperatives stay unfilled. */
+export function withMiddle(cells: Cells, pattern: string): Cells {
+  const out: Cells = {};
+  if (pattern === "strong class 6") return out;
+  const weak = cells["act|past_ind_3sg"]?.every((form) => form.endsWith("i")) ?? false;
   for (const [key, forms] of Object.entries(cells)) {
+    if (!key.startsWith("act|")) continue;
     const code = key.slice(4);
-    cells[`mpass|${code}`] = forms.map((form) => {
+    if (code === "past_part" && !["weak -að", "weak dental suffix -da", "weak dental suffix -nda"].includes(pattern)
+      && !pattern.startsWith("strong")) continue;
+    if (code === "impr_2sg" && pattern === "strong class 2") continue;
+    let base = forms;
+    if (code.endsWith("1sg")) {
+      const plural = code === "past_sub_1sg" ? "act|past_sub_1pl"
+        : code.startsWith("pres") ? "act|pres_ind_1pl" : "act|past_ind_1pl";
+      base = cells[plural] ?? [];
+    } else if (code === "pres_ind_2sg" || code === "pres_ind_3sg") {
+      base = cells["act|pres_ind_1sg"] ?? [];
+    } else if (code === "impr_2sg" && weak) {
+      base = cells["act|pres_ind_1sg"] ?? [];
+    }
+    const derived = base.map((form) => {
       if (code.endsWith("1sg")) {
-        const plural = code.startsWith("pres") ? "act|pres_ind_1pl" : "act|past_ind_1pl";
-        return `${cells[plural]![0]}k`;
+        const plural = code === "past_sub_1sg"
+          ? verbUEnding(form.replace(/im$/, ""), "um", /aðim$/.test(form)) : form;
+        return `${plural}k`;
       }
-      if (code === "past_part") return withSk(form.replace(/r$/, ""));
-      if (code === "pres_ind_2sg" || code === "pres_ind_3sg") return withSk(cells["act|pres_ind_1sg"]![0]!);
-      if (code.endsWith("2sg") && code !== "impr_2sg") return withSk(form.replace(/r$/, ""));
+      if (code === "past_part") return withSk(form.replace(/inn$/, "it").replace(/r$/, ""));
+      if (code.endsWith("2sg") && code !== "impr_2sg" && code !== "pres_ind_2sg") {
+        return withSk(form.replace(/r$/, "").replace(/st$/, "s"));
+      }
       return withSk(form);
     });
+    if (derived.length) out[`mpass|${code}`] = [...new Set(derived)];
   }
+  return out;
 }
 
 function agrees(cells: Cells, attested: Paradigm["attested"]): boolean {
-  for (const [key, forms] of Object.entries(attested)) {
+  const declined = Object.keys(attested).some((key) => key.startsWith("pp_"));
+  for (const [key, observed] of Object.entries(attested)) {
+    // A declined participle also marks the citation-form row, but only nominative masculine tests that form.
+    const forms = key === "act|past_part" && declined ? attested["pp_str|nsm"] ?? {} : observed;
     const generated = cells[key];
-    if (!generated) continue; // An ungenerated middle voice is unknown, not an active-table contradiction.
-    const allowed = new Set(generated.map((form) => fold(form.replace(/ǿ/g, "œ"))));
-    if (Object.keys(forms).some((form) => !allowed.has(fold(form.replace(/ǿ/g, "œ"))))) return false;
+    if (!generated) continue; // Middle cells have an independent Wiktionary gate.
+    const middle = key.startsWith("mpass|");
+    const normalize = (form: string) => {
+      const key = fold(form.replace(/ǿ/g, "œ"));
+      return middle ? key.replace(/([gkpsr])\1(?=[ðdt])/g, "$1") : key;
+    };
+    const allowed = new Set(generated.map(normalize));
+    if (Object.keys(forms).some((form) => {
+      const key = normalize(form);
+      return ![key, ...(middle ? spellingVariants(key, false) : [])].some((variant) => allowed.has(normalize(variant)));
+    })) return false;
   }
   return true;
 }
@@ -165,12 +199,13 @@ export function inflectVerb(
   const word = dictionaryHeadword(headword).toLowerCase().replace(/ø/g, "ö");
   if (!/^[a-záðéíóúýþæœö]+a$/.test(word)) return undefined;
   const notes = grammarNotes(entry).filter((note) => note.pos.startsWith("v."));
-  if (notes.length !== 1 || notes[0]!.pos !== "v.") return undefined;
+  if (!notes.length || notes.some((note) => note.pos !== "v." || note.paren !== notes[0]!.paren)) return undefined;
   const note = notes[0]!;
   const parts = principalParts(word, note);
   if (!parts) return undefined;
   const cells = active(word, parts);
-  if (parts.pattern === "weak -að") middle(cells);
   if (attested && !agrees(cells, attested)) return undefined;
+  const middle = withMiddle(cells, parts.pattern);
+  if (!attested || agrees(middle, attested)) Object.assign(cells, middle);
   return { cells, label: parts.pattern, note: note.text };
 }

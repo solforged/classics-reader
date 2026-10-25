@@ -1,6 +1,7 @@
 // Old Norse inflection tables for the word panel and the lemma pages.
 import type { Paradigm } from "../../lib/paradigm";
 import type { TableOptions } from "../types";
+import { fold } from "./spelling";
 
 const CASES = [["n", "nominative"], ["a", "accusative"], ["d", "dative"], ["g", "genitive"]] as const;
 const GENDERS = [["m", "masculine"], ["f", "feminine"], ["n", "neuter"]] as const;
@@ -17,6 +18,12 @@ const esc = (value: string): string => value.replace(/&/g, "&amp;").replace(/</g
 /** Shared, framework-free inflection tables. Switches use native radios and CSS; no client script is needed. */
 export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string {
   const highlighted = new Set(options.highlight ?? []);
+  const written = options.form?.trim();
+  const writtenKey = written ? fold(written.replace(/ǿ/g, "œ")) : "";
+  const spelled = (value: string) => fold(value.replace(/ǿ/g, "œ")) === writtenKey;
+  // The written form is noted once, on the first highlighted cell, and only when no highlighted cell displays it.
+  let noted = !written || [...highlighted].some((key) =>
+    (paradigm.cells[key]?.length ? paradigm.cells[key]! : Object.keys(paradigm.attested[key] ?? {})).some(spelled));
   const keys = [...new Set([...Object.keys(paradigm.cells), ...Object.keys(paradigm.attested)])];
   const has = (key: string): boolean => Boolean(paradigm.cells[key]?.length)
     || Object.values(paradigm.attested[key] ?? {}).some((count) => count > 0);
@@ -41,13 +48,16 @@ export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string 
       .filter(Boolean).join(" ");
     const marker = count ? `<span class="para-attested" aria-label="${esc(note)}">·</span>` : "";
     const form = shown.length ? shown.slice(0, 2).map(esc).join(" / ") : "—";
+    const here = current && !noted ? `<small class="para-here">here: <span lang="non">${esc(written!)}</span></small>` : "";
+    if (here) noted = true;
     return `<${tag} class="${classes}" data-cell="${esc(names.join(" "))}" title="${esc(title)}"${attributes}>`
       + `${current ? '<span class="para-sr">Clicked reading: </span>' : ""}`
-      + `<span lang="non">${form}</span>${marker}</${tag}>`;
+      + `<span lang="non">${form}</span>${marker}${here}</${tag}>`;
   }
 
+  /** A table; inside a disclosure whose summary names it, the caption is left out. */
   function table(caption: string, columns: readonly string[], rows: string): string {
-    return `<table class="para-table"><caption>${esc(caption)}</caption><thead><tr>`
+    return `<table class="para-table">${caption ? `<caption>${esc(caption)}</caption>` : ""}<thead><tr>`
       + `<th scope="col"><span class="para-sr">Case or person</span></th>`
       + columns.map((column) => `<th scope="col">${column}</th>`).join("")
       + `</tr></thead><tbody>${rows}</tbody></table>`;
@@ -102,20 +112,38 @@ export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string 
     ];
     const parts = `<dl class="para-principal">${principal.map(([key, label]) =>
       `<div><dt>${label}</dt>${cell(`${mode}|${key}`, "dd")}</div>`).join("")}</dl>`;
-    const tenses = (["pres", "past"] as const).map((tense) => table(tense === "pres" ? "Present" : "Past",
-      ["indicative", "subjunctive"], VERB_ROWS.map((person) =>
+    const focus = [...highlighted].map((key) => {
+      if (mode === "act" && key.startsWith("pp_")) return "part";
+      if (!key.startsWith(`${mode}|`)) return undefined;
+      const code = key.slice(mode.length + 1);
+      if (code.endsWith("_part")) return "part";
+      if (code.startsWith("pres_")) return "pres";
+      if (code.startsWith("past_")) return "past";
+      if (code.startsWith("impr_")) return "impr";
+      return undefined;
+    }).find(Boolean) ?? "pres";
+    const section = (key: string, label: string, content: string) =>
+      `<details class="para-block" data-block="${key}"${focus === key ? " open" : ""}>`
+      + `<summary>${label}</summary>${content}</details>`;
+    const tenses = (["pres", "past"] as const).map((tense) => {
+      const label = tense === "pres" ? "Present" : "Past";
+      return section(tense, label, table("", ["indicative", "subjunctive"], VERB_ROWS.map((person) =>
         `<tr><th scope="row">${person.replace("sg", " sg").replace("pl", " pl")}</th>`
-          + cell(`${mode}|${tense}_ind_${person}`) + cell(`${mode}|${tense}_sub_${person}`) + "</tr>").join("")))
-      .join("");
+          + cell(`${mode}|${tense}_ind_${person}`) + cell(`${mode}|${tense}_sub_${person}`) + "</tr>").join("")));
+    }).join("");
     const imperativeRows = VERB_ROWS.filter((person) =>
       person === "2sg" || person === "1pl" || person === "2pl" || has(`${mode}|impr_${person}`));
-    const imperative = `<div class="para-extra"><h5>Imperative</h5><dl>`
+    const imperative = `<div class="para-extra"><dl>`
       + imperativeRows.map((person) => `<div><dt>${person}</dt>${cell(`${mode}|impr_${person}`, "dd")}</div>`)
         .join("") + "</dl></div>";
-    const participles = `<div class="para-extra"><h5>Participles</h5><dl>`
+    const declensions = mode === "act" ? ([["pp_str", "strong"], ["pp_wk", "weak"]] as const)
+      .filter(([key]) => hasPrefix(`${key}|`)).map(([key, label]) =>
+        `<details class="para-participle"${[...highlighted].some((cell) => cell.startsWith(`${key}|`)) ? " open" : ""}>`
+        + `<summary>Past participle · ${label}</summary>${genderTables(key)}</details>`).join("") : "";
+    const participles = `<div class="para-extra"><dl>`
       + `<div><dt>present</dt>${cell(`${mode}|pres_part`, "dd")}</div>`
-      + `<div><dt>past</dt>${cell(`${mode}|past_part`, "dd")}</div></dl></div>`;
-    return parts + tenses + imperative + participles;
+      + `<div><dt>past</dt>${cell(`${mode}|past_part`, "dd")}</div></dl></div>${declensions}`;
+    return parts + tenses + section("impr", "Imperative", imperative) + section("part", "Participles", participles);
   }
 
   function personal(person: string): string {

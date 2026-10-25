@@ -99,6 +99,7 @@ interface WiktEntry {
   pos: string;
   forms?: { form: string; tags?: string[] }[];
   senses?: { glosses?: string[]; tags?: string[]; form_of?: { word: string }[] }[];
+  inflection_templates?: { name: string; args: Record<string, string> }[];
 }
 
 export interface WiktGloss {
@@ -121,12 +122,44 @@ export function indexWiktionary(jsonl: string, index: FormIndex): Map<string, Wi
       const list = glosses.get(k) ?? [];
       list.push({ pos, glosses: own.map((s) => s.glosses!.join("; ")).slice(0, 6) });
       glosses.set(k, list);
+      // Kaikki can omit voice headings, or every form, while retaining the explicit conjugation cells.
+      const middle = new Set<string>();
+      let blocks = 0;
+      for (const template of pos === "verb" ? e.inflection_templates ?? [] : []) {
+        if (template.name !== "non-conj-cell") continue;
+        const code = template.args["2"] ?? "";
+        if (code === "infinitive") blocks++;
+        const rawMode = template.args["3"] ?? "";
+        const mode = rawMode.includes("{{{") ? "" : rawMode;
+        if (mode ? mode !== "mpass" : blocks < 2) continue;
+        const tags = ["mediopassive"];
+        if (code === "infinitive") tags.push("infinitive");
+        else if (code === "pres_part" || code === "past_part") tags.push("participle", code === "past_part" ? "past" : "present");
+        else {
+          const finite = code.match(/^(pres|past)_(ind|sub)_([123])(sg|pl)$/);
+          const imperative = code.match(/^impr_([123])(sg|pl)$/);
+          if (finite) tags.push(finite[1] === "past" ? "past" : "present", finite[2] === "sub" ? "subjunctive" : "indicative");
+          else if (imperative) tags.push("imperative");
+          else continue;
+          const person = finite?.[3] ?? imperative![1]!;
+          const number = finite?.[4] ?? imperative![2]!;
+          tags.push(["first-person", "second-person", "third-person"][Number(person) - 1]!, number === "pl" ? "plural" : "singular");
+        }
+        for (const form of (template.args["1"] ?? "").split(/\s*[,/]\s*/)) {
+          if (!form || /^[-–—]$/.test(form) || form.includes("{{{")) continue;
+          middle.add(fold(form.replace(/ǿ/g, "œ")));
+          index.add(form, [e.word, morphFrom(pos, tags), "w"]);
+        }
+      }
       // Pronoun tables are shared across several headwords; only trust explicit form-of senses there.
       if (pos !== "pron" && pos !== "det") {
         for (const f of e.forms ?? []) {
           const tags = f.tags ?? [];
           if (!f.form || f.form === "-" || tags.some((t) => SKIP_TAGS.has(t))) continue;
-          for (const form of f.form.split(/\s*[,/]\s*/)) index.add(form, [e.word, morphFrom(pos, tags), "w"]);
+          for (const form of f.form.split(/\s*[,/]\s*/)) {
+            const voice = middle.has(fold(form.replace(/ǿ/g, "œ"))) ? [...tags, "mediopassive"] : tags;
+            index.add(form, [e.word, morphFrom(pos, voice), "w"]);
+          }
         }
       }
     }

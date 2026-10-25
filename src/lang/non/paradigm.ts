@@ -9,6 +9,8 @@
 //   verb code     infinitive, pres_part, past_part, `${tense}_${mood}_${person}${number}` with tense pres past,
 //                 mood ind sub, number sg pl (e.g. "past_ind_3sg"), imperative `impr_${person}${number}`
 //   verb mode     act, mpass
+//   past participle declension mode pp_str, pp_wk; nominal adjective codes (e.g. "pp_str|nsm", "pp_wk|dp").
+//                 These cells describe the active past participle.
 //   personal pronoun code  `${person}${case}${number}${gender?}` with person 1 2 3 r (reflexive), e.g. "1ns", "3asm"
 //   nouns and pronouns have mode "" (key "|nsi", "|dpm").
 
@@ -42,7 +44,10 @@ export function paradigmKind(morph: string, lemma = ""): ParadigmKind | undefine
   const { upos, feats } = parseMorph(morph);
   if (upos === "NOUN" || upos === "PROPN") return "noun";
   if (upos === "ADJ") return "adj";
-  if (upos === "VERB") return "verb";
+  if (upos === "VERB") {
+    // Some edition participles use an adjective headword rather than a verbal infinitive.
+    return feats.VerbForm?.includes("Part") && /(?:r|inn)$/.test(lemma) ? "adj" : "verb";
+  }
   if (upos === "PRON" && !feats.Poss) {
     if (feats.PronType?.includes("Prs") || feats.Person || REFLEXIVE.has(lemma.toLowerCase())) return "personal";
   }
@@ -90,7 +95,10 @@ export function morphCells(morph: string, lemma = ""): string[] {
   if (kind === "verb") {
     const mode = has("Voice", "Mid") ? "mpass" : "act";
     if (has("VerbForm", "Inf")) return [`${mode}|infinitive`];
-    if (has("VerbForm", "Part")) return [`${mode}|${has("Tense", "Past") ? "past" : "pres"}_part`];
+    if (has("VerbForm", "Part")) {
+      if (!has("Tense", "Past")) return [`${mode}|pres_part`];
+      return [`${mode}|past_part`, ...(mode === "act" ? nominal(has("Definite", "Def") ? "pp_wk" : "pp_str") : [])];
+    }
     const number = has("Number", "Plur") ? "pl" : "sg";
     const persons = feats.Person ?? [];
     if (has("Mood", "Imp")) return (persons.length ? persons : ["2"]).map((p) => `${mode}|impr_${p}${number}`);

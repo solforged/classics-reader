@@ -2,6 +2,7 @@
 // its build writes into the lexicon shards. Build-side parsers (sources, tagset conversion, dictionary structuring)
 // live with the pack's build scripts.
 import type { Paradigm } from "../lib/paradigm";
+import type { DictHit } from "../lib/dict";
 
 export interface MorphLabel {
   /** Word class, e.g. "noun", "personal pronoun". */
@@ -53,6 +54,8 @@ export interface TableOptions {
   id: string;
   /** Cells of the clicked reading. */
   highlight?: readonly string[];
+  /** Written form of this word, excluding any other words joined to it. */
+  form?: string;
 }
 
 /** Inflection tables (src/lib/paradigm.ts shards) for packs whose build writes them. */
@@ -88,9 +91,11 @@ export interface LanguagePack {
   /** Search key: fold() reduced further so a query typed without diacritics matches. */
   searchKey(text: string): string;
   /** English labels for a UD morphology string (src/lib/morph.ts). */
-  describeMorph(morph: string): MorphLabel;
+  describeMorph(morph: string, options?: { tableLabel?: string }): MorphLabel;
   /** Dictionaries in display order. */
   dictionaries: readonly Dictionary[];
+  /** Exact-lemma entries for senses that spelling-folded dictionary shards cannot distinguish. */
+  dictionaryEntry?(lemma: string): DictHit | undefined;
   /** Inflection tables; absent when the pack has none. */
   tables?: Tables;
   /** Label of the stored spelling in the script toggle, e.g. "IAST"; set together with `scripts`. */
