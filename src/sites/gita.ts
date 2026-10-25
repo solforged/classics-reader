@@ -52,17 +52,17 @@ export const gita: ReaderSite = {
   eyebrow: "Bhagavadgītā · Eighteen chapters",
   lede: "The Bhagavadgītā in Sanskrit with a facing English translation, across all eighteen chapters. " +
     "Click any Sanskrit word for its lemma, grammar and dictionary entry, including the words joined by sandhi or in compounds.",
-  credits: "Sanskrit text, annotation and dictionary: Oliver Hellwig, Digital Corpus of Sanskrit (2010–2024), " +
+  credits: "Sanskrit annotation, chapters 3–18 text and dictionary: Oliver Hellwig, Digital Corpus of Sanskrit (2010–2024), " +
     '<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. ' +
     "DCS morphology has been adapted for this reader, and three lemmas with damaged encoding are repaired. " +
-    "English: Annie Besant, The Bhagavad-Gita, fourth edition (1922), public domain, via Wikisource. " +
+    "English and chapters 1–2 Sanskrit: Annie Besant, The Bhagavad-Gita, fourth edition (1922), public domain, via Wikisource. " +
     "The English wording is retained; translator’s footnotes are omitted.",
   corpus: "the Gītā",
   searchHint: "IAST diacritics are optional: <i>sraddha</i> finds <i>śraddhā</i>, <i>samnyasya</i> finds <i>saṃnyasya</i>.",
   searchPlaceholder: "e.g. arjuna, dharma, devotion",
   countNote: "Counts use available DCS annotation. Each written token counts once for each lemma it contains, " +
-    "including words joined by sandhi or in compounds. Four source forms in chapter 13 lack usable analyses and " +
-    "are not counted. Glosses come from the DCS dictionary (Oliver Hellwig, CC BY 4.0).",
+    "including words joined by sandhi or in compounds. Unannotated Besant captions, the unannotated fragment in 2.67, " +
+    "and four source forms in chapter 13 are not counted. Glosses come from the DCS dictionary (Oliver Hellwig, CC BY 4.0).",
   translation: "English",
   groups: GROUPS,
   works: DISCOURSES.map(([english, summary], index) => ({

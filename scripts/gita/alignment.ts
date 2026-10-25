@@ -81,31 +81,6 @@ const RENUMBERED_PARTS: Readonly<Record<number, Readonly<Record<string, {
   },
 };
 
-interface LineStructure {
-  heads: readonly string[];
-  lines: readonly string[];
-}
-
-// All other verses have two source sentences, plus an optional initial speaker.
-// Whole-verse revised sentences remain one line. Split first halves remain two
-// separate lines, followed by their second half. No metrical resegmentation.
-export const DCS_LINE_STRUCTURES: Readonly<Record<number, Readonly<Record<number, LineStructure>>>> = {
-  1: {
-    1: { heads: ["230581_1"], lines: ["230583_1"] },
-  },
-  2: {
-    1: { heads: ["230677_1"], lines: ["230679_1"] },
-    2: { heads: ["230680_1"], lines: ["230681_1"] },
-    3: { heads: [], lines: ["230683_1", "230683_2", "230684_1"] },
-    4: { heads: ["230685_1"], lines: ["230687_1"] },
-    9: { heads: ["230696"], lines: ["230698_1"] },
-    10: { heads: [], lines: ["230699_1"] },
-    22: { heads: [], lines: ["230725_1"] },
-    23: { heads: [], lines: ["230726_1", "230726_2", "230727"] },
-    55: { heads: ["230791_1"], lines: ["230793_1"] },
-  },
-};
-
 interface Supplement {
   chapter: number;
   id: string;
@@ -287,16 +262,10 @@ export function readDcsChapter(
     }
   }
   if (verses.size !== count) throw new Error(`Expected ${count} DCS verses in chapter ${chapter}, got ${verses.size}`);
-  for (const [verse, group] of verses) {
-    const structure = DCS_LINE_STRUCTURES[chapter]?.[verse];
-    if (structure) {
-      if (group.heads.length !== structure.heads.length || group.lines.length !== structure.lines.length
-        || group.heads.some((sentence, index) => sentence.id !== structure.heads[index])
-        || group.lines.some((sentence, index) => sentence.id !== structure.lines[index])) {
-        throw new Error(`Changed DCS line-structure exception ${chapter}.${verse}`);
-      }
-    } else if (group.lines.length !== 2) {
-      throw new Error(`Unlisted DCS line structure ${chapter}.${verse}: ${group.lines.length} lines`);
+  // Chapters 1–2 use Besant's verse lines. Their DCS sentence counts are not display line constraints.
+  if (chapter >= 3) {
+    for (const [verse, group] of verses) {
+      if (group.lines.length !== 2) throw new Error(`Unlisted DCS line structure ${chapter}.${verse}: ${group.lines.length} lines`);
     }
   }
   return verses;

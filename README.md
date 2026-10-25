@@ -50,14 +50,15 @@ table spells the form differently (*skoðask*, here *skoðast*).
 
 ## The Gītā Reader
 
-The Sanskrit of all 700 verses is the surface text of the Digital Corpus of Sanskrit (Oliver Hellwig,
-CC BY 4.0), with its lemma and morphology for every word; the English is Annie Besant's fourth edition
-(1922), aligned verse by verse. DCS gives chapters 1 and 2 only in a revised, word-segmented form, so
-those verses show the words without sandhi. A written form that joins words by sandhi or in a compound
-(*parayopetāste*) opens one card per word, each with its segmented form, grammar and entry from the
-DCS dictionary. Search ignores IAST diacritics (`sraddha` finds *śraddhā*). The top-bar toggle shows the
-Sanskrit in Devanagari on every page (`src/lang/san/script.ts`, `src/scripts/script.ts`); text is
-still stored, searched and linked in IAST. Credits are in `src/components/sources/Gita.astro`.
+The Sanskrit of all 700 verses uses the lemma and morphology of the Digital Corpus of Sanskrit
+(Oliver Hellwig, CC BY 4.0); the English is Annie Besant's fourth edition (1922), aligned verse by
+verse. Chapters 1 and 2 show Besant's sandhied Devanagari text, transliterated into IAST and aligned
+to the DCS analyses; chapters 3–18 retain the DCS surface text. A written form that joins words by
+sandhi or in a compound (*parayopetāste*) opens one card per word, each with its segmented form,
+grammar and entry from the DCS dictionary. Search ignores IAST diacritics (`sraddha` finds *śraddhā*).
+The top-bar toggle shows the Sanskrit in Devanagari on every page (`src/lang/san/script.ts`,
+`src/scripts/script.ts`); text is still stored, searched and linked in IAST. Credits are in
+`src/components/sources/Gita.astro`.
 
 ## Building
 

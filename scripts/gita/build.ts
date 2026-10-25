@@ -1,5 +1,5 @@
 // Builds all eighteen pinned DCS and Besant chapters into generated/gita/. Run fetch:gita first.
-// Source sentences supply line boundaries; alignment.ts documents revised blocks and companion-source repairs.
+// Chapters 1–2 use Besant's sandhied Sanskrit; the remaining chapters retain DCS surface tokens and lines.
 import { join } from "node:path";
 import type { DictHit } from "../../src/lib/dict";
 import { sanskrit } from "../../src/lang/san";
@@ -11,9 +11,11 @@ import { readDcsChapter } from "./alignment";
 import { alignEnglish } from "./english-alignment";
 import { CACHE, CHAPTERS, SOURCES } from "./fetch";
 import { parseBesant } from "./lib/besant";
-import type { DcsSentence } from "./lib/conllu";
+import type { DcsToken } from "./lib/conllu";
 import { dictionaryArticle, parseDictionary, type DictionaryRow } from "./lib/dictionary";
 import { dcsMorph } from "./lib/morph";
+import { parseBesantSanskrit } from "./lib/besant-sanskrit";
+import { alignBesantSanskrit } from "./surface-alignment";
 
 const dictionary = parseDictionary(await Bun.file(join(CACHE, "dictionary.csv")).text());
 const lemmaRows = new Map<string, Map<string, DictionaryRow>>();
@@ -22,9 +24,9 @@ let grammaticalWords = 0;
 let multiwordTokens = 0;
 let unanalysedTokens = 0;
 
-function lineFor(sentence: DcsSentence, table: AnalysisTable): Piece[] {
+function piecesFor(tokens: readonly DcsToken[], context: string, table: AnalysisTable): Piece[] {
   const pieces: Piece[] = [];
-  for (const token of sentence.tokens) {
+  for (const token of tokens) {
     if (pieces.length) pieces.push(" ");
     const multiword = token.words.length > 1;
     if (multiword) multiwordTokens++;
@@ -48,7 +50,7 @@ function lineFor(sentence: DcsSentence, table: AnalysisTable): Piece[] {
         : [word.lemma, morph, "e"]);
     });
     if (!ids.length) {
-      if (!token.unanalysed) throw new Error(`Unanalysed DCS surface token in ${sentence.id}: ${token.form}`);
+      if (!token.unanalysed) throw new Error(`Unanalysed Sanskrit surface token in ${context}: ${token.form}`);
       unanalysedTokens++;
     }
     pieces.push([token.form, ids]);
@@ -69,22 +71,47 @@ for (const source of CHAPTERS) {
     ? await Bun.file(join(CACHE, supplementFile)).text()
     : undefined;
   const dcs = readDcsChapter(chapter, await Bun.file(join(CACHE, `chapter-${chapter}.conllu`)).text(), supplement);
+  const pageWiki = await Promise.all(source.pages.map(([page]) => Bun.file(join(CACHE, "besant", `${page}.wiki`)).text()));
   const besant = parseBesant(
     await Bun.file(join(CACHE, `discourse-${chapter}.wiki`)).text(),
-    await Promise.all(source.pages.map(([page]) => Bun.file(join(CACHE, "besant", `${page}.wiki`)).text())),
+    pageWiki,
     chapter,
   );
   if (besant.title !== definition.english) {
     throw new Error(`Besant chapter ${chapter} colophon differs from the site: ${besant.title}`);
   }
+  const sanskritDisplay = chapter <= 2 ? parseBesantSanskrit(chapter, pageWiki) : undefined;
   const table = new AnalysisTable(new FormIndex());
   const on = new Map<number, OnUnit[]>();
   for (const [verse, sourceVerse] of dcs) {
+    if (sanskritDisplay) {
+      const display = sanskritDisplay.get(verse);
+      if (!display) throw new Error(`Missing Besant Sanskrit verse ${chapter}.${verse}`);
+      const aligned = alignBesantSanskrit(chapter, verse, sourceVerse, display);
+      const stanzaLines = aligned.filter((unit) => unit.kind === "stanza").reduce((count, unit) => count + unit.lines.length, 0);
+      let lineNumber = 0;
+      let labelled = false;
+      on.set(verse, aligned.map((unit, index): OnUnit => {
+        const lines = unit.lines.map((tokens) => {
+          const pieces = piecesFor(tokens, `${chapter}.${verse}`, table);
+          if (unit.kind === "head") pieces.push(" |");
+          else {
+            lineNumber++;
+            pieces.push(lineNumber < stanzaLines ? " |" : " ||");
+          }
+          return pieces;
+        });
+        const label = unit.kind === "stanza" && !labelled ? String(verse) : undefined;
+        if (label) labelled = true;
+        return { key: `besant-sa-${verse}-${index + 1}`, kind: unit.kind, ...(label ? { label } : {}), lines };
+      }));
+      continue;
+    }
     const units: OnUnit[] = sourceVerse.heads.map((head) => ({
-      key: `dcs-${head.id}`, kind: "head", lines: [lineFor(head, table)],
+      key: `dcs-${head.id}`, kind: "head", lines: [piecesFor(head.tokens, head.id, table)],
     }));
     const lines = sourceVerse.lines.map((line, index) => [
-      ...lineFor(line, table), index === sourceVerse.lines.length - 1 ? " ||" : " |",
+      ...piecesFor(line.tokens, line.id, table), index === sourceVerse.lines.length - 1 ? " ||" : " |",
     ]);
     if (!lines.length) throw new Error(`DCS verse ${chapter}.${verse} has no Sanskrit lines`);
     units.push({

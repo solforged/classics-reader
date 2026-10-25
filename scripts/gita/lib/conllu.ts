@@ -12,7 +12,7 @@ export interface DcsWord {
 export interface DcsToken {
   form: string;
   words: DcsWord[];
-  /** Only alignment.ts may mark the four explicitly missing chapter 13 forms. */
+  /** Only explicit source exception tables may mark a printed form without an analysis. */
   unanalysed?: true;
 }
 

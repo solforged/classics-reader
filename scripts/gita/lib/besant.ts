@@ -196,9 +196,14 @@ export function parseBesant(chapterWiki: string, pageWiki: readonly string[], ch
     `Thus in the glorious Upanishads of [^]*?the ${ordinal} discourse,? entitled:\\s*([^]*?)\\.\\s*$`, "u",
   ).exec(text);
   if (!colophon) throw new Error(`Missing Besant Discourse ${chapterNumber} English colophon`);
-  const title = colophon[1]!.trim().toLowerCase()
+  let title = colophon[1]!.trim().toLowerCase()
     .replace(/^\p{L}/u, (letter) => letter.toUpperCase())
     .replace(/\barjuna\b/gu, "Arjuna").replace(/\bsankhya\b/gu, "Sankhya");
+  if (chapterNumber === 8) {
+    // Page 135, oldid 9514544: the transcription misspells the colophon's "indestructible".
+    if (title !== "The yoga of the indesctructible supreme eternal") throw new Error("Changed Besant chapter 8 title correction");
+    title = "The yoga of the indestructible supreme eternal";
+  }
   text = text.slice(0, colophon.index).trim();
   const verses = new Map<number, EnUnit[]>();
   let next = 1;

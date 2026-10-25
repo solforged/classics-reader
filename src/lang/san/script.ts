@@ -1,5 +1,5 @@
-// IAST → Devanagari, for the reader's script toggle. Text is stored and searched in IAST; each written token is
-// converted on its own, so a token ending in a consonant keeps its virāma.
+// IAST ↔ Devanagari. Text is stored and searched in IAST; each written token is converted on its own for the
+// reader's script toggle, so a token ending in a consonant keeps its virāma.
 
 const CONSONANTS: Readonly<Record<string, string>> = {
   kh: "ख", gh: "घ", ch: "छ", jh: "झ", ṭh: "ठ", ḍh: "ढ", th: "थ", dh: "ध", ph: "फ", bh: "भ",
@@ -21,6 +21,24 @@ const OTHERS: Readonly<Record<string, string>> = {
 
 const VIRAMA = "्";
 
+const DEVANAGARI_CONSONANTS = new Map<string, string>();
+const DEVANAGARI_VOWELS = new Map<string, string>();
+const DEVANAGARI_VOWEL_SIGNS = new Map<string, string>();
+const DEVANAGARI_OTHERS = new Map<string, string>();
+for (const [iast, letter] of Object.entries(CONSONANTS)) DEVANAGARI_CONSONANTS.set(letter, iast);
+for (const [iast, [letter, sign]] of Object.entries(VOWELS)) {
+  DEVANAGARI_VOWELS.set(letter, iast);
+  if (sign) DEVANAGARI_VOWEL_SIGNS.set(sign, iast);
+}
+for (const [iast, sign] of Object.entries(OTHERS)) {
+  // Prefer the first spelling of an alias: ṃ rather than ṁ, and the straight apostrophe.
+  if (!DEVANAGARI_OTHERS.has(sign)) DEVANAGARI_OTHERS.set(sign, iast);
+}
+
+function startsWord(text: string, at: number): boolean {
+  return at === 0 || !/\p{L}/u.test(text[at - 1]!);
+}
+
 /** The longest key of `table` at `at`, if any (keys are at most two characters). */
 function match(text: string, at: number, table: Readonly<Record<string, unknown>>): string | undefined {
   const two = text.slice(at, at + 2);
@@ -34,9 +52,16 @@ export function iastToDevanagari(input: string): string {
   let out = "";
   for (let i = 0; i < text.length;) {
     // The sacred syllable is written ॐ at the start of a word (oṃ, oṃkāra), as a vowel and anusvāra elsewhere.
-    if (text.startsWith("oṃ", i) && (i === 0 || !/\p{L}/u.test(text[i - 1]!))) {
+    if (text.startsWith("oṃ", i) && startsWord(text, i)) {
       out += "ॐ";
       i += 2;
+      continue;
+    }
+    // NFC leaves m + combining candrabindu as two code points. Consume it before the consonant m.
+    const other = match(text, i, OTHERS);
+    if (other) {
+      out += OTHERS[other];
+      i += other.length;
       continue;
     }
     const consonant = match(text, i, CONSONANTS);
@@ -58,13 +83,54 @@ export function iastToDevanagari(input: string): string {
       i += vowel.length;
       continue;
     }
-    const other = match(text, i, OTHERS);
-    if (other) {
-      out += OTHERS[other];
-      i += other.length;
+    out += text[i];
+    i++;
+  }
+  return out;
+}
+
+/**
+ * Transliterate the supported Sanskrit letters using the forward converter's spellings.
+ * Canonical IAST cannot retain every orthographic distinction: अइ/ऐ both give ai, क्ह/ख both give kh,
+ * and क्अ/क both give ka. The word-initial ॐ convention also cannot represent a medial ॐ.
+ * Well-formed canonical spellings round-trip; unsupported characters and standalone signs pass through.
+ */
+export function devanagariToIast(input: string): string {
+  const text = input.normalize("NFC");
+  let out = "";
+  for (let i = 0; i < text.length;) {
+    const letter = text[i]!;
+    const consonant = DEVANAGARI_CONSONANTS.get(letter);
+    if (consonant !== undefined) {
+      out += consonant;
+      i++;
+      if (text[i] === VIRAMA) {
+        i++;
+      } else {
+        const vowel = DEVANAGARI_VOWEL_SIGNS.get(text[i] ?? "");
+        out += vowel ?? "a";
+        if (vowel !== undefined) i++;
+      }
       continue;
     }
-    out += text[i];
+    if (letter === "ॐ") {
+      out += "oṃ";
+      i++;
+      continue;
+    }
+    const vowel = DEVANAGARI_VOWELS.get(letter);
+    if (vowel !== undefined) {
+      // Keep literal ओं distinct from ॐ by using the existing anusvāra alias that bypasses the oṃ rule.
+      if (vowel === "o" && text[i + 1] === OTHERS["ṃ"] && startsWord(out, out.length)) {
+        out += "oṁ";
+        i += 2;
+      } else {
+        out += vowel;
+        i++;
+      }
+      continue;
+    }
+    out += DEVANAGARI_OTHERS.get(letter) ?? letter;
     i++;
   }
   return out;

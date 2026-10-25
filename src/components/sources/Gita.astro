@@ -9,20 +9,30 @@ const chapterTwo = CHAPTERS.find((source) => source.chapter === 2)!;
 <dl>
   <dt>Oliver Hellwig, <i>Digital Corpus of Sanskrit</i> (DCS)</dt>
   <dd>
-    All eighteen chapters of the Bhagavadgītā, with 700 Sanskrit verses, from the DCS CoNLL-U release.
+    The DCS CoNLL-U release supplies the annotation for all 700 Sanskrit verses and the displayed text of chapters 3–18.
     The repository is <a href="https://github.com/OliverHellwig/sanskrit">OliverHellwig/sanskrit</a>, pinned to
     commit <code>{DCS_COMMIT}</code>. The text, annotation and dictionary are licensed
     <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
   </dd>
   <dt>Display and morphology</dt>
   <dd>
-    The reader uses DCS written tokens in IAST, with sentence boundaries as verse-line boundaries and speaker
-    sentences as headings. Multiword-token ranges preserve sandhi and compounds. Revised syntactic passages
-    in chapters 1 and 2 already have segmented spellings. Those spellings are retained; sandhi is not invented.
-    A source sentence can span a whole verse or less than a half-verse, so not every verse occupies two lines.
+    Chapters 1 and 2 use Besant’s Sanskrit from the same pinned scan pages as the English, pages 11–55.
+    Their Devanagari text is transliterated into IAST, retaining the printed sandhi, spacing, lines and speaker
+    captions. The remaining chapters use DCS written tokens and sentence boundaries.
+    The script toggle can show either IAST or Devanagari.
     <i>CONJ</i> becomes <i>CCONJ</i>. DCS-specific values such as <i>Case=Cpd</i> (compound member),
     <i>Tense=Impf</i> (imperfect), <i>Mood=Jus</i> (jussive), <i>Mood=Cond</i> (conditional) and
     <i>Formation=peri/s</i> (periphrastic or sigmatic formation) are retained and labelled.
+  </dd>
+  <dt>Aligning Besant’s text to DCS words</dt>
+  <dd>
+    Each verse is aligned globally in IAST letters, treating aspirates and vowel digraphs as single letters.
+    Each DCS word belongs to the written token containing its first aligned letter, or the next aligned letter
+    if its beginning falls in a gap. Words stay in source order and appear exactly once.
+    A written token may therefore carry several ordered analyses.
+    Validation allows two letter edits per constituent word, plus an exact allowance for homorganic nasal spellings.
+    Changes away from word edges are rejected unless they are those nasal spellings or an explicit reading exception.
+    Unknown differences fail the data build rather than receiving guessed analyses.
   </dd>
 </dl>
 <details>
@@ -85,6 +95,35 @@ const chapterTwo = CHAPTERS.find((source) => source.chapter === 2)!;
     Its first half is recovered from the same-commit companion sentence <code>229134_1_0</code>,
     including that witness’s seven annotated words. No replacement analyses are generated.
   </dd>
+  <dt>Besant’s Sanskrit transcription</dt>
+  <dd>
+    The explicit <code>REPAIRS</code> table in <code>scripts/gita/lib/besant-sanskrit.ts</code> repairs:
+    a duplicate double danda at 1.11 (Page 15); one shaping control at 1.22 (Page 19);
+    <i>त्यक्त्वोत्तिष्ट</i> to <i>त्यक्त्वोत्तिष्ठ</i> at 2.3 (Page 29);
+    the sole ASCII colon to visarga in <i>जिजीविषाम:</i> at 2.6 (Page 30);
+    <i>व्ययसायात्मिका</i> to <i>व्यवसायात्मिका</i> at 2.41 (Page 42);
+    and <i>रागद्वेषवियुक्तैस्तुं</i> to <i>रागद्वेषवियुक्तैस्तु</i> at 2.64 (Page 51).
+    The changes at 2.3, 2.41 and 2.64 follow explicit corrections in the transcription’s SIC templates.
+    Double avagrahas in 1.28 and 2.1 remain as printed.
+    In 2.1, <i>कृपयाऽऽविष्टमश्रुपूर्णाकुलेक्षणम्</i> remains one written token, not two editorially separated words.
+  </dd>
+  <dt>Differences between Besant and DCS</dt>
+  <dd>
+    <code>BESANT_DCS_READINGS</code> in <code>scripts/gita/surface-alignment.ts</code> records the exact forms
+    and DCS constituents. Besant’s singular forms in 1.28 face DCS plural analyses, and <i>samupasthitam</i>
+    faces DCS <i>samavasthitān</i>. Other differences are <i>śyālāḥ/syālāḥ</i> (1.34),
+    <i>sva/sa</i> (1.37), <i>klaivyam/klaibyam</i> (2.3), <i>bhaikṣyam/bhaikṣam</i> (2.5),
+    and Besant’s nominative <i>parantapaḥ</i> against DCS’s vocative (2.9).
+    Besant’s printed form is shown with the corresponding DCS analyses; the morphology is not silently rewritten.
+  </dd>
+  <dt>Unannotated Besant captions and a split verb</dt>
+  <dd>
+    <code>EXTRA_HEADS</code> lists speaker captions at 1.21, 1.24, 1.28 and 1.47 that have no DCS word rows.
+    They remain visible without analyses. At 2.67, Besant prints <i>yanmano’nu vidhīyate</i> as two written tokens,
+    while DCS supplies one verb word <i>anuvidhīyate</i>.
+    The first-letter rule places that complete analysis on <i>yanmano’nu</i>; the remaining printed
+    <i>vidhīyate</i> has no separate analysis. The DCS word is never counted or assigned twice.
+  </dd>
   <dt>Four forms without usable annotation</dt>
   <dd>
     DCS sentence <code>231624</code> (13.11b) includes <i>proktam ajñānaṃ</i> in its text comment
@@ -100,7 +139,7 @@ const chapterTwo = CHAPTERS.find((source) => source.chapter === 2)!;
     omitted labels at 10.31 and 11.8. English 17.19 is misnumbered 20, and 18.14 is misnumbered 15;
     the adjacent Sanskrit numbers and neighbouring verses establish the intended labels.
     No English verse paragraphs are merged or omitted.
-    The source colophon for chapter 8 spells <i>indesctructible</i>; that transcription is retained.
+    The chapter 8 title corrects the transcription’s <i>indesctructible</i>.
     The transcription’s truncated wording in 11.25 is retained too.
     English speaker headings are not added where the transcription omits them, at 6.33 and 11.32.
   </dd>
@@ -112,7 +151,7 @@ const chapterTwo = CHAPTERS.find((source) => source.chapter === 2)!;
   <dd>
     Annotated words carry the DCS lemma and morphology for that occurrence.
     A written form that joins several words lists its constituents in order, each with its own analysis.
-    No grammatical analysis is inferred for the four explicitly listed unannotated forms.
+    No grammatical analysis is inferred for the explicitly listed unannotated forms and captions.
   </dd>
   <dt>DCS dictionary</dt>
   <dd>
@@ -133,6 +172,6 @@ const chapterTwo = CHAPTERS.find((source) => source.chapter === 2)!;
 <h2>Licence of this site’s data</h2>
 <p>
   The aligned text, word analyses and lexicon are derived from CC BY 4.0 sources and are shared under the same
-  licence. Citation mappings, companion-source recovery and transcription-marker repairs are this reader’s
-  modifications. Besant’s translation remains in the public domain.
+  licence. Citation mappings, companion-source recovery, transcription repairs and the Besant-to-DCS alignment
+  are this reader’s modifications. Besant’s Sanskrit and English remain in the public domain.
 </p>
