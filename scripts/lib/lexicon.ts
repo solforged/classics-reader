@@ -98,7 +98,7 @@ interface WiktEntry {
   word: string;
   pos: string;
   forms?: { form: string; tags?: string[] }[];
-  senses?: { glosses?: string[]; tags?: string[]; form_of?: { word: string }[] }[];
+  senses?: { glosses?: string[]; tags?: string[]; form_of?: { word: string }[]; alt_of?: { word: string }[] }[];
   inflection_templates?: { name: string; args: Record<string, string> }[];
 }
 
@@ -107,21 +107,89 @@ export interface WiktGloss {
   glosses: string[];
 }
 
+// Wiktionary uses these headwords for words the edition lemmatizes under their other spelling.
+const EDITION_LEMMAS: Record<string, string> = {
+  mínn: "minn", sínn: "sinn", einnhverr: "einhverr", þit: "it",
+};
+
+function alternativeTarget(s: NonNullable<WiktEntry["senses"]>[number]): string | undefined {
+  if (s.alt_of?.length === 1) return s.alt_of[0]!.word;
+  if (s.form_of?.length === 1 && s.tags?.some((t) => t === "alt-of" || t === "alternative")) return s.form_of[0]!.word;
+  const gloss = s.glosses?.join("; ") ?? "";
+  const spelling = /^(?:(?:alternative|alternate|variant|manuscript|obsolete|archaic|old|older|later|nonstandard)\s+)+(?:form|spelling|orthography) of ([^\s,;()“”]+)/i.exec(gloss);
+  return spelling ? s.form_of?.[0]?.word ?? spelling[1]!.replace(/[.:]+$/, "") : undefined;
+}
+
+function tableForms(e: WiktEntry) {
+  return (e.forms ?? []).filter((f) => f.form && !/^[-–—]$/.test(f.form)
+    && !(f.tags ?? []).some((t) => SKIP_TAGS.has(t)) && morphFrom(e.pos, f.tags).includes(" "));
+}
+
 /** Adds Wiktionary forms to the index and returns lemma glosses (non form-of senses) by fold key. */
 export function indexWiktionary(jsonl: string, index: FormIndex): Map<string, WiktGloss[]> {
   const glosses = new Map<string, WiktGloss[]>();
-  for (const line of jsonl.split("\n")) {
-    if (!line) continue;
-    const e = JSON.parse(line) as WiktEntry;
-    if (!e.word || e.word.includes(" ") || e.word.startsWith("-")) continue;
+  const entries = jsonl.split("\n").filter(Boolean).map((line) => JSON.parse(line) as WiktEntry)
+    .filter((e) => e.word && !e.word.includes(" ") && !e.word.startsWith("-"));
+  const byWord = new Map<string, WiktEntry[]>();
+  const aliases = new Map<WiktEntry, string>();
+  for (const e of entries) {
+    const list = byWord.get(e.word) ?? [];
+    list.push(e);
+    byWord.set(e.word, list);
+    const targets = (e.senses ?? []).map(alternativeTarget);
+    if (targets.length && targets.every((t) => t && t === targets[0])) aliases.set(e, targets[0]!);
+  }
+  const canonical = (word: string, pos: string): string => {
+    const seen = new Set<string>();
+    while (!seen.has(word)) {
+      seen.add(word);
+      if (EDITION_LEMMAS[word]) return EDITION_LEMMAS[word]!;
+      const variants = (byWord.get(word) ?? []).filter((e) => POS[e.pos]?.[0] === POS[pos]?.[0]);
+      const targets = variants.map((e) => aliases.get(e));
+      if (!targets.length || !targets.every((t) => t && t === targets[0])) break;
+      word = targets[0]!;
+    }
+    return word;
+  };
+  for (const e of entries) {
     const pos = e.pos;
-    const own = (e.senses ?? []).filter((s) => !s.form_of?.length && s.glosses?.length);
-    if (own.length) {
-      index.add(e.word, [e.word, morphFrom(pos), "w"]);
-      const k = fold(e.word);
-      const list = glosses.get(k) ?? [];
-      list.push({ pos, glosses: own.map((s) => s.glosses!.join("; ")).slice(0, 6) });
-      glosses.set(k, list);
+    const target = aliases.get(e);
+    const lemma = canonical(target ?? e.word, pos);
+    if (target) {
+      const targets = (byWord.get(target) ?? []).filter((e) => POS[e.pos]?.[0] === POS[pos]?.[0]);
+      const forms = targets.flatMap(tableForms);
+      const ownForms = tableForms(e);
+      const layout = (fs: typeof ownForms) => [...new Set(fs.map((f) => morphFrom(pos, f.tags)))];
+      const ownLayout = layout(ownForms);
+      const matching = targets.find((t) => JSON.stringify(layout(tableForms(t))) === JSON.stringify(ownLayout));
+      // Cell order is usable only when both tables expose the same sequence of grammatical cells.
+      if (ownLayout.length && matching && !ownForms.some((f) => f.tags?.includes("personal"))) {
+        for (const f of ownForms) for (const form of f.form.split(/\s*[,/]\s*/)) {
+          index.add(form, [lemma, morphFrom(pos, f.tags), "w"]);
+        }
+      }
+      let readings = forms.filter((f) => f.form.split(/\s*[,/]\s*/).includes(e.word));
+      if (!readings.length) readings = ownForms.filter((f) => f.form.split(/\s*[,/]\s*/).includes(e.word));
+      if (!readings.length) {
+        const head = forms.filter((f) => f.form.split(/\s*[,/]\s*/).includes(target));
+        // An untagged spelling alias cannot disambiguate a syncretic headword.
+        if (new Set(head.map((f) => morphFrom(pos, f.tags))).size === 1) readings = head;
+      }
+      if (readings.length) for (const f of readings) index.add(e.word, [lemma, morphFrom(pos, f.tags), "w"]);
+      else for (const s of e.senses ?? []) index.add(e.word, [lemma, morphFrom(pos, s.tags), "w"]);
+    }
+    const own = target ? [] : (e.senses ?? []).filter((s) => !s.form_of?.length && !s.alt_of?.length && s.glosses?.length);
+    if (own.length || target) {
+      if (own.length) {
+        const head = tableForms(e).filter((f) => f.form.split(/\s*[,/]\s*/).includes(e.word));
+        if ((pos === "pron" || pos === "det") && head.length) {
+          for (const f of head) index.add(e.word, [lemma, morphFrom(pos, f.tags), "w"]);
+        } else index.add(e.word, [lemma, morphFrom(pos), "w"]);
+        const k = fold(lemma);
+        const list = glosses.get(k) ?? [];
+        list.push({ pos, glosses: own.map((s) => s.glosses!.join("; ")).slice(0, 6) });
+        glosses.set(k, list);
+      }
       // Kaikki can omit voice headings, or every form, while retaining the explicit conjugation cells.
       const middle = new Set<string>();
       let blocks = 0;
@@ -148,7 +216,7 @@ export function indexWiktionary(jsonl: string, index: FormIndex): Map<string, Wi
         for (const form of (template.args["1"] ?? "").split(/\s*[,/]\s*/)) {
           if (!form || /^[-–—]$/.test(form) || form.includes("{{{")) continue;
           middle.add(fold(form.replace(/ǿ/g, "œ")));
-          index.add(form, [e.word, morphFrom(pos, tags), "w"]);
+          index.add(form, [lemma, morphFrom(pos, tags), "w"]);
         }
       }
       // Pronoun tables are shared across several headwords; only trust explicit form-of senses there.
@@ -158,14 +226,14 @@ export function indexWiktionary(jsonl: string, index: FormIndex): Map<string, Wi
           if (!f.form || f.form === "-" || tags.some((t) => SKIP_TAGS.has(t))) continue;
           for (const form of f.form.split(/\s*[,/]\s*/)) {
             const voice = middle.has(fold(form.replace(/ǿ/g, "œ"))) ? [...tags, "mediopassive"] : tags;
-            index.add(form, [e.word, morphFrom(pos, voice), "w"]);
+            index.add(form, [lemma, morphFrom(pos, voice), "w"]);
           }
         }
       }
     }
-    for (const s of e.senses ?? []) {
-      for (const fo of s.form_of ?? []) {
-        if (fo.word && !fo.word.startsWith("-")) index.add(e.word, [fo.word, morphFrom(pos, s.tags), "w"]);
+    for (const s of target ? [] : e.senses ?? []) {
+      for (const fo of [...s.form_of ?? [], ...s.alt_of ?? []]) {
+        if (fo.word && !fo.word.startsWith("-")) index.add(e.word, [canonical(fo.word, pos), morphFrom(pos, s.tags), "w"]);
       }
     }
   }

@@ -38,6 +38,8 @@ function wordClass(upos: string, has: (name: string, value: string) => boolean):
       if (has("PronType", "Prs")) return "personal pronoun";
       if (has("PronType", "Ind")) return "indefinite pronoun";
       if (has("PronType", "Int")) return "interrogative pronoun";
+      if (has("PronType", "Dem")) return "demonstrative pronoun";
+      if (has("PronType", "Art")) return "article";
       return "pronoun";
     case "DET":
       if (has("Poss", "Yes")) return "possessive";
@@ -85,6 +87,7 @@ export function describeMorph(morph: string, options: { tableLabel?: string } = 
     props.push(v("Govern"));
   }
   if (has("Clitic", "Yes")) props.push("enclitic");
+  if (has("Poss", "Yes") && feats.Possessor?.length === 1) props.push(`possessive of ${feats.Possessor[0]}`);
   return {
     pos: wordClass(upos, has),
     form: form.filter(Boolean).join(" "),

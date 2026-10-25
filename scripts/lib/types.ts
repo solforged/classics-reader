@@ -71,8 +71,12 @@ export type SearchRow = [string, string, string, string, ([number, number, strin
 /** A lexicon entry (data/lexicon.json). */
 export interface LemmaStat {
   lemma: string;
-  /** The lemma's first analysis (UD morphology); lexicon pages show its word class. */
+  /** A representative analysis (UD morphology); lexicon pages show its word class. */
   morph: string;
+  /** UPOS classes belonging to this entry, when the lemma has separate homograph pages. */
+  classes?: string[];
+  /** Class discriminator for additional homograph page slugs; the first entry retains the old slug. */
+  homograph?: string;
   count: number;
   works: Record<string, number>;
   /** Concordance lines: slug, row id, line with the word marked ⟦…⟧, 1 = probable (not edition-annotated). */

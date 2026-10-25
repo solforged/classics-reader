@@ -2,6 +2,7 @@
 import { withoutFeature } from "../../src/lib/morph";
 import { fold } from "../../src/lang/non/spelling";
 import type { Analysis } from "./types";
+import { pronounMorph } from "./menota";
 
 /** Spelling differences between the Snorra Edda / Bugge texts and the Codex Regius edition's normalization. */
 const NORMAL_STEPS: [RegExp, string][] = [
@@ -65,6 +66,10 @@ const deaccent = (k: string) => k.normalize("NFD").replace(/\p{M}/gu, "").normal
 interface IndexedAnalysis {
   analysis: Analysis;
   count: number;
+  /** Wiktionary independently lists this spelling for the lemma. */
+  wiktionary?: boolean;
+  /** Exceptional weak forms can be restricted to enclitic use. */
+  clitic?: boolean;
   /** Survived the exact key's attestation filter before a diplomatic merger. */
   exact?: boolean;
 }
@@ -78,15 +83,20 @@ export class FormIndex {
     const k = fold(form.replace(/ǿ/g, "œ"));
     if (!k) return;
     // The clitic flag describes a particular occurrence, not the form.
-    const analysis: Analysis = [a[0], withoutFeature(a[1], "Clitic"), a[2]];
+    const analysis: Analysis = [a[0], withoutFeature(pronounMorph(a[0], a[1]), "Clitic"), a[2]];
     let m = this.forms.get(k);
     if (!m) this.forms.set(k, (m = new Map()));
     const id = `${analysis[0]}\t${analysis[1]}`;
     const prev = m.get(id);
     // Each edition annotation contributes one attestation of this form and reading.
-    if (!prev) m.set(id, { analysis, count: analysis[2] === "e" ? 1 : 0 });
+    if (!prev) m.set(id, {
+      analysis, count: analysis[2] === "e" ? 1 : 0, wiktionary: analysis[2] === "w",
+      clitic: /\bClitic=Yes\b/.test(a[1]),
+    });
     else {
       if (analysis[2] === "e") prev.count++;
+      prev.wiktionary ||= analysis[2] === "w";
+      prev.clitic ||= /\bClitic=Yes\b/.test(a[1]);
       if (prev.analysis[2] === "w" && analysis[2] !== "w") prev.analysis = analysis;
     }
     const b = deaccent(k);
@@ -112,6 +122,8 @@ export class FormIndex {
         else {
           prev.count += a.count;
           prev.exact ||= exact;
+          prev.wiktionary ||= a.wiktionary;
+          prev.clitic ||= a.clitic;
           if (prev.analysis[2] === "w" && a.analysis[2] !== "w") prev.analysis = a.analysis;
         }
       }
@@ -139,7 +151,18 @@ export class FormIndex {
 
 /** Attested readings lead; diplomatic mergers preserve exact candidates without flooding them with unattested ones. */
 function rank(list: IndexedAnalysis[], diplomatic: boolean): Analysis[] {
-  const attested = list.filter((a) => a.analysis[2] !== "w").sort((a, b) => b.count - a.count);
+  const counts = new Map<string, number>();
+  const supported = new Set<string>();
+  for (const a of list) {
+    counts.set(a.analysis[0], (counts.get(a.analysis[0]) ?? 0) + a.count);
+    if (a.wiktionary || a.clitic) supported.add(a.analysis[0]);
+  }
+  const dominant = Math.max(0, ...counts.values());
+  // Keep dictionary-supported homographs and exceptional enclitics. An unsupported singleton
+  // lemma loses only against at least 200 edition occurrences of a competing lemma.
+  const attested = list.filter((a) => a.analysis[2] !== "w"
+    && !(dominant >= 200 && counts.get(a.analysis[0]) === 1 && !supported.has(a.analysis[0])))
+    .sort((a, b) => b.count - a.count);
   const candidates = attested.length
     ? [...attested, ...(diplomatic ? list.filter((a) => a.analysis[2] === "w" && a.exact) : [])] : list;
   const seen = new Set<string>();
@@ -163,6 +186,8 @@ export class AnalysisTable {
   ) {}
 
   add(a: Analysis): number {
+    const morph = pronounMorph(a[0], a[1]);
+    if (morph !== a[1]) a = a[3] === undefined ? [a[0], morph, a[2]] : [a[0], morph, a[2], a[3]];
     const k = a.join("\t");
     let id = this.ids.get(k);
     if (id === undefined) {

@@ -4,6 +4,7 @@ import { lang } from "../../lang";
 import { base, LEXICON, lemmaSlugs, site } from "../../lib/site";
 
 const total = LEXICON.reduce((n, l) => n + l.count, 0);
+const splitCount = new Set(LEXICON.filter((l) => l.classes).map((l) => l.lemma)).size;
 ---
 
 <Base title={`Lexicon · ${site.name}`} crumbs={[{ label: "Lexicon" }]}>
@@ -11,8 +12,9 @@ const total = LEXICON.reduce((n, l) => n + l.count, 0);
     <p class="eyebrow">Lexicon</p>
     <h1>{lang.name} lexicon</h1>
     <p class="prose-note">
-      {LEXICON.length.toLocaleString("en")} lemmas, {total.toLocaleString("en")} counted occurrences.{" "}
+      {LEXICON.length.toLocaleString("en")} entries, {total.toLocaleString("en")} counted occurrences.{" "}
       <Fragment set:html={site.countNote} />
+      {splitCount > 0 && <>{" "}{splitCount} lemmas have separate homograph entries; probable occurrences require agreement on the entry.</>}
     </p>
     <div class="controls">
       <input type="search" id="filter" placeholder="Filter lemmas or glosses…" autocomplete="off" />
@@ -28,7 +30,7 @@ const total = LEXICON.reduce((n, l) => n + l.count, 0);
         {
           LEXICON.map((l, i) => (
             <tr data-k={`${lang.searchKey(l.lemma)} ${l.gloss.toLowerCase()}`} data-i={i} data-a={lang.searchKey(l.lemma)}>
-              <td><a href={`${base}lexicon/${lemmaSlugs.get(l.lemma)}/`} lang={lang.code}>{l.lemma}</a></td>
+              <td><a href={`${base}lexicon/${lemmaSlugs.get(l)}/`} lang={lang.code}>{l.lemma}</a></td>
               <td class="pos">{lang.describeMorph(l.morph).pos}</td>
               <td class="gloss">{l.gloss}</td>
               <td class="n">{l.count.toLocaleString("en")}</td>
@@ -60,7 +62,7 @@ const total = LEXICON.reduce((n, l) => n + l.count, 0);
       r.hidden = !hit;
       if (hit) shown++;
     }
-    count.textContent = q ? `${shown.toLocaleString("en")} matching lemmas` : "";
+    count.textContent = q ? `${shown.toLocaleString("en")} matching entries` : "";
   }
   filter.addEventListener("input", apply);
   for (const b of document.querySelectorAll<HTMLButtonElement>("[data-sort]")) {

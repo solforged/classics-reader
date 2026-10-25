@@ -6,6 +6,7 @@ import { lang, shardOf } from "../lang";
 import { site } from "../sites";
 import type { WorkInfo } from "../sites/types";
 import type { DictHit } from "./dict";
+import { parseMorph } from "./morph";
 import type { Paradigm } from "./paradigm";
 
 export { site, type LemmaStat, type WorkInfo };
@@ -36,21 +37,33 @@ export const LEXICON = readJson<LemmaStat[]>(join(DATA, "lexicon.json"));
 
 /** URL slugs for lemma pages: lowercase, unique even on case-insensitive file systems. */
 export const lemmaSlugs = (() => {
-  const map = new Map<string, string>();
+  const map = new Map<LemmaStat, string>();
   const taken = new Set<string>();
-  for (const { lemma } of LEXICON) {
+  // Reserve every existing lemma URL before assigning class-suffixed homographs.
+  const ordered = [...LEXICON.filter((l) => !l.homograph), ...LEXICON.filter((l) => l.homograph)];
+  for (const stat of ordered) {
     // Unassigned and control characters (a stray U+FFDE in one DCS lemma) cannot be file names.
-    const base = lemma.normalize("NFC").toLowerCase().replace(/[\p{Cn}\p{Cc}\p{Co}\p{Cs}]/gu, "")
-      .replace(/[\s/?#%\\]+/g, "-");
+    const base = stat.lemma.normalize("NFC").toLowerCase().replace(/[\p{Cn}\p{Cc}\p{Co}\p{Cs}]/gu, "")
+      .replace(/[\s/?#%\\]+/g, "-") + (stat.homograph ? `-${stat.homograph.toLowerCase()}` : "");
     let slug = base;
     for (let i = 2; taken.has(slug); i++) slug = `${base}-${i}`;
     taken.add(slug);
-    map.set(lemma, slug);
+    map.set(stat, slug);
   }
   return map;
 })();
 
-export const lemmaCounts = new Map(LEXICON.map((l) => [l.lemma, l.count]));
+const lemmaPages = new Map<string, { slug: string; count: number }>();
+for (const stat of LEXICON) {
+  for (const upos of stat.classes ?? [""]) {
+    lemmaPages.set(`${stat.lemma}\t${upos}`, { slug: lemmaSlugs.get(stat)!, count: stat.count });
+  }
+}
+
+/** The reading's homograph page, or the unchanged lemma page when it is not split. */
+export function lemmaPage(lemma: string, morph: string): { slug: string; count: number } | undefined {
+  return lemmaPages.get(`${lemma}\t${parseMorph(morph).upos}`) ?? lemmaPages.get(`${lemma}\t`);
+}
 
 export const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 

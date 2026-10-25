@@ -3,7 +3,7 @@ import type { EnUnit, OnUnit, Piece } from "../../../scripts/lib/types";
 import Base from "../../layouts/Base.astro";
 import WordPanel from "../../components/WordPanel.astro";
 import { lang } from "../../lang";
-import { base, lemmaCounts, lemmaSlugs, loadWork, site, WORKS } from "../../lib/site";
+import { base, lemmaPage, loadWork, site, WORKS } from "../../lib/site";
 
 export function getStaticPaths() {
   return WORKS.map((w) => ({ params: { slug: w.slug } }));
@@ -60,7 +60,8 @@ function enUnit(u: EnUnit): string {
 
 // [lemma, morph, source, lemma page slug, corpus count, segmented word]; src/scripts/reader.ts reads these.
 const analyses = work.analyses.map(([lemma, morph, s, word]) => {
-  const a = [lemma, morph, s, lemmaSlugs.get(lemma) ?? "", lemmaCounts.get(lemma) ?? 0];
+  const page = lemmaPage(lemma, morph);
+  const a = [lemma, morph, s, page?.slug ?? "", page?.count ?? 0];
   return word ? [...a, word] : a;
 });
 const chapters = isProse ? work.rows.filter((r) => /^\d+$/.test(r.id)).map((r) => r.id) : [];

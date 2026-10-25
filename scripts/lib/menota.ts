@@ -7,9 +7,11 @@
 //   PartType=Inf   xIM, the infinitive marker "at"
 //   Govern=Acc|Dat|Gen  case a preposition governs (y)
 //   InflClass=Strong|Weak|Redup|PretPres  verb class (i)
+//   Possessor=ek|þú|sik|vér|vit|it|ér  personal pronoun a possessive is derived from
 // Unspecified values (gU, cU, …) are dropped. Syncretic values (cAD, cO) and a feature repeated with different values
 // ("cA cD cG") become comma-joined alternatives.
-import { formatMorph } from "../../src/lib/morph";
+import { formatMorph, parseMorph } from "../../src/lib/morph";
+import { fold } from "../../src/lang/non/spelling";
 
 /** Numeric headwords in the edition stand for different cardinal and ordinal words. */
 const NUMERAL_LEMMAS: Record<string, readonly [cardinal: string, ordinal?: string]> = {
@@ -37,6 +39,48 @@ const NUMERAL_LEMMAS: Record<string, readonly [cardinal: string, ordinal?: strin
 export function menotaLemma(lemma: string, msa: string): string {
   const numeral = NUMERAL_LEMMAS[lemma];
   return (numeral?.[/\bxNO\b/.test(msa) ? 1 : 0] ?? lemma).normalize("NFC");
+}
+
+type PronounClass = "personal" | "reflexive" | "demonstrative" | "article" | "possessive" | "interrogative" | "indefinite";
+const PRONOUNS = new Map<string, { kind: PronounClass; type: string; possessor?: string }>();
+for (const [kind, type, lemmas] of [
+  ["personal", "Prs", ["ek", "þú", "hann", "hon", "vit", "it", "vér", "ér", "þeir", "þær", "þau"]],
+  ["reflexive", "Prs", ["sik", "sín"]],
+  ["demonstrative", "Dem", ["sá", "sjá", "þessi", "hinn"]],
+  ["article", "Art", ["inn"]],
+  ["interrogative", "Int", ["hverr", "hvat", "hvárr"]],
+  ["indefinite", "Ind", ["engi", "manngi", "nǫkkurr", "einhverr", "einnhverr", "hvárgi", "hvatvetna", "hvatki",
+    "neinn", "báðir", "hvárrtveggi", "einn", "annarr"]],
+] as const) {
+  for (const lemma of lemmas) PRONOUNS.set(fold(lemma), { kind, type });
+}
+for (const [lemma, possessor] of Object.entries({
+  minn: "ek", mínn: "ek", þinn: "þú", sinn: "sik", sínn: "sik", várr: "vér", vórr: "vér",
+  okkarr: "vit", ykkarr: "it", yðvarr: "ér", yðarr: "ér",
+})) PRONOUNS.set(fold(lemma), { kind: "possessive", type: "Prs", possessor });
+
+/** Lexical subclass shared by edition annotations, candidate readings and table captions. */
+export function pronounLabel(lemma: string): string | undefined {
+  const entry = PRONOUNS.get(fold(lemma.toLowerCase()));
+  return entry ? entry.kind === "article" ? "article" : `${entry.kind} pronoun` : undefined;
+}
+
+/** The edition's xPD also covers articles and possessives; hverr/hvat use their interrogative classification. */
+export function pronounMorph(lemma: string, morph: string): string {
+  if (!/^(?:PRON|DET)(?: |$)/.test(morph)) return morph;
+  const entry = PRONOUNS.get(fold(lemma.toLowerCase()));
+  if (!entry) return morph;
+  const parsed = parseMorph(morph);
+  parsed.feats.PronType = [entry.type];
+  delete parsed.feats.Poss;
+  delete parsed.feats.Reflex;
+  delete parsed.feats.Possessor;
+  if (entry.kind === "reflexive") parsed.feats.Reflex = ["Yes"];
+  if (entry.possessor) {
+    parsed.feats.Poss = ["Yes"];
+    parsed.feats.Possessor = [entry.possessor];
+  }
+  return formatMorph(parsed);
 }
 
 const WORD_CLASS: Record<string, [upos: string, feats?: Record<string, string>]> = {

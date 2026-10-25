@@ -9,12 +9,15 @@ import { inflectAdjective } from "./inflect/adjectives";
 import { CompoundAdjectives } from "./inflect/compounds";
 import { inflectNoun } from "./inflect/nouns";
 import { inflectName } from "./inflect/names";
+import { inflectPronoun } from "./inflect/pronouns";
 import { inflectVerb } from "./inflect/verbs";
 import { grammarNotes, type Generated } from "./inflect/zoega";
+import { pronounLabel } from "./menota";
 
 const GENERATORS: Partial<Record<ParadigmKind, typeof inflectNoun>> = {
   noun: inflectNoun,
   adj: inflectAdjective,
+  pron: inflectPronoun,
   verb: inflectVerb,
 };
 
@@ -178,14 +181,14 @@ function inflectionLabel(entry: WiktEntry, kind: ParadigmKind, cells: Paradigm["
     if (Object.keys(cells).some((key) => /^(str|wk)_sup\|/.test(key))) return "superlative adjective";
     return undefined;
   }
-  return kind === "personal" ? "personal pronouns" : "pronominal declension";
+  return pronounLabel(entry.word) ?? (kind === "personal" ? "personal pronoun" : "pronoun");
 }
 
 /** Wiktionary table or explicit indeclinability of one entry, or undefined when it has neither. */
 export function extract(entry: WiktEntry): Candidate | undefined {
   const kind: ParadigmKind | undefined = entry.pos === "noun" || entry.pos === "name" ? "noun"
     : entry.pos === "adj" ? "adj" : entry.pos === "verb" ? "verb"
-    : entry.pos === "pron" || entry.pos === "det" || entry.pos === "article"
+    : entry.pos === "pron" || entry.pos === "det" || entry.pos === "article" || entry.pos === "num"
       ? entry.forms?.some((f) => f.tags?.includes("personal")) ? "personal" : "pron" : undefined;
   if (!kind) return undefined;
   const cells: Paradigm["cells"] = {};
@@ -240,6 +243,11 @@ export function extract(entry: WiktEntry): Candidate | undefined {
     // Explicit conjugation tables preserve voice; case-tagged participles add their own declension cells.
     if (kind === "adj" && adjectiveTables) break;
     let tags = form.tags ?? [];
+    // These neuter singular compounds have case-only rows in Wiktionary; Zoëga confirms their gender.
+    if (kind === "pron" && /^(?:hvatki|hvatvetna)$/.test(entry.word) && form.source === "declension"
+      && CASES.some(([tag]) => tags.includes(tag)) && !NUMBERS.some(([tag]) => tags.includes(tag))) {
+      tags = [...tags, "singular", "neuter"];
+    }
     const declined = kind === "verb" && tags.includes("participle") && tags.includes("past")
       && CASES.some(([tag]) => tags.includes(tag));
     if ((kind === "adj" || kind === "verb" && form.source === "declension") && tags.includes("table-tags")) {
@@ -340,6 +348,8 @@ export class ParadigmBuilder {
       const candidate = extract(entry);
       if (!candidate) continue;
       const aliases = new Set([entry.word]);
+      // Zoëga's einhverr entry redirects to einnhverr, whose table uses both spellings in its forms.
+      if (candidate.kind === "pron" && entry.word === "einnhverr") aliases.add("einhverr");
       // The shared personal table also serves headwords such as hon, absent as standalone entries.
       if (candidate.kind === "personal") {
         for (const [cell, forms] of Object.entries(candidate.cells)) {
@@ -389,6 +399,16 @@ export class ParadigmBuilder {
       if (!candidates.length) {
         candidates = loose.get(looseDictionaryKey(lemma))
           ?.filter((c) => c.kind === kind && (!proper || /^\p{Lu}/u.test(c.word))) ?? [];
+      }
+      if (kind === "pron" && !proper && !candidates.length) {
+        // The edition uses pronominal readings of adjective/numeral lemmas such as einn and annarr.
+        const nominal = exact.get(fold(lemma)) ?? loose.get(looseDictionaryKey(lemma)) ?? [];
+        candidates = nominal.filter((candidate) => candidate.kind === "adj" && candidate.cells["str|nsm"]?.length)
+          .map((candidate) => ({
+            word: candidate.word, kind: "pron", label: "pronominal declension",
+            cells: Object.fromEntries(Object.entries(candidate.cells)
+              .filter(([cell]) => cell.startsWith("str|")).map(([cell, forms]) => [cell.slice(3), forms])),
+          }));
       }
       if (kind === "adj") {
         let parent: Candidate | undefined;
@@ -470,6 +490,11 @@ export class ParadigmBuilder {
           }
         }
       }
+    }
+    for (const record of out) {
+      if (record.kind !== "pron" && record.kind !== "personal") continue;
+      const label = pronounLabel(record.lemma);
+      if (label) record.label = `${record.label?.startsWith("partial ") ? "partial " : ""}${label}`;
     }
     return out;
   }

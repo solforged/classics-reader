@@ -33,7 +33,9 @@ analyses: spellings the edition annotates elsewhere (most frequent first), then
 Wiktionary inflection tables, then Bellows's name index for capitalized words.
 Lookup bridges the prose's middle-voice *-st* to Wiktionary's *-sk*, and Bugge's
 unaccented manuscript spellings match accented and unaccented forms alike.
-About 80–93% of those words get a candidate.
+About 80–93% of those words get a candidate. A Wiktionary headword that is only
+another spelling of a word the edition lemmatizes (*ec*, *enginn*, *sunr*) reads
+as that word (*ek*, *engi*, *sonr*).
 
 Dictionary lookup bridges the edition's spellings to the dictionaries' headwords
 (*loft*/*lopt*, *ǿði*/*œði*) and splits unlisted compounds into listed parts
@@ -50,6 +52,13 @@ table spells the form differently (*skoðask*, here *skoðast*). Comparatives th
 edition files under their own headword (*betri*, *meiri*) use the positive's
 table, so superlatives such as *beztr* land on a cell, and compound adjectives
 without a table are declined like their last part (*ósnjallr* like *snjallr*).
+
+The edition tags pronouns without their kind, so the build adds it from the lemma
+(personal, reflexive, demonstrative, article, possessive, interrogative,
+indefinite); possessives name their personal pronoun (*minn*, possessive of *ek*).
+The lexicon gives a spelling one page per word class when it is clearly two words
+(*vit* "consciousness" and *vit* "we two" at `/lexicon/vit-pron/`), and each page's
+gloss comes from the dictionary section for that class.
 
 ## The Gītā Reader
 

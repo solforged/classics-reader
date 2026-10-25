@@ -6,7 +6,7 @@ import { WORKS, type WorkDef } from "./catalog";
 import { Concordance, Outputs, ROOT, statsLine } from "./core/outputs";
 import { suffixEntry, zoegaFits, zoegaGrammarPattern } from "../src/lang/non/dictionaries";
 import { fold } from "../src/lang/non/spelling";
-import type { DictEntry as PrintedEntry, DictHit } from "../src/lib/dict";
+import type { ArticleSection, DictEntry as PrintedEntry, DictHit } from "../src/lib/dict";
 import { parseMorph } from "../src/lib/morph";
 import type { Paradigm } from "../src/lib/paradigm";
 import { glossArticle, nameArticle, plainArticle, zoegaArticle } from "./lib/articles";
@@ -245,6 +245,8 @@ await outputs.reset();
 const concordance = new Concordance();
 const usedLemmas = new Set<string>();
 const lemmaMorph = new Map<string, string>(); // a representative analysis, to rank dictionary homographs
+const classMorphs = new Map<string, Map<string, string>>();
+const editionClasses = new Map<string, Set<string>>();
 const stats: string[] = [];
 const paradigms = new ParadigmBuilder();
 
@@ -259,7 +261,16 @@ for (const def of WORKS) {
     usedLemmas.add(a[0]);
     paradigms.use(a);
     if (!lemmaMorph.has(a[0]) || a[2] === "e") lemmaMorph.set(a[0], a[1]);
-    if (parseMorph(a[1]).upos === "PROPN" && a[2] !== "n") knownNames.add(a[0]);
+    const upos = parseMorph(a[1]).upos;
+    let morphs = classMorphs.get(a[0]);
+    if (!morphs) classMorphs.set(a[0], morphs = new Map());
+    if (!morphs.has(upos) || a[2] === "e") morphs.set(upos, a[1]);
+    if (a[2] === "e") {
+      let classes = editionClasses.get(a[0]);
+      if (!classes) editionClasses.set(a[0], classes = new Set());
+      classes.add(upos);
+    }
+    if (upos === "PROPN" && a[2] !== "n") knownNames.add(a[0]);
   }
   for (const row of rows) {
     for (const u of row.on) {
@@ -324,10 +335,76 @@ function dictionaryHit(lemma: string, morph = ""): RawHit {
   return { z, c, w, via };
 }
 
-/** Zoëga italicizes its English senses; Wiktionary is the fallback for a brief gloss. */
-function dictionaryGloss(hit: RawHit): string {
-  const italic = hit.z?.[0]?.d.join(" ").match(/<i>([^<]+)<\/i>/)?.[1];
-  return (italic ?? hit.w?.[0]?.glosses[0] ?? "").replace(/[;,.:\s]+$/, "");
+/** Match the panel's grammar test, stopping before senses when an article is unparsed. */
+function sectionFits(section: ArticleSection, morph: string): boolean {
+  const grammar = section.grammar || (section.text ?? "").split(/\b1\)|<i>/, 1)[0]!;
+  return zoegaFits(morph, grammar.replace(/\([^)]*\)/g, ""));
+}
+
+const WIKTIONARY_POS: Record<string, string[]> = {
+  NOUN: ["noun"], PROPN: ["name", "noun"], VERB: ["verb"], ADJ: ["adj"], ADV: ["adv"],
+  PRON: ["pron", "det", "article"], DET: ["det", "article", "pron"], ADP: ["prep", "postp"],
+  CCONJ: ["conj"], SCONJ: ["conj"], PART: ["particle"], NUM: ["num"], INTJ: ["intj"],
+};
+
+/** Prefer the first sense in the matching homograph, never a translation from its examples. */
+function dictionaryGloss(hit: RawHit, morph: string, seen = new Set<string>()): string {
+  const sections = hit.z?.flatMap((entry) => zoegaArticle(entry).sections) ?? [];
+  const upos = parseMorph(morph).upos;
+  const matching = sections.filter((section) => sectionFits(section, morph));
+  const sameClass = sections.filter((section) => sectionFits(section, upos));
+  const only = sections.length === 1 ? sections[0] : undefined;
+  const grammar = (only?.grammar ?? only?.text ?? "").split(/\b1\)|<i>/, 1)[0]!;
+  const marked = /\b(?:[mfn]|a|adj|adv|prep|pron|v|conj|interj|num|art)\./.test(grammar);
+  const section = matching[0] ?? sameClass[0] ?? (!marked || !zoegaGrammarPattern(morph) ? only : undefined);
+  const raw = section?.text ?? "";
+  const preface = section?.grammar ?? raw.split(/\b1\)/, 1)[0]!;
+  const reference = /(?:\bsee\s+|=\s*)([\p{L}ǫǿœø-]+)/u.exec(preface);
+  if (reference && !seen.has(reference[1]!)) {
+    seen.add(reference[1]!);
+    const gloss = dictionaryGloss(dictionaryHit(reference[1]!, morph), morph, seen);
+    if (gloss) return gloss;
+  }
+  // A gloss before numbered usage notes takes precedence (sinn: "his, her, its, their").
+  const introductory = [...preface.matchAll(/<i>([^<]+)<\/i>/g)].find((match) => match[1]!.length > 1)?.[1];
+  const unmarked = /(?:^|[,.]\s*)(?:[mfn]|a|adv|pron|prep|v)\.\s+([a-z]+(?:[ ,/-]+[a-z]+)*)[;(]/.exec(preface)?.[1];
+  const sense = section?.senses?.[0]?.gloss ?? raw.replace(/^[^]*?\b1\)\s*/, "");
+  const italic = /<i>([^<]+)<\/i>/.exec(sense);
+  // Some first senses are unitalicized before a parenthesized example (hvat: "what (h. sýnist …)").
+  const plain = sense.slice(0, italic?.index ?? sense.length).split("(", 1)[0]!.trim();
+  const unitalicized = /^[a-z]+(?:[ ,/-]+[a-z]+)*[?!]?$/.test(plain)
+    && sense.slice(plain.length, italic?.index).includes("(");
+  const positions = WIKTIONARY_POS[upos] ?? [];
+  const fallback = hit.w?.find((gloss) => positions.includes(gloss.pos) || !upos)?.glosses[0];
+  return (introductory ?? unmarked ?? (unitalicized ? plain : italic?.[1]) ?? fallback ?? "").replace(/[;,.:\s]+$/, "");
+}
+
+/** Keep nominal names and functionally interchangeable tags together. */
+function lexemeClass(morph: string): string {
+  const upos = parseMorph(morph).upos;
+  return upos === "PROPN" ? "NOUN" : upos === "DET" ? "PRON" : upos === "SCONJ" ? "CCONJ" : upos;
+}
+
+const splitClasses = new Map<string, Map<string, string>>();
+for (const [lemma, classes] of editionClasses) {
+  const morphs = classMorphs.get(lemma)!;
+  const groups = new Map([...classes].map((upos) => [lexemeClass(morphs.get(upos)!), morphs.get(upos)!]));
+  if (groups.size < 2) continue;
+  const sections = dictionaryHit(lemma).z?.flatMap((entry) => zoegaArticle(entry).sections) ?? [];
+  const keys = [...groups.keys()];
+  const parents = new Map(keys.map((key) => [key, key]));
+  const root = (key: string): string => parents.get(key) === key ? key : root(parents.get(key)!);
+  for (let i = 0; i < keys.length; i++) {
+    for (let j = i + 1; j < keys.length; j++) {
+      const a = keys[i]!, b = keys[j]!;
+      const clear = ["NOUN", "PRON", "VERB"].includes(a) && ["NOUN", "PRON", "VERB"].includes(b);
+      const separate = sections.some((s) => sectionFits(s, groups.get(a)!) && !sectionFits(s, groups.get(b)!))
+        && sections.some((s) => sectionFits(s, groups.get(b)!) && !sectionFits(s, groups.get(a)!));
+      // Adjectival nouns, adverbs and particles split only with separate dictionary homographs.
+      if (!clear && !separate) parents.set(root(b), root(a));
+    }
+  }
+  if (new Set(keys.map(root)).size > 1) splitClasses.set(lemma, new Map(keys.map((key) => [key, root(key)])));
 }
 
 /** The shard record: entries structured under the pack's dictionary ids (src/lang/non/dictionaries.ts). */
@@ -430,31 +507,32 @@ function writeHit(lemma: string, hit: RawHit, overwrite = false) {
   }
 }
 
-let withGloss = 0;
+const withGloss = new Set<string>();
 for (const lemma of usedLemmas) {
   if (!fold(lemma)) continue;
-  const morph = lemmaMorph.get(lemma) ?? "";
-  const hit = dictionaryHit(lemma, morph);
-  const suffix = suffixEntry(lemma)?.entries.zoega?.[0]?.sections[0]?.senses?.[0]?.gloss;
-  let gloss = suffix ? suffix.replace(/<[^>]+>/g, "") : dictionaryGloss(hit);
-  const proper = parseMorph(morph).upos === "PROPN";
-  const n = proper ? names.glosses(lemma) : [];
-  if (n.length) {
-    hit.n = n;
-    // A proper noun's own identification beats a gloss of the common word it shares a spelling with.
-    gloss = [...new Set(n.map((e) => e.desc))].slice(0, 2).join("; ");
+  for (const morph of classMorphs.get(lemma)?.values() ?? []) {
+    const hit = dictionaryHit(lemma, morph);
+    const suffix = suffixEntry(lemma)?.entries.zoega?.[0]?.sections[0]?.senses?.[0]?.gloss;
+    let gloss = suffix ? suffix.replace(/<[^>]+>/g, "") : dictionaryGloss(hit, morph);
+    const proper = parseMorph(morph).upos === "PROPN";
+    const n = proper ? names.glosses(lemma) : [];
+    if (n.length) {
+      hit.n = n;
+      // A proper noun's own identification beats a gloss of the common word it shares a spelling with.
+      gloss = [...new Set(n.map((e) => e.desc))].slice(0, 2).join("; ");
+    }
+    if (!hit.z && !hit.c && !hit.w && !hit.n) {
+      const parts = compoundParts(lemma, morph);
+      if (!parts) continue;
+      hit.parts = parts.map((part) => part.word);
+      // Do not turn an ambiguous homograph into an asserted compound translation.
+      gloss = parts.some((part) => part.ambiguous) ? "" : parts.map((part) => part.gloss).join(" + ");
+      for (const part of parts) writeHit(part.word, part.hit);
+    }
+    withGloss.add(lemma);
+    if (gloss) shortGloss.set(`${lemma}\t${parseMorph(morph).upos}`, gloss.length > 70 ? `${gloss.slice(0, 70)}…` : gloss);
+    writeHit(lemma, hit, true);
   }
-  if (!hit.z && !hit.c && !hit.w && !hit.n) {
-    const parts = compoundParts(lemma, morph);
-    if (!parts) continue;
-    hit.parts = parts.map((part) => part.word);
-    // Do not turn an ambiguous homograph into an asserted compound translation.
-    gloss = parts.some((part) => part.ambiguous) ? "" : parts.map((part) => part.gloss).join(" + ");
-    for (const part of parts) writeHit(part.word, part.hit);
-  }
-  withGloss++;
-  if (gloss) shortGloss.set(lemma, gloss.length > 70 ? `${gloss.slice(0, 70)}…` : gloss);
-  writeHit(lemma, hit, true);
 }
 await outputs.writeShards("lex", new Map([...shards].map(([k, hit]) => [k, shardRecord(hit)])));
 
@@ -465,8 +543,19 @@ for (const paradigm of paradigms.build(wiktionary, (lemma) => dictionaryHit(lemm
 }
 await outputs.writeShards("para", tables);
 
-await concordance.write(outputs, (lemma) => shortGloss.get(lemma) ?? "");
+await concordance.write(
+  outputs,
+  (lemma, morph) => {
+    const upos = parseMorph(morph).upos;
+    const suffix = suffixEntry(lemma)?.entries.zoega?.[0]?.sections[0]?.senses?.[0]?.gloss;
+    const gloss = upos === "PROPN" || suffix ? shortGloss.get(`${lemma}\t${upos}`) ?? ""
+      : dictionaryGloss(dictionaryHit(lemma, morph), morph) || shortGloss.get(`${lemma}\t${upos}`) || "";
+    return gloss.length > 70 ? `${gloss.slice(0, 70)}…` : gloss;
+  },
+  (lemma, morph) => splitClasses.has(lemma) ? splitClasses.get(lemma)!.get(lexemeClass(morph)) : "",
+);
 
 console.log(stats.join("\n"));
-console.log(`lemmas in corpus: ${usedLemmas.size}, with a dictionary entry: ${withGloss}; concordance lemmas: ${concordance.size}`);
+console.log(`lemmas in corpus: ${usedLemmas.size}, with a dictionary entry: ${withGloss.size}; concordance lemmas: ${concordance.size}`);
+console.log(`separate homographs: ${splitClasses.size} lemmas (${[...splitClasses.keys()].sort().join(", ")})`);
 console.timeEnd("total");

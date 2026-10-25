@@ -50,7 +50,7 @@ export function paradigmKind(morph: string, lemma = ""): ParadigmKind | undefine
     return feats.VerbForm?.includes("Part") && /(?:r|inn)$/.test(lemma) ? "adj" : "verb";
   }
   if (upos === "PRON" && !feats.Poss) {
-    if (feats.PronType?.includes("Prs") || feats.Person || REFLEXIVE.has(lemma.toLowerCase())) return "personal";
+    if (feats.Person || REFLEXIVE.has(lemma.toLowerCase())) return "personal";
   }
   if (upos === "PRON" || upos === "DET") return "pron";
   return undefined;
