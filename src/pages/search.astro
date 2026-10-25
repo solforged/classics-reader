@@ -1,0 +1,215 @@
+---
+import Base from "../layouts/Base.astro";
+import { WORKS } from "../lib/site";
+
+const meta = Object.fromEntries(WORKS.map((w) => [w.slug, { title: w.title, abbr: w.abbr, c: w.collection }]));
+---
+
+<Base title="Search · The Edda Reader" crumbs={[{ label: "Search" }]}>
+  <main class="page">
+    <p class="eyebrow">Search</p>
+    <h1>Search the Eddas</h1>
+    <p class="prose-note">
+      Searches the Old Norse and the English of every work. Accents and Old Norse letters are optional: <i>voluspa</i>{" "}
+      finds <i>Völuspá</i>, <i>thorr</i> finds <i>Þórr</i>. All words must occur in the passage; put a phrase in quotes.
+    </p>
+    <form id="search-form" role="search">
+      <input type="search" id="q" name="q" placeholder="e.g. Yggdrasill, “ask veit ek”, hammer" autocomplete="off" />
+      <div class="filters">
+        <div class="segmented" role="group" aria-label="Language">
+          <button type="button" data-side="all" aria-pressed="true">Both</button>
+          <button type="button" data-side="on" aria-pressed="false">Old Norse</button>
+          <button type="button" data-side="en" aria-pressed="false">English</button>
+        </div>
+        <div class="segmented" role="group" aria-label="Collection">
+          <button type="button" data-coll="all" aria-pressed="true">All works</button>
+          <button type="button" data-coll="poetic" aria-pressed="false">Poetic Edda</button>
+          <button type="button" data-coll="prose" aria-pressed="false">Snorri’s Edda</button>
+        </div>
+      </div>
+    </form>
+    <p id="status" class="prose-note"></p>
+    <ol id="results"></ol>
+  </main>
+  <script type="application/json" id="meta" set:html={JSON.stringify(meta)} />
+</Base>
+
+<script>
+  import { searchKey } from "../lib/norse";
+
+  type Row = [slug: string, id: string, on: string, en: string];
+  interface Indexed {
+    row: Row;
+    on: { key: string; map: number[] };
+    en: { key: string; map: number[] };
+  }
+  const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+  const meta = JSON.parse(document.getElementById("meta")!.textContent!) as Record<
+    string,
+    { title: string; abbr: string; c: string }
+  >;
+  const input = document.getElementById("q") as HTMLInputElement;
+  const status = document.getElementById("status")!;
+  const results = document.getElementById("results")!;
+  let side = "all";
+  let coll = "all";
+
+  /** Search key plus, for each key character, the index of the source character it came from. */
+  function keyed(s: string) {
+    let key = "";
+    const map: number[] = [];
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i]!;
+      const k = /\s/.test(c) ? " " : searchKey(c);
+      for (let j = 0; j < k.length; j++) map.push(i);
+      key += k;
+    }
+    return { key, map };
+  }
+
+  let index: Promise<Indexed[]> | undefined;
+  const load = () =>
+    (index ??= fetch(`${BASE}search.json`)
+      .then((r) => r.json() as Promise<Row[]>)
+      .then((rows) => rows.map((row) => ({ row, on: keyed(row[2]), en: keyed(row[3]) }))));
+
+  function terms(q: string): string[] {
+    const out: string[] = [];
+    for (const m of q.matchAll(/"([^"]+)"|“([^”]+)”|(\S+)/g)) {
+      const t = searchKey(m[1] ?? m[2] ?? m[3] ?? "").replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+      if (t) out.push(t);
+    }
+    return out;
+  }
+
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  function snippet(text: string, k: { key: string; map: number[] }, ts: string[]): string | undefined {
+    const spans: [number, number][] = [];
+    for (const t of ts) {
+      let from = 0;
+      let found = false;
+      for (let at = k.key.indexOf(t, from); at >= 0; at = k.key.indexOf(t, from)) {
+        spans.push([k.map[at]!, k.map[at + t.length - 1]! + 1]);
+        found = true;
+        from = at + t.length;
+      }
+      if (!found) return undefined;
+    }
+    spans.sort((a, b) => a[0] - b[0]);
+    const first = spans[0]![0];
+    const start = Math.max(0, text.lastIndexOf(" ", Math.max(0, first - 90)));
+    const end = Math.min(text.length, first + 260);
+    let out = start > 0 ? "… " : "";
+    let pos = start;
+    for (const [a, b] of spans) {
+      if (a < pos || a >= end) continue;
+      out += esc(text.slice(pos, a)) + `<mark>${esc(text.slice(a, b))}</mark>`;
+      pos = b;
+    }
+    out += esc(text.slice(pos, end)) + (end < text.length ? " …" : "");
+    return out;
+  }
+
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  async function run() {
+    const q = input.value.trim();
+    const url = new URL(location.href);
+    if (q) url.searchParams.set("q", q);
+    else url.searchParams.delete("q");
+    history.replaceState(null, "", url);
+    const ts = terms(q);
+    if (!ts.length) {
+      results.innerHTML = "";
+      status.textContent = "";
+      return;
+    }
+    status.textContent = "Searching…";
+    const rows = await load();
+    const hits: string[] = [];
+    let total = 0;
+    for (const r of rows) {
+      const m = meta[r.row[0]];
+      if (!m || (coll !== "all" && m.c !== coll)) continue;
+      const on = side !== "en" ? snippet(r.row[2], r.on, ts) : undefined;
+      const en = side !== "on" ? snippet(r.row[3], r.en, ts) : undefined;
+      if (!on && !en) continue;
+      total++;
+      if (hits.length >= 300) continue;
+      const href = `${BASE}${r.row[0]}/#${encodeURIComponent(r.row[1])}`;
+      hits.push(`<li><a class="ref" href="${href}">${esc(m.title)} <span>${esc(r.row[1])}</span></a>
+        ${on ? `<p class="on" lang="non">${on}</p>` : ""}${en ? `<p class="en">${en}</p>` : ""}</li>`);
+    }
+    results.innerHTML = hits.join("");
+    status.textContent = total
+      ? `${total.toLocaleString("en")} passage${total === 1 ? "" : "s"}${total > hits.length ? `; showing the first ${hits.length}` : ""}.`
+      : "No passages found.";
+  }
+
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(run, 180);
+  });
+  document.getElementById("search-form")!.addEventListener("submit", (e) => {
+    e.preventDefault();
+    run();
+  });
+  for (const b of document.querySelectorAll<HTMLButtonElement>("[data-side], [data-coll]")) {
+    b.addEventListener("click", () => {
+      const group = b.dataset.side !== undefined ? "[data-side]" : "[data-coll]";
+      for (const o of document.querySelectorAll(group)) o.setAttribute("aria-pressed", String(o === b));
+      if (b.dataset.side) side = b.dataset.side;
+      if (b.dataset.coll) coll = b.dataset.coll;
+      run();
+    });
+  }
+  const initial = new URLSearchParams(location.search).get("q");
+  if (initial) {
+    input.value = initial;
+    run();
+  }
+  input.focus();
+</script>
+
+<style>
+  h1 {
+    font-weight: 500;
+    margin: 0.3rem 0 0.5rem;
+  }
+  form {
+    margin: 1.2rem 0 0.6rem;
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.6rem;
+  }
+  #results {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  #results :global(li) {
+    border-top: 1px solid var(--border);
+    padding: 0.7rem 0;
+  }
+  #results :global(.ref) {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  #results :global(.ref span) {
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 0.3rem;
+  }
+  #results :global(p) {
+    margin: 0.25rem 0 0;
+    line-height: 1.45;
+  }
+  #results :global(p.en) {
+    color: var(--muted);
+  }
+</style>

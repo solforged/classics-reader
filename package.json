@@ -1,0 +1,27 @@
+{
+  "name": "eddas-reader",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "fetch": "bun scripts/fetch-sources.ts",
+    "data": "bun scripts/build-data.ts",
+    "all": "bun scripts/fetch-sources.ts && bun scripts/build-data.ts && astro build",
+    "align": "bun scripts/check-alignment.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "@xmldom/xmldom": "^0.9.12",
+    "cheerio": "^1.2.0"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "dependencies": {
+    "@fontsource-variable/eb-garamond": "^5.3.0",
+    "astro": "7.4.2"
+  }
+}

@@ -1,0 +1,456 @@
+---
+import type { EnUnit, OnUnit, Piece } from "../../../scripts/lib/types";
+import Base from "../../layouts/Base.astro";
+import WordPanel from "../../components/WordPanel.astro";
+import { base, lemmaCounts, lemmaSlugs, loadWork, sourceLine, WORKS } from "../../lib/site";
+
+export function getStaticPaths() {
+  return WORKS.map((w) => ({ params: { slug: w.slug } }));
+}
+
+const { slug } = Astro.params;
+const index = WORKS.findIndex((w) => w.slug === slug);
+const def = WORKS[index]!;
+const prev = WORKS[index - 1];
+const next = WORKS[index + 1];
+const work = loadWork(def.slug);
+const src = sourceLine(def);
+const isProse = def.collection === "prose" && def.slug !== "hattatal";
+const hasEnglish = work.rows.some((r) => r.en.length);
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+function pieces(line: Piece[]): string {
+  return line
+    .map((p) => {
+      if (typeof p === "string") return esc(p);
+      const cls = p[2] ? "w sup" : "w";
+      return `<span class="${cls}" data-a="${p[1].join(" ")}">${esc(p[0])}</span>`;
+    })
+    .join("");
+}
+
+function onUnit(u: OnUnit): string {
+  if (u.kind === "head") {
+    const label = u.label && isProse ? `<span class="chap">${esc(u.label)}</span> ` : "";
+    return `<h3 class="rubric">${label}${u.lines.map(pieces).join(" ")}</h3>`;
+  }
+  if (u.kind === "prose") return `<p class="prose">${u.lines.map(pieces).join(" ")}</p>`;
+  const label = u.label ? `<span class="slabel">${esc(u.label)}</span>` : "";
+  return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${pieces(l)}</div>`).join("")}</div>`;
+}
+
+function enText(s: string): string {
+  return esc(s).replace(/ \| /g, '<span class="cz" aria-hidden="true"></span>');
+}
+
+function enUnit(u: EnUnit): string {
+  const notes = (u.notes ?? [])
+    .map((k) => `<button class="note-btn" type="button" data-note="${esc(k)}" title="Translator’s note">n</button>`)
+    .join("");
+  if (u.kind === "head") {
+    const label = u.label ? `<span class="chap">${esc(u.label)}</span>` : "";
+    const text = u.lines.map(enText).join(" ");
+    return `<h3 class="rubric">${label}${label && text ? " " : ""}${text}${notes}</h3>`;
+  }
+  if (u.kind === "prose") return `<p class="prose">${u.lines.map(enText).join(" ")}${notes}</p>`;
+  const label = u.label ? `<span class="slabel">${esc(u.label)}</span>` : "";
+  return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${enText(l)}</div>`).join("")}${notes}</div>`;
+}
+
+const analyses = work.analyses.map(([lemma, msa, s]) => [lemma, msa, s, lemmaSlugs.get(lemma) ?? "", lemmaCounts.get(lemma) ?? 0]);
+const chapters = isProse ? work.rows.filter((r) => /^\d+$/.test(r.id)).map((r) => r.id) : [];
+const collection = def.collection === "poetic" ? "Poetic Edda" : "Prose Edda";
+const ids = new Set(work.rows.map((r) => r.id));
+---
+
+<Base
+  title={`${def.title}: ${def.english} · The Edda Reader`}
+  description={`${def.title} (${def.english}) in Old Norse with a facing English translation. ${def.summary}`}
+  crumbs={[{ label: def.title }]}
+  bodyClass="reader view-both"
+>
+  <main>
+    <header class="work-head page">
+      <p class="eyebrow">{collection} · {def.abbr}</p>
+      <h1>{def.title}</h1>
+      <p class="english">{def.english}</p>
+      <p class="summary">{def.summary}</p>
+      <dl class="sources">
+        <dt>Old Norse</dt><dd>{src.on}</dd>
+        <dt>English</dt><dd>{src.en}</dd>
+      </dl>
+      {
+        work.intro && work.intro.length > 0 && (
+          <details class="intro">
+            <summary>Translator’s introductory note (Bellows)</summary>
+            {work.intro.map((p) => <p set:html={p} />)}
+          </details>
+        )
+      }
+    </header>
+
+    <div class="toolbar no-print">
+      <div class="toolbar-inner">
+        <select id="work-select" aria-label="Choose a work">
+          {WORKS.map((w) => <option value={w.slug} selected={w.slug === def.slug}>{w.title}</option>)}
+        </select>
+        <form id="goto" class="goto">
+          <label for="goto-input">{isProse ? "Chapter" : "Stanza"}</label>
+          <input id="goto-input" name="row" inputmode="numeric" autocomplete="off" placeholder={isProse ? "12" : "1"} />
+        </form>
+        {
+          hasEnglish && (
+            <div class="segmented" role="group" aria-label="Columns">
+              <button type="button" data-view="on" aria-pressed="false">Old Norse</button>
+              <button type="button" data-view="both" aria-pressed="true">Both</button>
+              <button type="button" data-view="en" aria-pressed="false">English</button>
+            </div>
+          )
+        }
+        <button class="btn print" type="button" onclick="window.print()">Print</button>
+      </div>
+      {
+        chapters.length > 0 && (
+          <nav class="chapters" aria-label="Chapters">
+            {chapters.map((c) => <a href={`#${c}`}>{c}</a>)}
+          </nav>
+        )
+      }
+    </div>
+
+    <div class={`text ${hasEnglish ? "" : "single"}`} data-slug={def.slug} data-abbr={def.abbr} data-title={def.title}>
+      {
+        work.rows.map((r) => (
+          <section class="row" id={r.id}>
+            <a class="cite no-print" href={`#${r.id}`} title="Link to this passage">
+              {r.id}
+            </a>
+            <div class="col on" lang="non" set:html={r.on.map(onUnit).join("")} />
+            {hasEnglish && <div class="col en" lang="en" set:html={r.en.map(enUnit).join("")} />}
+          </section>
+        ))
+      }
+    </div>
+
+    <nav class="work-nav page no-print">
+      {prev ? <a href={`${base}${prev.slug}/`}>‹ {prev.title}</a> : <span />}
+      {next ? <a href={`${base}${next.slug}/`}>{next.title} ›</a> : <span />}
+    </nav>
+  </main>
+
+  <WordPanel />
+  <script type="application/json" id="analyses" set:html={JSON.stringify(analyses).replace(/</g, "\\u003c")} />
+  <script type="application/json" id="notes" set:html={JSON.stringify(work.notes).replace(/</g, "\\u003c")} />
+  <script type="application/json" id="row-ids" set:html={JSON.stringify([...ids])} />
+</Base>
+
+<script>
+  import "../../scripts/reader";
+</script>
+
+<style is:global>
+  .work-head {
+    padding-bottom: 1rem;
+  }
+  .work-head h1 {
+    font-size: 2.4rem;
+    font-weight: 500;
+    margin: 0.3rem 0 0;
+  }
+  .work-head .english {
+    margin: 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1.15rem;
+  }
+  .work-head .summary {
+    font-size: 1.05rem;
+  }
+  .sources {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.15rem 0.8rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0 0 0.6rem;
+  }
+  .sources dt {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-top: 0.2rem;
+  }
+  .sources dd {
+    margin: 0;
+  }
+  details.intro {
+    font-size: 0.95rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 0.5rem 1rem;
+  }
+  details.intro summary {
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+
+  .toolbar {
+    position: sticky;
+    top: 2.85rem;
+    z-index: 15;
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--sans);
+    font-size: 0.8rem;
+  }
+  .toolbar-inner {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0.5rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    align-items: center;
+  }
+  .toolbar select,
+  .toolbar input {
+    font: inherit;
+    color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+  }
+  .goto {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .goto input {
+    width: 4.2rem;
+  }
+  .toolbar .print {
+    margin-left: auto;
+    padding: 0.3rem 0.7rem;
+  }
+  .chapters {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1.25rem 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .chapters a {
+    min-width: 1.7rem;
+    text-align: center;
+    padding: 0.05rem 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--fg);
+    background: var(--surface);
+  }
+  .chapters a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .text {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 4rem 3.2rem;
+  }
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid transparent;
+    scroll-margin-top: 7rem;
+  }
+  .text.single .row,
+  .view-on .row,
+  .view-en .row {
+    grid-template-columns: minmax(0, 40rem);
+    justify-content: center;
+  }
+  .view-on .col.en,
+  .view-en .col.on {
+    display: none;
+  }
+  .row:target,
+  .row.flash {
+    background: color-mix(in srgb, var(--hit) 45%, transparent);
+    border-radius: 6px;
+  }
+  .cite {
+    position: absolute;
+    left: -2.6rem;
+    top: 0.85rem;
+    width: 2.2rem;
+    text-align: right;
+    font-family: var(--sans);
+    font-size: 0.65rem;
+    color: var(--faint);
+    text-decoration: none;
+    opacity: 0;
+  }
+  .row:hover .cite,
+  .row:target .cite {
+    opacity: 1;
+  }
+  .cite:hover {
+    color: var(--accent);
+  }
+  .col {
+    min-width: 0;
+  }
+  .stanza {
+    position: relative;
+    margin: 0.25rem 0 0.75rem;
+  }
+  .stanza .l {
+    padding-left: 1.2em;
+    text-indent: -1.2em;
+  }
+  .stanza .l:nth-child(even of .l) {
+    padding-left: 2.2em;
+  }
+  .slabel {
+    position: absolute;
+    left: -1.9rem;
+    width: 1.5rem;
+    text-align: right;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    line-height: 2.2;
+    color: var(--faint);
+  }
+  .col.en .slabel {
+    color: var(--faint);
+  }
+  .col.en {
+    color: color-mix(in srgb, var(--fg) 88%, var(--muted));
+  }
+  .prose {
+    margin: 0.25rem 0 0.75rem;
+    text-align: justify;
+    hyphens: auto;
+  }
+  .rubric {
+    font-weight: 500;
+    font-size: 1.05rem;
+    font-variant: small-caps;
+    letter-spacing: 0.03em;
+    color: var(--accent);
+    margin: 0.6rem 0 0.4rem;
+  }
+  .chap {
+    font-family: var(--sans);
+    font-variant: normal;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0 0.35rem;
+    color: var(--muted);
+  }
+  .cz {
+    display: inline-block;
+    width: 1.6em;
+  }
+  .w {
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .w:hover {
+    background: var(--accent-soft);
+  }
+  .w.sel {
+    background: var(--hit);
+  }
+  .w.sup {
+    font-style: italic;
+    color: var(--muted);
+  }
+  .note-btn {
+    font-family: var(--sans);
+    font-size: 0.6rem;
+    vertical-align: super;
+    margin-left: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--accent);
+    padding: 0 0.25rem;
+    line-height: 1.3;
+    cursor: pointer;
+  }
+  .stanza > .note-btn {
+    position: absolute;
+    right: -1.4rem;
+    top: 0.35rem;
+    margin: 0;
+    vertical-align: baseline;
+  }
+  @media (min-width: 1100px) {
+    body.panel-open .text,
+    body.panel-open .toolbar-inner,
+    body.panel-open .chapters {
+      margin-right: 26rem;
+    }
+  }
+  .work-nav {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+  }
+  .work-nav a {
+    text-decoration: none;
+  }
+  @media (max-width: 760px) {
+    .text {
+      padding-left: 2.2rem;
+      padding-right: 0.9rem;
+    }
+    .view-both .row {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+    .view-both .col.en {
+      border-left: 2px solid var(--border);
+      padding-left: 0.7rem;
+      font-size: 0.92em;
+    }
+    .toolbar {
+      top: 2.7rem;
+    }
+    .cite {
+      display: none;
+    }
+  }
+  @media print {
+    .toolbar,
+    .cite {
+      display: none;
+    }
+    .text {
+      padding: 0;
+    }
+    .row {
+      break-inside: avoid;
+    }
+    details.intro {
+      display: none;
+    }
+  }
+</style>

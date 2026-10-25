@@ -1,0 +1,158 @@
+---
+import Base from "../layouts/Base.astro";
+import { base, GROUPS, LEXICON, WORKS } from "../lib/site";
+
+const workTitles = Object.fromEntries(WORKS.map((w) => [w.slug, w.title]));
+const roman = ["I", "II", "III"];
+---
+
+<Base title="The Edda Reader: the Poetic and Prose Eddas in Old Norse and English" bodyClass="home">
+  <main class="page wide">
+    <header class="hero">
+      <p class="eyebrow">Eddukvæði · Snorra Edda</p>
+      <h1>The Edda Reader</h1>
+      <p class="lede">
+        The Poetic and Prose Eddas in Old Norse with a facing English translation, stanza by stanza. Click any Old Norse
+        word for its lemma, grammar and dictionary entry.
+      </p>
+    </header>
+
+    <div class="cards">
+      <a class="card resume" id="resume" href="#" hidden data-titles={JSON.stringify(workTitles)}>
+        <span class="card-title">Continue reading</span>
+        <span class="eyebrow-muted" id="resume-where"></span>
+        <span class="chev">›</span>
+      </a>
+      <a class="card" href={`${base}search/`}>
+        <span class="card-title">Search</span>
+        <span class="eyebrow-muted">Old Norse &amp; English · all works</span>
+        <span class="chev">›</span>
+      </a>
+      <a class="card" href={`${base}lexicon/`}>
+        <span class="card-title">Lexicon</span>
+        <span class="eyebrow-muted">{LEXICON.length.toLocaleString("en")} lemmas · frequency &amp; concordance</span>
+        <span class="chev">›</span>
+      </a>
+    </div>
+
+    <section id="works">
+      <p class="eyebrow section-label">Open a work</p>
+      {
+        GROUPS.map((group, gi) => (
+          <section class="group">
+            <h2>
+              <span class="num">{roman[gi]}.</span> {group}
+            </h2>
+            <div class="grid">
+              {WORKS.filter((w) => w.group === group).map((w) => (
+                <a class="card work" href={`${base}${w.slug}/`}>
+                  <h3>{w.title}</h3>
+                  <span class="on">{w.english}</span>
+                  <p>{w.summary}</p>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </section>
+
+    <footer class="site-foot">
+      Old Norse: Codex Regius, EAE electronic edition (CC BY-SA 4.0); Bugge (1867); Snorra Edda ed. Guðni Jónsson.
+      English: Bellows (1923); Brodeur (1916). Dictionaries: Zoëga (1910), Cleasby–Vigfússon (1874), Wiktionary.
+      <a href={`${base}sources/`}>Sources &amp; licences</a>.
+    </footer>
+  </main>
+</Base>
+
+<script>
+  const card = document.getElementById("resume") as HTMLAnchorElement | null;
+  const last = localStorage.getItem("edda-last");
+  if (card && last) {
+    try {
+      const { slug, row } = JSON.parse(last) as { slug: string; row?: string };
+      const titles = JSON.parse(card.dataset.titles ?? "{}") as Record<string, string>;
+      if (titles[slug]) {
+        card.href = `${import.meta.env.BASE_URL.replace(/\/?$/, "/")}${slug}/${row ? `#${row}` : ""}`;
+        card.querySelector("#resume-where")!.textContent = `${titles[slug]}${row ? ` · ${row}` : ""}`;
+        card.hidden = false;
+      }
+    } catch {
+      localStorage.removeItem("edda-last");
+    }
+  }
+</script>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 2.5rem 0 1.5rem;
+  }
+  .hero h1 {
+    font-weight: 400;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    margin: 0.4rem 0 0.8rem;
+    letter-spacing: 0.01em;
+  }
+  .lede {
+    max-width: 34rem;
+    margin: 0 auto;
+    color: var(--muted);
+  }
+  .cards {
+    max-width: 34rem;
+    margin: 1.5rem auto 3rem;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .cards .card {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+  }
+  .cards .card[hidden] {
+    display: none;
+  }
+  .card-title {
+    font-size: 1.2rem;
+    color: var(--accent);
+  }
+  .eyebrow-muted {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .chev {
+    margin-left: auto;
+    color: var(--muted);
+  }
+  .section-label {
+    border-top: 1px solid var(--border);
+    padding-top: 1.2rem;
+    color: var(--muted);
+  }
+  .group h2 {
+    font-weight: 400;
+    font-size: 1.7rem;
+    margin: 1.5rem 0 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .group .num {
+    color: var(--accent);
+    font-size: 1rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 0.7rem;
+  }
+  .site-foot {
+    margin-top: 4rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>

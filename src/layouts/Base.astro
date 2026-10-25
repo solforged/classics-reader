@@ -1,0 +1,66 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  crumbs?: { href?: string; label: string }[];
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description = "The Poetic and Prose Eddas in Old Norse with facing English translations, click-to-parse words, a Zoëga glossary, stanza citation and full-text search.",
+  crumbs = [],
+  bodyClass = "",
+} = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <script is:inline>
+      (function () {
+        var t = localStorage.getItem("edda-theme");
+        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body class={bodyClass}>
+    <header class="topbar">
+      <div class="crumbs">
+        <a class="home-link" href={base}>Edda Reader</a>
+        {
+          crumbs.map((c) => (
+            <>
+              <span>›</span>
+              {c.href ? <a href={c.href}>{c.label}</a> : <span class="here">{c.label}</span>}
+            </>
+          ))
+        }
+      </div>
+      <nav>
+        <a class="wide-only" href={`${base}#works`}>All works</a>
+        <a href={`${base}lexicon/`}>Lexicon</a>
+        <a href={`${base}search/`}>Search</a>
+        <a class="wide-only" href={`${base}sources/`}>Sources</a>
+        <button class="icon-btn theme-toggle" type="button" aria-label="Toggle night mode" title="Toggle night mode">◐</button>
+      </nav>
+    </header>
+    <slot />
+    <script>
+      document.querySelector(".theme-toggle")?.addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem("edda-theme", next);
+      });
+    </script>
+  </body>
+</html>

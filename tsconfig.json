@@ -1,0 +1,10 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist", ".cache"],
+  "compilerOptions": {
+    "types": ["bun"],
+    "resolveJsonModule": true,
+    "noUncheckedIndexedAccess": true
+  }
+}

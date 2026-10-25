@@ -1,0 +1,129 @@
+<aside class="word-panel" id="word-panel" hidden aria-live="polite">
+  <header>
+    <h2 id="wp-title"></h2>
+    <button class="icon-btn" type="button" id="wp-close" aria-label="Close panel">×</button>
+  </header>
+  <div id="wp-body"></div>
+</aside>
+
+<style is:global>
+  .word-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(26rem, 100vw);
+    z-index: 40;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    box-shadow: -8px 0 24px rgb(0 0 0 / 0.08);
+    display: flex;
+    flex-direction: column;
+  }
+  .word-panel[hidden] {
+    display: none;
+  }
+  .word-panel header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .word-panel h2 {
+    margin: 0;
+    font-weight: 500;
+    font-size: 1.4rem;
+    flex: 1;
+  }
+  #wp-body {
+    overflow-y: auto;
+    padding: 0.8rem 1rem 2rem;
+    font-size: 0.95rem;
+  }
+  .an {
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 0.7rem 0.85rem;
+    margin-bottom: 0.7rem;
+  }
+  .an .lemma {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .an .lemma a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .an .lemma a:hover {
+    color: var(--accent);
+  }
+  @media (max-width: 640px) {
+    .word-panel {
+      top: auto;
+      height: 58vh;
+      width: 100vw;
+      border-left: 0;
+      border-top: 1px solid var(--border);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 -8px 24px rgb(0 0 0 / 0.15);
+    }
+  }
+  .an .pos {
+    font-style: italic;
+    color: var(--muted);
+  }
+  .an .form {
+    margin: 0.15rem 0 0;
+  }
+  .an .props,
+  .an .meta {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .an .badge {
+    font-family: var(--sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0 0.3rem;
+    margin-left: 0.3rem;
+    color: var(--muted);
+    vertical-align: middle;
+  }
+  .dict {
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.45rem;
+  }
+  .dict h4 {
+    margin: 0.2rem 0;
+    font-family: var(--sans);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .dict p {
+    margin: 0.2rem 0;
+    line-height: 1.4;
+  }
+  .dict details summary {
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+  .wp-note {
+    line-height: 1.5;
+  }
+  .wp-empty {
+    color: var(--muted);
+    font-style: italic;
+  }
+</style>

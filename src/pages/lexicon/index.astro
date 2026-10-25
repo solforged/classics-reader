@@ -1,0 +1,135 @@
+---
+import Base from "../../layouts/Base.astro";
+import { decodeMsa, searchKey } from "../../lib/norse";
+import { base, LEXICON, lemmaSlugs } from "../../lib/site";
+
+const total = LEXICON.reduce((n, l) => n + l.count, 0);
+---
+
+<Base title="Lexicon · The Edda Reader" crumbs={[{ label: "Lexicon" }]}>
+  <main class="page">
+    <p class="eyebrow">Lexicon</p>
+    <h1>Old Norse lexicon</h1>
+    <p class="prose-note">
+      {LEXICON.length.toLocaleString("en")} lemmas, {total.toLocaleString("en")} counted occurrences. Counts come from
+      the Codex Regius edition’s own annotation, plus words elsewhere whose possible analyses all agree on one lemma.
+      Glosses from Zoëga’s <i>Concise Dictionary of Old Icelandic</i> (1910) or Wiktionary.
+    </p>
+    <div class="controls">
+      <input type="search" id="filter" placeholder="Filter lemmas or glosses…" autocomplete="off" />
+      <div class="segmented" role="group" aria-label="Sort">
+        <button type="button" data-sort="freq" aria-pressed="true">By frequency</button>
+        <button type="button" data-sort="alpha" aria-pressed="false">A–Z</button>
+      </div>
+    </div>
+    <p id="count" class="prose-note"></p>
+    <table class="lex">
+      <thead><tr><th>Lemma</th><th>Class</th><th>Gloss</th><th class="n">Count</th></tr></thead>
+      <tbody id="lex-body">
+        {
+          LEXICON.map((l, i) => (
+            <tr data-k={`${searchKey(l.lemma)} ${l.gloss.toLowerCase()}`} data-i={i} data-a={searchKey(l.lemma)}>
+              <td><a href={`${base}lexicon/${lemmaSlugs.get(l.lemma)}/`}>{l.lemma}</a></td>
+              <td class="pos">{decodeMsa(l.pos).pos}</td>
+              <td class="gloss">{l.gloss}</td>
+              <td class="n">{l.count.toLocaleString("en")}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </main>
+</Base>
+
+<script>
+  import { searchKey } from "../../lib/norse";
+
+  const body = document.getElementById("lex-body")!;
+  const rows = [...body.querySelectorAll<HTMLTableRowElement>("tr")];
+  const filter = document.getElementById("filter") as HTMLInputElement;
+  const count = document.getElementById("count")!;
+  let sort = "freq";
+
+  function apply() {
+    const q = filter.value.trim();
+    const key = searchKey(q);
+    const low = q.toLowerCase();
+    let shown = 0;
+    for (const r of rows) {
+      const k = r.dataset.k!;
+      const hit = !q || k.includes(key) || k.includes(low);
+      r.hidden = !hit;
+      if (hit) shown++;
+    }
+    count.textContent = q ? `${shown.toLocaleString("en")} matching lemmas` : "";
+  }
+  filter.addEventListener("input", apply);
+  for (const b of document.querySelectorAll<HTMLButtonElement>("[data-sort]")) {
+    b.addEventListener("click", () => {
+      sort = b.dataset.sort!;
+      for (const o of document.querySelectorAll("[data-sort]")) o.setAttribute("aria-pressed", String(o === b));
+      const sorted = [...rows].sort((a, c) =>
+        sort === "alpha" ? a.dataset.a!.localeCompare(c.dataset.a!) : Number(a.dataset.i) - Number(c.dataset.i),
+      );
+      body.append(...sorted);
+    });
+  }
+  const q = new URLSearchParams(location.search).get("q");
+  if (q) filter.value = q;
+  apply();
+</script>
+
+<style>
+  h1 {
+    font-weight: 500;
+    margin: 0.3rem 0 0.5rem;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    margin: 1rem 0 0.5rem;
+  }
+  .controls input {
+    flex: 1;
+    min-width: 14rem;
+  }
+  .lex {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .lex th {
+    text-align: left;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding: 0.4rem 0.3rem;
+  }
+  .lex td {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+    padding: 0.25rem 0.3rem;
+    vertical-align: top;
+  }
+  .lex td a {
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .lex .pos {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .lex .gloss {
+    color: var(--muted);
+  }
+  .lex .n {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
