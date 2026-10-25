@@ -55,7 +55,9 @@ The Sanskrit of all 700 verses uses the lemma and morphology of the Digital Corp
 verse. Chapters 1 and 2 show Besant's sandhied Devanagari text, transliterated into IAST and aligned
 to the DCS analyses; chapters 3–18 retain the DCS surface text. A written form that joins words by
 sandhi or in a compound (*parayopetāste*) opens one card per word, each with its segmented form,
-grammar and entry from the DCS dictionary. Search ignores IAST diacritics (`sraddha` finds *śraddhā*).
+grammar and entry from the DCS dictionary. Of the thirteen written forms DCS leaves unannotated (Besant's
+extra speaker captions, *vidhīyate* at 2.67, four words in chapter 13), all but *tajjyotis* show
+*candidate* analyses that DCS gives the same form elsewhere. Search ignores IAST diacritics (`sraddha` finds *śraddhā*).
 The top-bar toggle shows the Sanskrit in Devanagari on every page (`src/lang/san/script.ts`,
 `src/scripts/script.ts`); text is still stored, searched and linked in IAST. Credits are in
 `src/components/sources/Gita.astro`.

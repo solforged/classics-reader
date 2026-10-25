@@ -60,9 +60,9 @@ export const gita: ReaderSite = {
   corpus: "the Gītā",
   searchHint: "IAST diacritics are optional: <i>sraddha</i> finds <i>śraddhā</i>, <i>samnyasya</i> finds <i>saṃnyasya</i>.",
   searchPlaceholder: "e.g. arjuna, dharma, devotion",
-  countNote: "Counts use available DCS annotation. Each written token counts once for each lemma it contains, " +
-    "including words joined by sandhi or in compounds. Unannotated Besant captions, the unannotated fragment in 2.67, " +
-    "and four source forms in chapter 13 are not counted. Glosses come from the DCS dictionary (Oliver Hellwig, CC BY 4.0).",
+  countNote: "Counts use DCS annotation. Each written token counts once for each lemma it contains, including " +
+    "words joined by sandhi or in compounds. Forms DCS leaves unannotated count as probable when all their candidate " +
+    "analyses agree on one lemma. Glosses come from the DCS dictionary (Oliver Hellwig, CC BY 4.0).",
   translation: "English",
   groups: GROUPS,
   works: DISCOURSES.map(([english, summary], index) => ({
@@ -80,5 +80,7 @@ export const gita: ReaderSite = {
       en: "Annie Besant (4th ed., 1922)",
     },
   })),
-  sourceNotes: {},
+  sourceNotes: {
+    a: `<span class="badge" title="Not annotated here; DCS annotates this written form this way elsewhere in the Gītā">candidate</span>`,
+  },
 };

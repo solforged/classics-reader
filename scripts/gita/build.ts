@@ -62,6 +62,7 @@ const works: Work[] = [];
 const chapterCounts: string[] = [];
 let sanskritVerses = 0;
 let englishVerses = 0;
+const tables = new Map<string, AnalysisTable>();
 for (const source of CHAPTERS) {
   const chapter = source.chapter;
   const definition = gita.works.find((work) => work.slug === `bhagavad-gita-${chapter}`);
@@ -82,6 +83,7 @@ for (const source of CHAPTERS) {
   }
   const sanskritDisplay = chapter <= 2 ? parseBesantSanskrit(chapter, pageWiki) : undefined;
   const table = new AnalysisTable(new FormIndex());
+  tables.set(definition.slug, table);
   const on = new Map<number, OnUnit[]>();
   for (const [verse, sourceVerse] of dcs) {
     if (sanskritDisplay) {
@@ -128,6 +130,45 @@ for (const source of CHAPTERS) {
 }
 if (works.length !== 18 || gita.works.length !== 18) throw new Error("The Gītā requires eighteen chapter works");
 
+// Words with no analysis of their own (Besant's extra speaker captions in chapter 1, the second half of the verb he
+// splits at 2.67, the four unannotated chapter 13 words) get candidate analyses ("a"): those DCS gives the same
+// written form as a single word elsewhere in the Gītā, most frequent first. Speaker captions look first among other
+// captions, where a name is nominative rather than the vocative of the verses.
+type Tally = Map<string, { lemma: string; morph: string; count: number }>;
+const attested = { head: new Map<string, Tally>(), any: new Map<string, Tally>() };
+function eachWord(work: Work, visit: (piece: [string, number[]], head: boolean) => void): void {
+  for (const row of work.rows) for (const unit of row.on) for (const line of unit.lines) {
+    for (const piece of line) if (typeof piece !== "string") visit(piece as [string, number[]], unit.kind === "head");
+  }
+}
+for (const work of works) {
+  eachWord(work, ([form, ids], head) => {
+    const analysis = ids.length === 1 ? work.analyses[ids[0]!]! : undefined;
+    if (!analysis || analysis[2] !== "e" || analysis[3]) return;
+    const key = sanskrit.fold(form);
+    for (const index of head ? [attested.head, attested.any] : [attested.any]) {
+      const tally = index.get(key) ?? new Map();
+      const entry = tally.get(`${analysis[0]}\t${analysis[1]}`) ?? { lemma: analysis[0], morph: analysis[1], count: 0 };
+      entry.count++;
+      tally.set(`${analysis[0]}\t${analysis[1]}`, entry);
+      index.set(key, tally);
+    }
+  });
+}
+let candidateTokens = 0;
+for (const work of works) {
+  const table = tables.get(work.slug)!;
+  eachWord(work, (piece, head) => {
+    if (piece[1].length) return;
+    const key = sanskrit.fold(piece[0]);
+    const tally = (head ? attested.head.get(key) : undefined) ?? attested.any.get(key);
+    if (!tally) return;
+    piece[1] = [...tally.values()].sort((a, b) => b.count - a.count).map((c) => table.add([c.lemma, c.morph, "a"]));
+    candidateTokens++;
+    unanalysedTokens--;
+  });
+}
+
 const records = new Map<string, DictHit>();
 const glosses = new Map<string, string>();
 for (const [key, matches] of lemmaRows) {
@@ -158,5 +199,5 @@ console.log(chapterCounts.join("\n"));
 console.log(stats.join("\n"));
 console.log(`verses: DCS ${sanskritVerses}, Besant ${englishVerses}; works: ${works.length}`);
 console.log(`DCS: ${grammaticalWords} grammatical words, ${multiwordTokens} multiword tokens; labelled morphologies: ${labelledMorphs.size}`);
-console.log(`documented source forms without usable analyses: ${unanalysedTokens}`);
+console.log(`source forms without analyses: ${candidateTokens} with candidates attested elsewhere, ${unanalysedTokens} without`);
 console.log(`lemmas in corpus: ${lemmaRows.size}, with a dictionary entry: ${records.size}; concordance lemmas: ${concordance.size}`);
