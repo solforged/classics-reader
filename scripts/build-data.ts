@@ -2,6 +2,7 @@
 //   src/data/works/<slug>.json   aligned rows, analyses, notes, intro per work
 //   src/data/lexicon.json        lemma frequencies and concordance (build-time only)
 //   public/lex/<shard>.json      dictionary entries, fetched by the word panel
+//   public/para/<shard>.json     inflection tables and edition-attested forms for corpus lemmas
 //   public/search.json           full-text search index
 //   .cache/raw/<slug>.json       unaligned units, input for alignment review
 import { mkdir, rm } from "node:fs/promises";
@@ -9,11 +10,13 @@ import { join } from "node:path";
 import { WORKS, type WorkDef } from "./catalog";
 import { entryFits, fold, shardOf } from "../src/lib/norse";
 import type { DictHit } from "../src/lib/dict";
+import type { Paradigm } from "../src/lib/paradigm";
 import { AnalysisTable, FormIndex } from "./lib/analyses";
 import { parseBellows } from "./lib/bellows";
 import { parseBugge } from "./lib/bugge";
 import { NameIndex } from "./lib/names";
 import { eaeUnits, headText, parseEae } from "./lib/eae";
+import { ParadigmBuilder } from "./lib/paradigms";
 import {
   dictionaryHeadword,
   indexDictionary,
@@ -34,7 +37,8 @@ console.time("total");
 const index = new FormIndex();
 const eae = parseEae(await read("eae/codex-regius.xml"), await read("eae/menota-entities.txt"));
 indexEae(eae, index);
-const wiktGlosses = indexWiktionary(await read("lex/wiktionary-non.jsonl"), index);
+const wiktionary = await read("lex/wiktionary-non.jsonl");
+const wiktGlosses = indexWiktionary(wiktionary, index);
 console.log(`form index: ${index.size.toLocaleString()} spellings`);
 
 const bellows = parseBellows(await read("bellows/bellows.html"));
@@ -241,8 +245,10 @@ if (rawOnly) {
 
 await rm(join(ROOT, "src", "data", "works"), { recursive: true, force: true });
 await rm(join(ROOT, "public", "lex"), { recursive: true, force: true });
+await rm(join(ROOT, "public", "para"), { recursive: true, force: true });
 await mkdir(join(ROOT, "src", "data", "works"), { recursive: true });
 await mkdir(join(ROOT, "public", "lex"), { recursive: true });
+await mkdir(join(ROOT, "public", "para"), { recursive: true });
 
 type SearchRow = [string, string, string, string]; // slug, row id, Old Norse, English
 const search: SearchRow[] = [];
@@ -257,6 +263,7 @@ const lemmas = new Map<string, LemmaStat>();
 const usedLemmas = new Set<string>();
 const lemmaMsa = new Map<string, string>(); // a representative analysis, to rank dictionary homographs
 const stats: string[] = [];
+const paradigms = new ParadigmBuilder();
 
 for (const def of WORKS) {
   const raw = await rawWork(def);
@@ -270,6 +277,7 @@ for (const def of WORKS) {
   let annotated = 0;
   for (const a of raw.analyses) {
     usedLemmas.add(a[0]);
+    paradigms.use(a);
     if (!lemmaMsa.has(a[0]) || a[2] === "e") lemmaMsa.set(a[0], a[1]);
     if (a[1].startsWith("xNP") && a[2] !== "n") knownNames.add(a[0]);
   }
@@ -283,6 +291,7 @@ for (const def of WORKS) {
           words++;
           if (p[1].length) parsed++;
           const as = p[1].map((id) => raw.analyses[id]!);
+          paradigms.attest(p[0], as);
           if (as.some((a) => a[2] === "e")) annotated++;
           // Concordance: edition-annotated words, plus candidates that agree on a single lemma.
           const lemmaSet = new Set(as.filter((a) => a[2] === "e").map((a) => a[0]));
@@ -485,6 +494,15 @@ for (const lemma of usedLemmas) {
   writeHit(lemma, hit, true);
 }
 for (const [s, rec] of shards) await Bun.write(join(ROOT, "public", "lex", `${s}.json`), JSON.stringify(rec));
+
+const paraShards = new Map<string, Record<string, Paradigm[]>>();
+for (const paradigm of paradigms.build(wiktionary)) {
+  const shard = shardOf(paradigm.lemma);
+  const rec = paraShards.get(shard) ?? {};
+  (rec[fold(paradigm.lemma)] ??= []).push(paradigm);
+  paraShards.set(shard, rec);
+}
+for (const [s, rec] of paraShards) await Bun.write(join(ROOT, "public", "para", `${s}.json`), JSON.stringify(rec));
 
 await Bun.write(
   join(ROOT, "src", "data", "lexicon.json"),

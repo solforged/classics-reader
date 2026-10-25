@@ -6,6 +6,7 @@ import type { Work } from "../../scripts/lib/types";
 import lexicon from "../data/lexicon.json";
 import { fold, shardOf } from "./norse";
 import type { DictHit } from "./dict";
+import type { Paradigm } from "./paradigm";
 
 export { GROUPS, WORKS, type WorkDef };
 
@@ -62,6 +63,25 @@ export function dictionaryEntry(lemma: string): DictHit | undefined {
     shards.set(shard, data);
   }
   return data[fold(lemma)];
+}
+
+const paradigmShards = new Map<string, Record<string, Paradigm[]>>();
+/** Inflection tables from the same shards fetched by the word panel. */
+export function paradigms(lemma: string): Paradigm[] {
+  const shard = shardOf(lemma);
+  let data = paradigmShards.get(shard);
+  if (!data) {
+    try {
+      data = JSON.parse(readFileSync(join(process.cwd(), "public", "para", `${shard}.json`), "utf8")) as
+        Record<string, Paradigm[]>;
+    } catch {
+      data = {};
+    }
+    paradigmShards.set(shard, data);
+  }
+  const records = data[fold(lemma)] ?? [];
+  const exact = records.filter((record) => record.lemma === lemma);
+  return exact.length ? exact : records;
 }
 
 export function sourceLine(def: WorkDef): { on: string; en: string } {

@@ -2,6 +2,9 @@
 import { decodeMsa, fold, shardOf } from "../lib/norse";
 import type { DictHit } from "../lib/dict";
 import { dictionaryHtml } from "../lib/entry";
+import type { Paradigm } from "../lib/paradigm";
+import { msaCell } from "../lib/paradigm";
+import { paradigmHtml, selectParadigm } from "../lib/tables";
 
 type ClientAnalysis = [lemma: string, msa: string, source: "e" | "a" | "w" | "n", slug: string, count: number];
 
@@ -121,6 +124,17 @@ function dictionary(lemma: string): Promise<DictHit | undefined> {
   return p.then((s) => s[fold(lemma)]);
 }
 
+const paradigmShards = new Map<string, Promise<Record<string, Paradigm[]>>>();
+function paradigms(lemma: string): Promise<Paradigm[]> {
+  const shard = shardOf(lemma);
+  let p = paradigmShards.get(shard);
+  if (!p) {
+    p = fetch(`${BASE}para/${shard}.json`).then((r) => (r.ok ? r.json() : {}));
+    paradigmShards.set(shard, p);
+  }
+  return p.then((data) => data[fold(lemma)] ?? []);
+}
+
 const SOURCE_NOTE: Record<ClientAnalysis[2], string> = {
   e: "",
   a: `<span class="badge" title="Not annotated here; this spelling is annotated this way elsewhere in the Codex Regius edition">candidate</span>`,
@@ -224,6 +238,7 @@ async function showWord(el: HTMLElement) {
       ${readingsHtml(readings)}
       ${props.length ? `<div class="props">${esc(props.join(" · "))}</div>` : ""}
       ${occurs}
+      <div class="paradigm-slot"></div>
       ${dictionaryBlock}
     </div>`;
   });
@@ -233,12 +248,32 @@ async function showWord(el: HTMLElement) {
       ? `<p class="props">Possible analyses (the edition does not annotate this word):</p>`
       : "";
   body.innerHTML = note + blocks.join("");
-  const hits = new Map(await Promise.all([...lemmasShown].map(async (lemma) => [lemma, await dictionary(lemma)] as const)));
+  const [hits, tables] = await Promise.all([
+    Promise.all([...lemmasShown].map(async (lemma) => [lemma, await dictionary(lemma)] as const)).then(
+      (entries) => new Map(entries),
+    ),
+    Promise.all([...lemmasShown].map(async (lemma) => [lemma, await paradigms(lemma)] as const)).then(
+      (entries) => new Map(entries),
+    ),
+  ]);
   const partNames = new Set([...hits.values()].flatMap((hit) => hit?.parts ?? []));
   const parts = new Map(await Promise.all([...partNames].map(async (part) => [part, await dictionary(part)] as const)));
   if (selected !== el) return;
   body.querySelectorAll<HTMLElement>(".an").forEach((block) => {
-    const [lemma, msa, source] = groups[Number(block.dataset.i)]![0]!;
+    const index = Number(block.dataset.i);
+    const readings = groups[index]!;
+    const [lemma, msa, source] = readings[0]!;
+    const paradigm = selectParadigm(tables.get(lemma) ?? [], lemma, msa);
+    if (paradigm) {
+      const highlight = readings.map((reading) => msaCell(reading[1], reading[0]))
+        .filter((key): key is string => key !== undefined);
+      const heading = paradigm.kind === "verb" ? "Conjugation" : "Declension";
+      block.querySelector(".paradigm-slot")!.outerHTML =
+        `<details class="paradigm-details"${index === 0 ? " open" : ""}><summary>${heading}</summary>`
+        + paradigmHtml(paradigm, { id: `word-paradigm-${index}`, highlight }) + "</details>";
+    } else {
+      block.querySelector(".paradigm-slot")!.remove();
+    }
     const content = dictionaryHtml(hits.get(lemma), { msa, work: slug, parts, properNoun: source === "n" });
     block.querySelector(".dict-slot")!.outerHTML = `<div class="dict">${content}</div>`;
   });

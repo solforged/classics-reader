@@ -1,0 +1,201 @@
+.paradigm {
+  min-width: 0;
+  color: var(--fg);
+  font-size: 0.94rem;
+  line-height: 1.3;
+}
+.paradigm + .paradigm {
+  margin-top: 1.5rem;
+}
+.para-label,
+.para-source {
+  font-family: var(--sans);
+  color: var(--muted);
+  font-size: 0.68rem;
+  margin: 0.5rem 0;
+}
+.para-label {
+  font-weight: 500;
+}
+.para-source {
+  line-height: 1.5;
+}
+.para-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 0.65rem 0;
+  font-variant-numeric: tabular-nums;
+}
+.para-table caption {
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding-bottom: 0.2rem;
+}
+.para-table th {
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: var(--muted);
+  text-align: left;
+}
+.para-table th:first-child {
+  width: 24%;
+}
+.para-table th,
+.para-table td {
+  padding: 0.28rem 0.22rem;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+.para-table th[scope="row"] {
+  vertical-align: middle;
+}
+.para-table abbr[title] {
+  text-decoration: none;
+  cursor: help;
+}
+.para-cell {
+  position: relative;
+  overflow-wrap: anywhere;
+}
+.para-cell[colspan] {
+  text-align: center;
+}
+.para-cell.is-empty {
+  color: var(--faint);
+}
+.para-cell.is-current {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  box-shadow: inset 0 -2px var(--accent);
+  border-radius: 3px 3px 0 0;
+}
+.para-attested {
+  display: inline-block;
+  color: var(--accent);
+  font-family: var(--sans);
+  font-weight: 700;
+  margin-left: 0.12rem;
+  cursor: help;
+}
+.para-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.45rem;
+}
+.para-tab {
+  position: relative;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  line-height: 1.5;
+}
+.para-tab input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+.para-tab span {
+  display: block;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+}
+.para-tab:has(input:checked) span {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.para-tab:has(input:focus-visible) span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.para-variant {
+  flex-basis: 100%;
+  min-width: 0;
+  order: 1;
+}
+.para-tab:not(:has(input:checked)) + .para-variant {
+  display: none;
+}
+.para-article > summary,
+.word-panel .paradigm-details > summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  color: var(--accent);
+  font-size: 0.72rem;
+  margin-top: 0.5rem;
+}
+.word-panel .paradigm-details {
+  border-top: 1px solid var(--border);
+  margin-top: 0.5rem;
+  padding-top: 0.1rem;
+}
+.para-principal,
+.para-extra dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  margin: 0.65rem 0;
+}
+.para-principal > div {
+  flex: 1 1 26%;
+  min-width: 0;
+}
+.para-principal dt,
+.para-extra dt,
+.para-extra h5 {
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  color: var(--muted);
+  font-weight: 400;
+  margin: 0 0 0.12rem;
+}
+.para-principal dd,
+.para-extra dd {
+  margin: 0;
+}
+.para-extra h5 {
+  font-weight: 600;
+  font-size: 0.7rem;
+  margin-top: 0.65rem;
+}
+.para-extra dl {
+  margin-top: 0.3rem;
+}
+.para-extra dl > div {
+  flex: 1 1 40%;
+  min-width: 0;
+}
+.para-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 420px) {
+  .paradigm {
+    font-size: 0.9rem;
+  }
+  .para-table th,
+  .para-table td {
+    padding: 0.28rem 0.16rem;
+  }
+  .para-table th {
+    font-size: 0.6rem;
+  }
+}

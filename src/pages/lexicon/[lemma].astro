@@ -2,7 +2,11 @@
 import Base from "../../layouts/Base.astro";
 import { decodeMsa } from "../../lib/norse";
 import { dictionaryHtml } from "../../lib/entry";
-import { base, dictionaryEntry, LEXICON, lemmaSlugs, type LemmaStat, workBySlug, WORKS } from "../../lib/site";
+import {
+  base, dictionaryEntry, LEXICON, lemmaSlugs, paradigms, type LemmaStat, workBySlug, WORKS,
+} from "../../lib/site";
+import { paradigmHtml } from "../../lib/tables";
+import "../../styles/paradigm.css";
 
 export function getStaticPaths() {
   return LEXICON.map((l) => ({ params: { lemma: lemmaSlugs.get(l.lemma)! }, props: { stat: l } }));
@@ -11,6 +15,7 @@ export function getStaticPaths() {
 const { stat } = Astro.props as { stat: LemmaStat };
 const dict = dictionaryEntry(stat.lemma);
 const parts = new Map(dict?.parts?.map((part) => [part, dictionaryEntry(part)]));
+const tables = paradigms(stat.lemma);
 const pos = decodeMsa(stat.pos).pos;
 const order = new Map(WORKS.map((w, i) => [w.slug, i]));
 const byWork = Object.entries(stat.works).sort((a, b) => order.get(a[0])! - order.get(b[0])!);
@@ -34,6 +39,15 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
     <section class="dict" set:html={dictionaryHtml(dict, {
       parts, fullTitles: true, properNoun: stat.pos.startsWith("xNP"),
     })} />
+
+    {
+      tables.map((table, index) => (
+        <section class="lemma-paradigm">
+          <h2>{table.kind === "verb" ? "Conjugation" : "Declension"}</h2>
+          <div set:html={paradigmHtml(table, { id: `lemma-paradigm-${index}` })} />
+        </section>
+      ))
+    }
 
     <section>
       <h2>Frequency by work</h2>

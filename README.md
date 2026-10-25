@@ -6,6 +6,8 @@ public-domain English translation, one aligned stanza (or chapter) per row.
 
 - Click any Old Norse word for its lemma, morphology and dictionary entries (Zoëga,
   Cleasby–Vigfússon, Wiktionary), or, for names, Bellows's index of proper names.
+- The panel also shows the word's declension or conjugation table, with the clicked form
+  highlighted and the forms attested in the Eddas marked.
 - Bellows's notes open from the `n` markers beside his stanzas.
 - Every row has a stable anchor (`/voluspa/#45`); the margin number copies a link.
 - Full-text search covers both languages, and accents are optional (`thorr` finds *Þórr*).
@@ -48,7 +50,8 @@ bun run preview
 - `scripts/catalog.ts`: the works, their groups and which source sections make up each side.
 - `scripts/lib/`: parsers (`eae.ts`, `bugge.ts`, `bellows.ts`, `snorra.ts`), the form index
   (`analyses.ts`), dictionary loading (`lexicon.ts`) and Bellows's name index (`names.ts`).
-- `src/lib/entry.ts`: renders dictionary entries for the word panel and the lemma pages.
+- `src/lib/entry.ts`, `src/lib/tables.ts`: render dictionary entries and inflection tables for the
+  word panel and the lemma pages; `src/lib/paradigm.ts` defines the table cells.
 - `scripts/build-data.ts`: builds every output; fails if an alignment misses or repeats a unit.
 - `alignment/<slug>.json`: the curated row-by-row crosswalk between the two sides.
 - `src/lib/norse.ts`: spelling fold, search key and Menota morphology decoding, shared by the
