@@ -1,9 +1,10 @@
 // The reader site being built, chosen by READER (astro.config.mjs passes it to pages and browser code as
 // PUBLIC_READER). Shared pages and scripts read everything site-specific from `site`.
 import { edda } from "./edda";
+import { gita } from "./gita";
 import type { ReaderSite } from "./types";
 
-const SITES: Readonly<Record<string, ReaderSite>> = { edda };
+const SITES: Readonly<Record<string, ReaderSite>> = { edda, gita };
 
 const id = import.meta.env.PUBLIC_READER ?? "edda";
 const chosen = SITES[id];

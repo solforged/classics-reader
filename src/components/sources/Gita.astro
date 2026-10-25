@@ -1,0 +1,47 @@
+---
+// Sources and licences of the Gītā Reader (src/pages/sources.astro).
+---
+<h2>Sanskrit</h2>
+<dl>
+  <dt>Oliver Hellwig, <i>Digital Corpus of Sanskrit</i> (DCS)</dt>
+  <dd>
+    Bhagavadgītā chapter 12 (Mahābhārata 6, BhaGī 12) from the DCS CoNLL-U release,
+    <a href="https://github.com/OliverHellwig/sanskrit">OliverHellwig/sanskrit</a>, commit <code>8aeed5a</code>. Licensed
+    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. The reader shows the DCS surface text in IAST,
+    split into half-verses at the DCS sentence boundaries, with the speaker lines as headings. Lemmas and
+    segmentation are used unchanged; the morphological tags are converted to Universal Dependencies spelling
+    (<i>CONJ</i> becomes <i>CCONJ</i>), keeping the DCS-specific values <i>Case=Cpd</i> (compound member) and
+    <i>Tense=Impf</i>.
+  </dd>
+</dl>
+
+<h2>English</h2>
+<dl>
+  <dt>Annie Besant, <i>The Bhagavad-Gita</i>, 4th edition (Adyar: Theosophical Publishing House, 1922)</dt>
+  <dd>
+    Public domain (published 1922; Besant died 1933). From
+    <a href="https://en.wikisource.org/wiki/Bhagavad-Gita_(Besant_4th)/Discourse_12">English Wikisource</a>. Only the
+    English is used; Besant’s footnotes are left out. Her verse numbers match the DCS verses one to one.
+  </dd>
+</dl>
+
+<h2>Word analysis and dictionary</h2>
+<dl>
+  <dt>Word analyses</dt>
+  <dd>
+    Every word carries the DCS lemma and morphology for that occurrence. A written form that joins several words by
+    sandhi or in a compound lists its words in order, each with its own analysis and dictionary entry.
+  </dd>
+  <dt>DCS dictionary</dt>
+  <dd>
+    The dictionary that accompanies the DCS (<code>dcs/data/conllu/lookup/dictionary.csv</code>), by Oliver Hellwig,
+    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Entries are matched to lemmas through the
+    DCS lemma ids.
+  </dd>
+</dl>
+
+<h2>Licence of this site’s data</h2>
+<p>
+  The aligned text, word analyses and lexicon are derived from CC BY 4.0 sources and are shared under the same
+  licence. Besant’s translation remains in the public domain.
+</p>

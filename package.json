@@ -10,7 +10,13 @@
     "fetch": "bun scripts/fetch-sources.ts",
     "data": "bun scripts/build-data.ts",
     "all": "bun scripts/fetch-sources.ts && bun scripts/build-data.ts && astro build",
-    "align": "bun scripts/check-alignment.ts"
+    "align": "bun scripts/check-alignment.ts",
+    "dev:gita": "READER=gita astro dev",
+    "build:gita": "READER=gita astro build",
+    "preview:gita": "READER=gita astro preview",
+    "fetch:gita": "bun scripts/gita/fetch.ts",
+    "data:gita": "bun scripts/gita/build.ts",
+    "all:gita": "bun scripts/gita/fetch.ts && bun scripts/gita/build.ts && READER=gita astro build"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4",
