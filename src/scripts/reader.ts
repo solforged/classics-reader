@@ -4,6 +4,7 @@ import type { DictHit } from "../lib/dict";
 import { dictionaryHtml } from "../lib/entry";
 import { expandMorph, parseMorph } from "../lib/morph";
 import { selectParadigm, type Paradigm } from "../lib/paradigm";
+import { applyScript, sourceText } from "./script";
 
 /** [lemma, morph, source, lemma page slug, corpus count, segmented word] (see src/pages/[slug]/index.astro). */
 type ClientAnalysis = [
@@ -194,11 +195,14 @@ async function showWord(el: HTMLElement) {
   selected = el;
   el.classList.add("sel");
   const ids = (el.dataset.a ?? "").split(" ").filter(Boolean).map(Number);
-  title.textContent = el.textContent ?? "";
+  const word = sourceText(el);
+  title.textContent = word;
+  title.setAttribute("lang", lang.code);
+  applyScript(title);
   panel.hidden = false;
   document.body.classList.add("panel-open");
   if (!ids.length) {
-    const form = encodeURIComponent(el.textContent ?? "");
+    const form = encodeURIComponent(word);
     body.innerHTML = `<p class="wp-empty">No analysis is available for this form.</p><p><a href="${BASE}lexicon/?q=${form}">Search the lexicon</a> · <a href="${BASE}search/?q=${form}">Find other passages</a></p>`;
     return;
   }
@@ -237,7 +241,7 @@ async function showWord(el: HTMLElement) {
       : slot;
     const seg = words.length ? `<div class="seg" lang="${lang.code}">${esc(words.join(" / "))}</div>` : "";
     return `<div class="an" data-i="${i}">
-      ${seg}<div><span class="lemma">${lemmaHtml}</span> <span class="pos">${esc(pos)}</span>${site.sourceNotes[source] ?? ""}</div>
+      ${seg}<div><span class="lemma" lang="${lang.code}">${lemmaHtml}</span> <span class="pos">${esc(pos)}</span>${site.sourceNotes[source] ?? ""}</div>
       ${readingsHtml(readings)}
       ${props.length ? `<div class="props">${esc(props.join(" · "))}</div>` : ""}
       ${occurs}
@@ -251,6 +255,7 @@ async function showWord(el: HTMLElement) {
       ? `<p class="props">Possible analyses (the edition does not annotate this word):</p>`
       : "";
   body.innerHTML = note + blocks.join("");
+  applyScript(body);
   const [hits, tableRecords] = await Promise.all([
     Promise.all([...lemmasShown].map(async (lemma) => [lemma, await dictionary(lemma)] as const)).then(
       (entries) => new Map(entries),
@@ -279,12 +284,14 @@ async function showWord(el: HTMLElement) {
     const content = dictionaryHtml(hits.get(lemma), { morph, work: slug, parts, properNoun: source === "n" });
     block.querySelector(".dict-slot")!.outerHTML = `<div class="dict">${content}</div>`;
   });
+  applyScript(body);
 }
 
 function showNote(key: string) {
   selected?.classList.remove("sel");
   selected = null;
   title.textContent = "Translator’s note";
+  title.removeAttribute("lang");
   body.innerHTML = `<div class="wp-note">${notes[key] ?? ""}</div><p class="props">${site.noteCredit}</p>`;
   panel.hidden = false;
   document.body.classList.add("panel-open");
@@ -302,7 +309,7 @@ text.addEventListener("click", (e) => {
 const want = new URLSearchParams(location.search).get("w");
 if (want && location.hash) {
   const row = document.getElementById(decodeURIComponent(location.hash.slice(1)));
-  const hit = [...(row?.querySelectorAll<HTMLElement>(".w") ?? [])].find((w) => w.textContent === want);
+  const hit = [...(row?.querySelectorAll<HTMLElement>(".w") ?? [])].find((w) => sourceText(w) === want);
   if (hit) {
     hit.classList.add("sel");
     selected = hit;

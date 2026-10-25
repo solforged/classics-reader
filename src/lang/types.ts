@@ -66,6 +66,18 @@ export interface Tables {
   html(paradigm: Paradigm, options: TableOptions): string;
 }
 
+/** Another writing system the reader can show source-language text in (src/scripts/script.ts). */
+export interface DisplayScript {
+  /** Storage value, e.g. "deva". */
+  id: string;
+  /** Toggle label, written in the script itself, e.g. "देवनागरी". */
+  label: string;
+  /** BCP 47 tag for converted text, e.g. "sa-Deva". */
+  tag: string;
+  /** Converts text from the stored spelling (the pack's `code`). */
+  convert(text: string): string;
+}
+
 export interface LanguagePack {
   /** BCP 47 tag for lang attributes on source-language text, e.g. "non", "sa-Latn". */
   code: string;
@@ -81,4 +93,8 @@ export interface LanguagePack {
   dictionaries: readonly Dictionary[];
   /** Inflection tables; absent when the pack has none. */
   tables?: Tables;
+  /** Label of the stored spelling in the script toggle, e.g. "IAST"; set together with `scripts`. */
+  scriptLabel?: string;
+  /** Other scripts the reader can display; absent when text is shown only as stored. */
+  scripts?: readonly DisplayScript[];
 }

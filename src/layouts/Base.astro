@@ -1,4 +1,5 @@
 ---
+import { lang } from "../lang";
 import { site } from "../sites";
 import "../styles/global.css";
 
@@ -17,6 +18,13 @@ const {
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const themeKey = `${site.id}-theme`;
+// Script toggle (src/scripts/script.ts): the stored spelling first, then the pack's other scripts.
+const scripts = lang.scripts?.length
+  ? [{ id: "", label: lang.scriptLabel ?? lang.code }, ...lang.scripts.map((s) => ({ id: s.id, label: s.label }))]
+  : [];
+const scriptKey = `${site.id}-script`;
+const scriptIds = scripts.map((s) => s.id).filter(Boolean);
+const hideUnconverted = `html[data-script]:not([data-script=""]) [lang="${lang.code}"] { visibility: hidden; }`;
 ---
 
 <!doctype html>
@@ -34,6 +42,17 @@ const themeKey = `${site.id}-theme`;
         document.documentElement.dataset.theme = t;
       })();
     </script>
+    {
+      scripts.length > 0 && (
+        <>
+          <script is:inline define:vars={{ scriptKey, scriptIds }}>
+            var s = localStorage.getItem(scriptKey);
+            if (s && scriptIds.indexOf(s) >= 0) document.documentElement.dataset.script = s;
+          </script>
+          <style set:html={hideUnconverted} />
+        </>
+      )
+    }
   </head>
   <body class={bodyClass}>
     <header class="topbar">
@@ -53,16 +72,41 @@ const themeKey = `${site.id}-theme`;
         <a href={`${base}lexicon/`}>Lexicon</a>
         <a href={`${base}search/`}>Search</a>
         <a class="wide-only" href={`${base}sources/`}>Sources</a>
+        {
+          scripts.length > 0 && (
+            <button class="script-toggle" type="button" data-scripts={JSON.stringify(scripts)}
+              title={`Show ${lang.name} in another script`}>{scripts[1]!.label}</button>
+          )
+        }
         <button class="icon-btn theme-toggle" type="button" aria-label="Toggle night mode" title="Toggle night mode">◐</button>
       </nav>
     </header>
     <slot />
     <script>
+      import { activeScript, applyScript, setScript } from "../scripts/script";
+
       document.querySelector(".theme-toggle")?.addEventListener("click", () => {
         const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
         document.documentElement.dataset.theme = next;
         localStorage.setItem(`${import.meta.env.PUBLIC_READER}-theme`, next);
       });
+
+      // The button names the script it switches to; it cycles through the stored spelling and the pack's scripts.
+      const toggle = document.querySelector<HTMLButtonElement>(".script-toggle");
+      if (toggle) {
+        const scripts = JSON.parse(toggle.dataset.scripts!) as { id: string; label: string }[];
+        const label = () => {
+          const current = scripts.findIndex((s) => s.id === (activeScript()?.id ?? ""));
+          toggle.textContent = scripts[(current + 1) % scripts.length]!.label;
+        };
+        toggle.addEventListener("click", () => {
+          const current = scripts.findIndex((s) => s.id === (activeScript()?.id ?? ""));
+          setScript(scripts[(current + 1) % scripts.length]!.id);
+          label();
+        });
+        applyScript();
+        label();
+      }
     </script>
   </body>
 </html>

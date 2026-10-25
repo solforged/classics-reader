@@ -41,6 +41,7 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
 
 <script>
   import { lang } from "../lang";
+  import { activeScript, applyScript } from "../scripts/script";
 
   type Row = [slug: string, id: string, on: string, en: string];
   interface Indexed {
@@ -89,13 +90,20 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
 
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  function snippet(text: string, k: { key: string; map: number[] }, ts: string[]): string | undefined {
+  /** Snippet with the matches marked. `whole` widens marks to whole words, so text shown in another script
+   *  (src/scripts/script.ts) is converted word by word rather than split mid-word. */
+  function snippet(text: string, k: { key: string; map: number[] }, ts: string[], whole = false): string | undefined {
     const spans: [number, number][] = [];
     for (const t of ts) {
       let from = 0;
       let found = false;
       for (let at = k.key.indexOf(t, from); at >= 0; at = k.key.indexOf(t, from)) {
-        spans.push([k.map[at]!, k.map[at + t.length - 1]! + 1]);
+        let [a, b] = [k.map[at]!, k.map[at + t.length - 1]! + 1];
+        if (whole) {
+          while (a > 0 && !/\s/.test(text[a - 1]!)) a--;
+          while (b < text.length && !/\s/.test(text[b]!)) b++;
+        }
+        spans.push([a, b]);
         found = true;
         from = at + t.length;
       }
@@ -104,7 +112,8 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
     spans.sort((a, b) => a[0] - b[0]);
     const first = spans[0]![0];
     const start = Math.max(0, text.lastIndexOf(" ", Math.max(0, first - 90)));
-    const end = Math.min(text.length, first + 260);
+    let end = Math.min(text.length, first + 260);
+    if (whole) while (end < text.length && !/\s/.test(text[end]!)) end++;
     let out = start > 0 ? "… " : "";
     let pos = start;
     for (const [a, b] of spans) {
@@ -136,7 +145,7 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
     for (const r of rows) {
       const m = meta[r.row[0]];
       if (!m || (coll !== "all" && m.c !== coll)) continue;
-      const on = side !== "en" ? snippet(r.row[2], r.on, ts) : undefined;
+      const on = side !== "en" ? snippet(r.row[2], r.on, ts, Boolean(activeScript())) : undefined;
       const en = side !== "on" ? snippet(r.row[3], r.en, ts) : undefined;
       if (!on && !en) continue;
       total++;
@@ -146,6 +155,7 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
         ${on ? `<p class="on" lang="${lang.code}">${on}</p>` : ""}${en ? `<p class="en">${en}</p>` : ""}</li>`);
     }
     results.innerHTML = hits.join("");
+    applyScript(results);
     status.textContent = total
       ? `${total.toLocaleString("en")} passage${total === 1 ? "" : "s"}${total > hits.length ? `; showing the first ${hits.length}` : ""}.`
       : "No passages found.";

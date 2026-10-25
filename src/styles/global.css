@@ -87,6 +87,23 @@ button { font: inherit; color: inherit; }
   cursor: pointer;
 }
 .icon-btn:hover { border-color: var(--accent); }
+.script-toggle {
+  height: 2rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.script-toggle:hover { border-color: var(--accent); }
+
+/* Devanagari display (src/scripts/script.ts). EB Garamond has no Devanagari, so name serif Devanagari faces. */
+:lang(sa-Deva) {
+  font-family: "Noto Serif Devanagari", "Devanagari Sangam MN", "Kohinoor Devanagari", "Mangal", var(--serif);
+}
 
 .page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
 .page.wide { max-width: 72rem; }

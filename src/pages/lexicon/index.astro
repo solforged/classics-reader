@@ -28,7 +28,7 @@ const total = LEXICON.reduce((n, l) => n + l.count, 0);
         {
           LEXICON.map((l, i) => (
             <tr data-k={`${lang.searchKey(l.lemma)} ${l.gloss.toLowerCase()}`} data-i={i} data-a={lang.searchKey(l.lemma)}>
-              <td><a href={`${base}lexicon/${lemmaSlugs.get(l.lemma)}/`}>{l.lemma}</a></td>
+              <td><a href={`${base}lexicon/${lemmaSlugs.get(l.lemma)}/`} lang={lang.code}>{l.lemma}</a></td>
               <td class="pos">{lang.describeMorph(l.morph).pos}</td>
               <td class="gloss">{l.gloss}</td>
               <td class="n">{l.count.toLocaleString("en")}</td>

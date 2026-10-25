@@ -32,7 +32,7 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
 >
   <main class="page">
     <p class="eyebrow">Lemma</p>
-    <h1>{stat.lemma}</h1>
+    <h1 lang={lang.code}>{stat.lemma}</h1>
     <p class="meta">
       <i>{pos}</i>{stat.gloss && <> · {stat.gloss}</>} · {stat.count.toLocaleString("en")} occurrence{stat.count === 1 ? "" : "s"}
     </p>

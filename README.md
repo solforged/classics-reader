@@ -44,8 +44,9 @@ The Sanskrit is the surface text of the Digital Corpus of Sanskrit (Oliver Hellw
 with its lemma and morphology for every word; the English is Annie Besant's fourth edition (1922),
 aligned verse by verse. A written form that joins words by sandhi or in a compound
 (*parayopetāste*) opens one card per word, each with its segmented form, grammar and entry from the
-DCS dictionary. Search ignores IAST diacritics (`sraddha` finds *śraddhā*). Credits are in
-`src/components/sources/Gita.astro`.
+DCS dictionary. Search ignores IAST diacritics (`sraddha` finds *śraddhā*). The top-bar toggle shows the
+Sanskrit in Devanagari on every page (`src/lang/san/script.ts`, `src/scripts/script.ts`); text is
+still stored, searched and linked in IAST. Credits are in `src/components/sources/Gita.astro`.
 
 ## Building
 
