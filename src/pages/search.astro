@@ -35,7 +35,7 @@ const meta = Object.fromEntries(WORKS.map((w) => [w.slug, { title: w.title, abbr
 </Base>
 
 <script>
-  import { searchKey } from "../lib/norse";
+  import { lang } from "../lang";
 
   type Row = [slug: string, id: string, on: string, en: string];
   interface Indexed {
@@ -60,7 +60,7 @@ const meta = Object.fromEntries(WORKS.map((w) => [w.slug, { title: w.title, abbr
     const map: number[] = [];
     for (let i = 0; i < s.length; i++) {
       const c = s[i]!;
-      const k = /\s/.test(c) ? " " : searchKey(c);
+      const k = /\s/.test(c) ? " " : lang.searchKey(c);
       for (let j = 0; j < k.length; j++) map.push(i);
       key += k;
     }
@@ -76,7 +76,7 @@ const meta = Object.fromEntries(WORKS.map((w) => [w.slug, { title: w.title, abbr
   function terms(q: string): string[] {
     const out: string[] = [];
     for (const m of q.matchAll(/"([^"]+)"|“([^”]+)”|(\S+)/g)) {
-      const t = searchKey(m[1] ?? m[2] ?? m[3] ?? "").replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+      const t = lang.searchKey(m[1] ?? m[2] ?? m[3] ?? "").replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
       if (t) out.push(t);
     }
     return out;

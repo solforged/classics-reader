@@ -1,7 +1,8 @@
-// Parses the EAE Codex Regius TEI (normalized level, with lemma + Menota morphosyntax).
+// Parses the EAE Codex Regius TEI (normalized level, with lemma + Menota morphosyntax, converted to UD).
 import { DOMParser, type Element } from "@xmldom/xmldom";
 import type { OnUnit, Piece, UnitKind } from "./types";
 import type { AnalysisTable } from "./analyses";
+import { menotaToUd } from "./menota";
 
 const TEI = "http://www.tei-c.org/ns/1.0";
 const ME = "http://www.menota.org/ns/1.0";
@@ -100,7 +101,7 @@ class LineBuilder {
 function wordAnalysis(w: El, table: AnalysisTable, surface: string): number[] {
   const lemma = w.getAttribute("lemma");
   const msa = w.getAttributeNS(ME, "msa") || w.getAttribute("me:msa") || "";
-  if (lemma) return [table.add([lemma.normalize("NFC"), msa, "e"])];
+  if (lemma) return [table.add([lemma.normalize("NFC"), menotaToUd(msa), "e"])];
   return table.lookup(surface);
 }
 

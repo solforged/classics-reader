@@ -58,7 +58,7 @@ function enUnit(u: EnUnit): string {
   return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${enText(l)}</div>`).join("")}${notes}</div>`;
 }
 
-const analyses = work.analyses.map(([lemma, msa, s]) => [lemma, msa, s, lemmaSlugs.get(lemma) ?? "", lemmaCounts.get(lemma) ?? 0]);
+const analyses = work.analyses.map(([lemma, morph, s]) => [lemma, morph, s, lemmaSlugs.get(lemma) ?? "", lemmaCounts.get(lemma) ?? 0]);
 const chapters = isProse ? work.rows.filter((r) => /^\d+$/.test(r.id)).map((r) => r.id) : [];
 const collection = def.collection === "poetic" ? "Poetic Edda" : "Prose Edda";
 const ids = new Set(work.rows.map((r) => r.id));

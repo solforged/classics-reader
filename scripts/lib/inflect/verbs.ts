@@ -7,7 +7,7 @@
 // homographs are deliberately refused. Middle -að passed separately (119/120); all other middle rules are disabled.
 // Validation compares only available cells, folding ǿ as œ first, and skips tables lacking core finite forms.
 import type { DictEntry } from "../../../src/lib/dict";
-import { fold } from "../../../src/lib/norse";
+import { fold } from "../../../src/lang/non/spelling";
 import type { Paradigm } from "../../../src/lib/paradigm";
 import { dictionaryHeadword } from "../lexicon";
 import { grammarNotes, type Generated, type GrammarNote } from "./zoega";

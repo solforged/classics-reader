@@ -13,6 +13,8 @@
 //   personal pronoun code  `${person}${case}${number}${gender?}` with person 1 2 3 r (reflexive), e.g. "1ns", "3asm"
 //   nouns and pronouns have mode "" (key "|nsi", "|dpm").
 
+import { parseMorph } from "./morph";
+
 export type ParadigmKind = "noun" | "adj" | "verb" | "pron" | "personal";
 
 export interface Paradigm {
@@ -34,53 +36,73 @@ export interface Paradigm {
   note?: string;
 }
 
-/** Reflexive pronoun lemmas; the edition tags them xPD without a person. */
+/** Reflexive pronoun lemmas; the edition tags them as pronouns without a person. */
 const REFLEXIVE = new Set(["sik", "sín"]);
 
 /**
- * Paradigm kind for a Menota msa word class, or undefined for uninflected classes. The edition tags personal pronouns
- * xPD with a person (ek "xPD p1 nS cN"), so a person, or a reflexive lemma, marks a personal pronoun.
+ * Paradigm kind for a UD analysis (src/lib/morph.ts), or undefined for uninflected classes. The edition tags personal
+ * and demonstrative pronouns alike (ek "PRON Case=Nom|Number=Sing|Person=1"), so a person, or a reflexive lemma,
+ * marks a personal pronoun.
  */
-export function paradigmKind(msa: string, lemma = ""): ParadigmKind | undefined {
-  const x = msa.match(/\bx(\w\w)/)?.[1] ?? "";
-  if (x === "PD" && (/\bp[123]\b/.test(msa) || REFLEXIVE.has(lemma.toLowerCase()))) return "personal";
-  if (x === "NC" || x === "NP") return "noun";
-  if (x === "AJ" || x === "NO") return "adj";
-  if (x === "VB") return "verb";
-  if (x === "PE") return "personal";
-  if (x === "PD" || x === "PI" || x === "PQ" || x === "PP" || x === "DD" || x === "DQ" || x === "DP" || x === "AT") return "pron";
+export function paradigmKind(morph: string, lemma = ""): ParadigmKind | undefined {
+  const { upos, feats } = parseMorph(morph);
+  if (upos === "NOUN" || upos === "PROPN") return "noun";
+  if (upos === "ADJ") return "adj";
+  if (upos === "VERB") return "verb";
+  if (upos === "PRON" && !feats.Poss) {
+    if (feats.PronType?.includes("Prs") || feats.Person || REFLEXIVE.has(lemma.toLowerCase())) return "personal";
+  }
+  if (upos === "PRON" || upos === "DET") return "pron";
   return undefined;
 }
 
-/** Table cell for a Menota msa string, e.g. "xNC gM nS cA sI" → "|asi", "xVB fF tPT mIN p3 nS vA" → "act|past_ind_3sg". */
-export function msaCell(msa: string, lemma = ""): string | undefined {
-  const f: Record<string, string> = {};
-  for (const tok of msa.split(/\s+/)) if (tok) f[tok[0]!] = tok.slice(1);
-  const kind = paradigmKind(msa, lemma);
-  const c = f.c?.toLowerCase();
-  const n = f.n?.toLowerCase();
-  const g = f.g?.toLowerCase();
-  if (kind === "noun") return c && n ? `|${c}${n}${f.s === "D" ? "d" : "i"}` : undefined;
+const CASE: Record<string, string> = { Nom: "n", Acc: "a", Dat: "d", Gen: "g" };
+const NUMBER: Record<string, string> = { Sing: "s", Plur: "p", Dual: "d" };
+const GENDER: Record<string, string> = { Masc: "m", Fem: "f", Neut: "n" };
+
+/** Every combination of one value from each list, joined. */
+function combine(...lists: string[][]): string[] {
+  return lists.reduce<string[]>((acc, list) => acc.flatMap((prefix) => list.map((v) => prefix + v)), [""]);
+}
+
+/**
+ * Table cells for a UD analysis, e.g. "NOUN Case=Acc|Definite=Ind|Gender=Masc|Number=Sing" → ["|asi"],
+ * "VERB Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin|Voice=Act" → ["act|past_ind_3sg"]. An ambiguous
+ * analysis ("Case=Acc,Dat") gives one cell per reading; an incomplete one gives none.
+ */
+export function morphCells(morph: string, lemma = ""): string[] {
+  const { feats } = parseMorph(morph);
+  const kind = paradigmKind(morph, lemma);
+  const codes = (name: string, table: Record<string, string>) =>
+    (feats[name] ?? []).map((value) => table[value]).filter((code): code is string => code !== undefined);
+  const cases = codes("Case", CASE);
+  const numbers = codes("Number", NUMBER);
+  const genders = codes("Gender", GENDER);
+  const has = (name: string, value: string) => feats[name]?.includes(value) ?? false;
+  /** Plural dative and genitive have no gender letter in adjective and pronoun tables. */
+  const nominal = (mode: string) => combine(cases, numbers).flatMap((cn) =>
+    cn[1] === "p" && (cn[0] === "d" || cn[0] === "g") ? [`${mode}|${cn}`] : combine([`${mode}|${cn}`], genders));
+  if (kind === "noun") return combine(["|"], cases, numbers, [has("Definite", "Def") ? "d" : "i"]);
   if (kind === "adj") {
-    if (!c || !n) return undefined;
-    const weak = f.s === "D";
-    const mode = f.r === "C" ? "comp" : f.r === "S" ? (weak ? "wk_sup" : "str_sup") : weak ? "wk" : "str";
-    return `${mode}|${c}${n}${n === "p" && (c === "d" || c === "g") ? "" : (g ?? "")}`;
+    const weak = has("Definite", "Def");
+    const mode = has("Degree", "Cmp") ? "comp" : has("Degree", "Sup") ? (weak ? "wk_sup" : "str_sup") : weak ? "wk" : "str";
+    return nominal(mode);
   }
-  if (kind === "pron") return c && n ? `|${c}${n}${n === "p" && (c === "d" || c === "g") ? "" : (g ?? "")}` : undefined;
+  if (kind === "pron") return nominal("");
   if (kind === "personal") {
-    const person = f.p ?? "r";
-    return c && n ? `|${person}${c}${n}${person === "3" ? (g ?? "") : ""}` : undefined;
+    const persons = feats.Person ?? ["r"];
+    return persons.flatMap((p) => combine([`|${p}`], cases, numbers, p === "3" ? genders : [""]));
   }
   if (kind === "verb") {
-    const mode = f.v === "R" ? "mpass" : "act";
-    if (f.f === "I") return `${mode}|infinitive`;
-    if (f.f === "P") return `${mode}|${f.t === "PT" ? "past" : "pres"}_part`;
-    const number = f.n === "P" ? "pl" : "sg";
-    if (f.m === "IP") return `${mode}|impr_${f.p ?? "2"}${number}`;
-    const tense = f.t === "PT" ? "past" : "pres";
-    const mood = f.m === "SU" ? "sub" : "ind";
-    return f.p ? `${mode}|${tense}_${mood}_${f.p}${number}` : undefined;
+    const mode = has("Voice", "Mid") ? "mpass" : "act";
+    if (has("VerbForm", "Inf")) return [`${mode}|infinitive`];
+    if (has("VerbForm", "Part")) return [`${mode}|${has("Tense", "Past") ? "past" : "pres"}_part`];
+    const number = has("Number", "Plur") ? "pl" : "sg";
+    const persons = feats.Person ?? [];
+    if (has("Mood", "Imp")) return (persons.length ? persons : ["2"]).map((p) => `${mode}|impr_${p}${number}`);
+    const tense = has("Tense", "Past") ? "past" : "pres";
+    const moods = (feats.Mood ?? ["Ind"]).map((m) => (m === "Sub" ? "sub" : "ind"));
+    return combine([`${mode}|${tense}_`], moods, ["_"], persons, [number]);
   }
-  return undefined;
+  return [];
 }

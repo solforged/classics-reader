@@ -8,13 +8,17 @@
 import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { WORKS, type WorkDef } from "./catalog";
-import { entryFits, fold, shardOf } from "../src/lib/norse";
-import type { DictHit } from "../src/lib/dict";
+import { shardOf } from "../src/lang";
+import { zoegaFits, zoegaGrammarPattern } from "../src/lang/non/dictionaries";
+import { fold } from "../src/lang/non/spelling";
+import type { DictEntry as PrintedEntry, DictHit } from "../src/lib/dict";
+import { parseMorph } from "../src/lib/morph";
 import type { Paradigm } from "../src/lib/paradigm";
+import { glossArticle, nameArticle, plainArticle, zoegaArticle } from "./lib/articles";
 import { AnalysisTable, FormIndex } from "./lib/analyses";
 import { parseBellows } from "./lib/bellows";
 import { parseBugge } from "./lib/bugge";
-import { NameIndex } from "./lib/names";
+import { NameIndex, type NameGloss } from "./lib/names";
 import { eaeUnits, headText, parseEae } from "./lib/eae";
 import { ParadigmBuilder } from "./lib/paradigms";
 import {
@@ -25,6 +29,7 @@ import {
   looseDictionaryKey,
   sanitizeDef,
   type DictEntry,
+  type WiktGloss,
 } from "./lib/lexicon";
 import { parseBrodeur, parseSnorra } from "./lib/snorra";
 import type { EnUnit, OnUnit, Piece, RawWork, Row, Work } from "./lib/types";
@@ -254,14 +259,15 @@ type SearchRow = [string, string, string, string]; // slug, row id, Old Norse, E
 const search: SearchRow[] = [];
 interface LemmaStat {
   lemma: string;
-  pos: string;
+  /** The lemma's first analysis (UD morphology); lexicon pages show its word class. */
+  morph: string;
   count: number;
   works: Record<string, number>;
   occ: [string, string, string, number][]; // slug, row id, line, 1 = probable (not edition-annotated)
 }
 const lemmas = new Map<string, LemmaStat>();
 const usedLemmas = new Set<string>();
-const lemmaMsa = new Map<string, string>(); // a representative analysis, to rank dictionary homographs
+const lemmaMorph = new Map<string, string>(); // a representative analysis, to rank dictionary homographs
 const stats: string[] = [];
 const paradigms = new ParadigmBuilder();
 
@@ -278,8 +284,8 @@ for (const def of WORKS) {
   for (const a of raw.analyses) {
     usedLemmas.add(a[0]);
     paradigms.use(a);
-    if (!lemmaMsa.has(a[0]) || a[2] === "e") lemmaMsa.set(a[0], a[1]);
-    if (a[1].startsWith("xNP") && a[2] !== "n") knownNames.add(a[0]);
+    if (!lemmaMorph.has(a[0]) || a[2] === "e") lemmaMorph.set(a[0], a[1]);
+    if (parseMorph(a[1]).upos === "PROPN" && a[2] !== "n") knownNames.add(a[0]);
   }
   for (const row of rows) {
     search.push([def.slug, row.id, row.on.map((u) => plain(u.lines)).join(" / "), row.en.map((u) => u.lines.join(" / ")).join(" / ")]);
@@ -307,7 +313,7 @@ for (const def of WORKS) {
             const k = lemma;
             let st = lemmas.get(k);
             if (!st) {
-              st = { lemma, pos: as.find((a) => a[0] === lemma)?.[1].split(" ")[0] ?? "", count: 0, works: {}, occ: [] };
+              st = { lemma, morph: as.find((a) => a[0] === lemma)?.[1] ?? "", count: 0, works: {}, occ: [] };
               lemmas.set(k, st);
             }
             st.count++;
@@ -336,10 +342,22 @@ const zoega = indexDictionary(zoegaEntries);
 const cv = indexDictionary(cvEntries);
 const looseZoega = indexDictionary(zoegaEntries, looseDictionaryKey);
 const looseCv = indexDictionary(cvEntries, looseDictionaryKey);
-const shards = new Map<string, Record<string, DictHit>>();
+/** Dictionary matches for a lemma while the build assembles them; structured into a DictHit when written. */
+interface RawHit {
+  /** Zoëga, best-fitting homograph first. */
+  z?: PrintedEntry[];
+  /** Cleasby–Vigfússon. */
+  c?: PrintedEntry[];
+  w?: WiktGloss[];
+  /** Bellows's index of names, for proper nouns. */
+  n?: NameGloss[];
+  via?: string;
+  parts?: string[];
+}
+const shards = new Map<string, Record<string, RawHit>>();
 const shortGloss = new Map<string, string>();
 
-function dictionaryHit(lemma: string, msa = ""): DictHit {
+function dictionaryHit(lemma: string, morph = ""): RawHit {
   const k = fold(lemma);
   const proper = /^\p{Lu}/u.test(lemma);
   const accepts = (e: DictEntry) => !proper || /^\p{Lu}/u.test(dictionaryHeadword(e.word));
@@ -347,9 +365,9 @@ function dictionaryHit(lemma: string, msa = ""): DictHit {
   const acceptsLoose = (e: DictEntry) => {
     if (!accepts(e) || (proper && !/\p{Ll}/u.test(dictionaryHeadword(e.word)))) return false;
     const head = e.definitions.join(" ").replace(/<[^>]+>/g, "").replace(/\badj\./g, "a.").slice(0, 80);
-    const ranked = /\bx(?:NC|NP|VB|AJ|NO|AV|AQ|AP|CC|CS|CU|PD|NA|RP|IT|IM)\b/.test(msa);
+    const ranked = zoegaGrammarPattern(morph) !== undefined;
     const grammar = /(?:^|[\s,(;])(?:m|f|n|a|adv|prep|pron|v)\./.test(head);
-    return !ranked || !grammar || entryFits(msa, head);
+    return !ranked || !grammar || zoegaFits(morph, head);
   };
   let ze = zoega.get(k)?.filter(accepts);
   let ce = cv.get(k)?.filter(accepts);
@@ -358,7 +376,7 @@ function dictionaryHit(lemma: string, msa = ""): DictHit {
   if (!ce?.length) ce = looseCv.get(loose)?.filter(acceptsLoose);
   const z = ze?.length
     ? ze.map((e) => ({ w: e.word, d: e.definitions.map(sanitizeDef) }))
-      .sort((a, b) => Number(entryFits(msa, b.d.join(" "))) - Number(entryFits(msa, a.d.join(" "))))
+      .sort((a, b) => Number(zoegaFits(morph, b.d.join(" "))) - Number(zoegaFits(morph, a.d.join(" "))))
     : undefined;
   const c = ce?.length
     ? ce.map((e) => ({ w: e.word, d: e.definitions.map((d) => (d.length > 2400 ? `${d.slice(0, 2400)}…` : d)) }))
@@ -371,9 +389,19 @@ function dictionaryHit(lemma: string, msa = ""): DictHit {
 }
 
 /** Zoëga italicizes its English senses; Wiktionary is the fallback for a brief gloss. */
-function dictionaryGloss(hit: DictHit): string {
+function dictionaryGloss(hit: RawHit): string {
   const italic = hit.z?.[0]?.d.join(" ").match(/<i>([^<]+)<\/i>/)?.[1];
   return (italic ?? hit.w?.[0]?.glosses[0] ?? "").replace(/[;,.:\s]+$/, "");
+}
+
+/** The shard record: entries structured under the pack's dictionary ids (src/lang/non/dictionaries.ts). */
+function shardRecord(hit: RawHit): DictHit {
+  const entries: DictHit["entries"] = {};
+  if (hit.n?.length) entries.bellows = hit.n.map(nameArticle);
+  if (hit.z?.length) entries.zoega = hit.z.map(zoegaArticle);
+  if (hit.w?.length) entries.wiktionary = hit.w.map(glossArticle);
+  if (hit.c?.length) entries.cleasby = hit.c.map(plainArticle);
+  return { entries, ...(hit.via ? { via: hit.via } : {}), ...(hit.parts ? { parts: hit.parts } : {}) };
 }
 
 const NOUN_GRAMMAR = /(?:^|[\s,(;])[mfn]\./;
@@ -382,7 +410,7 @@ const ADVERB_GRAMMAR = /(?:^|[\s,(;])adv\./;
 type PartRole = "noun" | "adjective" | "first";
 interface CompoundPart {
   word: string;
-  hit: DictHit;
+  hit: RawHit;
   gloss: string;
   ambiguous: boolean;
 }
@@ -405,7 +433,7 @@ for (const entries of [zoegaEntries, cvEntries]) {
 
 function compoundPart(word: string, role: PartRole): CompoundPart | undefined {
   if (role === "first" && !zoega.has(fold(word))) return undefined;
-  const hit = dictionaryHit(word, role === "noun" ? "xNC" : role === "adjective" ? "xAJ" : "");
+  const hit = dictionaryHit(word, role === "noun" ? "NOUN" : role === "adjective" ? "ADJ" : "");
   const prefix = word.endsWith("-");
   // The first element needs Zoëga evidence; a second element may use CV when Zoëga lacks it.
   const entries = (hit.z ?? (role === "first" ? undefined : hit.c)) ?? [];
@@ -428,9 +456,10 @@ function compoundPart(word: string, role: PartRole): CompoundPart | undefined {
   return undefined;
 }
 
-function compoundParts(lemma: string, msa: string): [CompoundPart, CompoundPart] | undefined {
+function compoundParts(lemma: string, morph: string): [CompoundPart, CompoundPart] | undefined {
   if (!/^\p{Ll}/u.test(lemma)) return undefined;
-  const role = /\bxNC\b/.test(msa) ? "noun" : /\bxAJ\b/.test(msa) ? "adjective" : undefined;
+  const { upos, feats } = parseMorph(morph);
+  const role = upos === "NOUN" ? "noun" : upos === "ADJ" && !feats.NumType ? "adjective" : undefined;
   if (!role) return undefined;
   const k = fold(lemma);
   if (/(?:andi|inn|aðr)$/.test(k)) return undefined;
@@ -453,7 +482,7 @@ function compoundParts(lemma: string, msa: string): [CompoundPart, CompoundPart]
   return undefined;
 }
 
-function writeHit(lemma: string, hit: DictHit, overwrite = false) {
+function writeHit(lemma: string, hit: RawHit, overwrite = false) {
   const shard = shardOf(lemma);
   const rec = shards.get(shard) ?? {};
   const k = fold(lemma);
@@ -461,7 +490,7 @@ function writeHit(lemma: string, hit: DictHit, overwrite = false) {
   if (!old) rec[k] = hit;
   else if (overwrite) {
     // fold() lowercases, so a proper noun and a common noun (Askr, askr) share one record: merge, don't replace.
-    const merged: DictHit = { ...old };
+    const merged: RawHit = { ...old };
     for (const [key, value] of Object.entries(hit)) if (value !== undefined) Object.assign(merged, { [key]: value });
     rec[k] = merged;
   }
@@ -471,10 +500,10 @@ function writeHit(lemma: string, hit: DictHit, overwrite = false) {
 let withGloss = 0;
 for (const lemma of usedLemmas) {
   if (!fold(lemma)) continue;
-  const msa = lemmaMsa.get(lemma) ?? "";
-  const hit = dictionaryHit(lemma, msa);
+  const morph = lemmaMorph.get(lemma) ?? "";
+  const hit = dictionaryHit(lemma, morph);
   let gloss = dictionaryGloss(hit);
-  const proper = msa.startsWith("xNP");
+  const proper = parseMorph(morph).upos === "PROPN";
   const n = proper ? names.glosses(lemma) : [];
   if (n.length) {
     hit.n = n;
@@ -482,7 +511,7 @@ for (const lemma of usedLemmas) {
     gloss = [...new Set(n.map((e) => e.desc))].slice(0, 2).join("; ");
   }
   if (!hit.z && !hit.c && !hit.w && !hit.n) {
-    const parts = compoundParts(lemma, msa);
+    const parts = compoundParts(lemma, morph);
     if (!parts) continue;
     hit.parts = parts.map((part) => part.word);
     // Do not turn an ambiguous homograph into an asserted compound translation.
@@ -493,10 +522,13 @@ for (const lemma of usedLemmas) {
   if (gloss) shortGloss.set(lemma, gloss.length > 70 ? `${gloss.slice(0, 70)}…` : gloss);
   writeHit(lemma, hit, true);
 }
-for (const [s, rec] of shards) await Bun.write(join(ROOT, "public", "lex", `${s}.json`), JSON.stringify(rec));
+for (const [s, rec] of shards) {
+  const records = Object.fromEntries(Object.entries(rec).map(([k, hit]) => [k, shardRecord(hit)]));
+  await Bun.write(join(ROOT, "public", "lex", `${s}.json`), JSON.stringify(records));
+}
 
 const paraShards = new Map<string, Record<string, Paradigm[]>>();
-for (const paradigm of paradigms.build(wiktionary, (lemma) => dictionaryHit(lemma, lemmaMsa.get(lemma)).z)) {
+for (const paradigm of paradigms.build(wiktionary, (lemma) => dictionaryHit(lemma, lemmaMorph.get(lemma)).z)) {
   const shard = shardOf(paradigm.lemma);
   const rec = paraShards.get(shard) ?? {};
   (rec[fold(paradigm.lemma)] ??= []).push(paradigm);

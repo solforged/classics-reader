@@ -5,7 +5,7 @@
 // their principal parts select the stem, with 100% agreement in the available examples.
 // Unmarked -inn/-ig/-ug, vowel contraction, long-á umlaut and ambiguous ja/wa classes remain disabled below.
 import type { DictEntry } from "../../../src/lib/dict";
-import { fold } from "../../../src/lib/norse";
+import { fold } from "../../../src/lang/non/spelling";
 import type { Paradigm } from "../../../src/lib/paradigm";
 import { isVowel, syncopate, syllables, uUmlaut, withT } from "./phonology";
 import { grammarNotes, type Generated, type GrammarNote } from "./zoega";

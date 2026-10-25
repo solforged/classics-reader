@@ -1,39 +1,45 @@
-// Dictionary shard records (public/lex/<shard>.json), written by scripts/build-data.ts and read by the
-// word panel and the lemma pages. Each shard maps fold(lemma) to a DictHit.
+// Dictionary shard records (public/lex/<shard>.json), written by scripts/build-data.ts and read by the word panel and
+// the lemma pages. Each shard maps the pack's fold(lemma) to a DictHit. Entries are structured at build time by the
+// pack's parser for each dictionary, so src/lib/entry.ts renders every language the same way.
 
-/** One dictionary article: headword as printed, and its definition chunks (sanitized HTML). */
-export interface DictEntry {
-  w: string;
-  d: string[];
+/** One sense: its number as printed ("1)", or "" for an unnumbered sense), gloss and examples (HTML). */
+export interface Sense {
+  marker?: string;
+  gloss: string;
+  examples?: string;
 }
 
-/** A Wiktionary sense group. */
-export interface WiktGloss {
-  pos: string;
-  glosses: string[];
+/** A homograph section (or the whole entry when it has none). */
+export interface ArticleSection {
+  /** Section label as printed, e.g. "<strong>II)</strong>". */
+  label?: string;
+  /** Grammar note before the first sense (HTML), e.g. "(-s, -ar), m.". */
+  grammar?: string;
+  senses?: Sense[];
+  /** Section text that the parser could not split into senses (HTML); rendered as is. */
+  text?: string;
 }
 
-/** An entry in Bellows's "Pronouncing Index of Proper Names" (1923). */
-export interface NameGloss {
-  /** Bellows's spelling, e.g. "Grani", "Hreithmar". */
-  name: string;
-  /** His identification, e.g. "Sigurth's horse", without page references. */
-  desc: string;
-  /** Reader slugs whose Bellows pages the entry cites; empty when none map to a work. */
-  works: string[];
+/** A structured dictionary entry. */
+export interface Article {
+  /** Headword as printed (plain text). */
+  head: string;
+  sections: ArticleSection[];
+  /** Reader slugs the entry cites, for "names" dictionaries; entries citing the current work are preferred. */
+  works?: string[];
 }
 
 export interface DictHit {
-  /** Zoëga, A Concise Dictionary of Old Icelandic (1910); best-fitting homograph first. */
-  z?: DictEntry[];
-  /** Cleasby–Vigfússon (1874). */
-  c?: DictEntry[];
-  /** Wiktionary. */
-  w?: WiktGloss[];
+  /** Entries by dictionary id (the pack's `dictionaries`), best-fitting homograph first. */
+  entries: Record<string, Article[]>;
   /** Headword spelling the dictionaries use when it differs from the lemma (e.g. "lopt" for loft). */
   via?: string;
-  /** Bellows's index of names, for proper nouns. */
-  n?: NameGloss[];
   /** Compound parts when no dictionary has the whole word; each part has its own record under fold(part). */
   parts?: string[];
+}
+
+/** A dictionary article as digitized: headword and definition chunks (sanitized HTML). Input to the parsers. */
+export interface DictEntry {
+  w: string;
+  d: string[];
 }

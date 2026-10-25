@@ -1,7 +1,9 @@
 // Builds the form → analysis index (EAE annotations + Wiktionary tables) and dictionary gloss lookups.
 import type { Element } from "@xmldom/xmldom";
-import { fold } from "../../src/lib/norse";
+import { formatMorph } from "../../src/lib/morph";
+import { fold } from "../../src/lang/non/spelling";
 import { FormIndex } from "./analyses";
+import { menotaToUd } from "./menota";
 
 const TEI = "http://www.tei-c.org/ns/1.0";
 const ME = "http://www.menota.org/ns/1.0";
@@ -21,71 +23,75 @@ export function indexEae(divs: Map<string, Element>, index: FormIndex) {
         && (parent as Element).localName === "seg"
         && (parent as Element).getAttribute("type") === "enc";
       if (lemma.startsWith("-") && (fragment || fold(text) === fold(lemma.slice(1)))) continue;
-      index.add(text, [lemma.normalize("NFC"), w.getAttributeNS(ME, "msa") || "", "e"]);
+      index.add(text, [lemma.normalize("NFC"), menotaToUd(w.getAttributeNS(ME, "msa") || ""), "e"]);
     }
   }
 }
 
-const POS: Record<string, string> = {
-  noun: "xNC",
-  name: "xNP",
-  verb: "xVB",
-  adj: "xAJ",
-  adv: "xAV",
-  prep: "xAP",
-  postp: "xAP",
-  pron: "xPD",
-  det: "xPD",
-  article: "xPD",
-  num: "xNA",
-  conj: "xCU",
-  intj: "xIT",
-  particle: "xUA",
+/** Wiktionary part of speech → UPOS and features, matching the classes the edition's tags convert to. */
+const POS: Record<string, [upos: string, feats?: Record<string, string>]> = {
+  noun: ["NOUN"],
+  name: ["PROPN"],
+  verb: ["VERB"],
+  adj: ["ADJ"],
+  adv: ["ADV"],
+  prep: ["ADP"],
+  postp: ["ADP"],
+  pron: ["PRON"],
+  det: ["PRON"],
+  article: ["PRON"],
+  num: ["NUM", { NumType: "Card" }],
+  conj: ["CCONJ", { ConjType: "Unsp" }],
+  intj: ["INTJ"],
+  particle: ["PART"],
 };
 
-const TAG: Record<string, string> = {
-  nominative: "cN",
-  accusative: "cA",
-  dative: "cD",
-  genitive: "cG",
-  singular: "nS",
-  plural: "nP",
-  dual: "nD",
-  masculine: "gM",
-  feminine: "gF",
-  neuter: "gN",
-  "first-person": "p1",
-  "second-person": "p2",
-  "third-person": "p3",
-  present: "tPS",
-  past: "tPT",
-  preterite: "tPT",
-  indicative: "mIN",
-  subjunctive: "mSU",
-  imperative: "mIP",
-  infinitive: "fI",
-  participle: "fP",
-  active: "vA",
-  mediopassive: "vR",
-  comparative: "rC",
-  superlative: "rS",
-  positive: "rP",
-  definite: "sD",
-  indefinite: "sI",
-  weak: "sD",
-  strong: "sI",
+const TAG: Record<string, [name: string, value: string]> = {
+  nominative: ["Case", "Nom"],
+  accusative: ["Case", "Acc"],
+  dative: ["Case", "Dat"],
+  genitive: ["Case", "Gen"],
+  singular: ["Number", "Sing"],
+  plural: ["Number", "Plur"],
+  dual: ["Number", "Dual"],
+  masculine: ["Gender", "Masc"],
+  feminine: ["Gender", "Fem"],
+  neuter: ["Gender", "Neut"],
+  "first-person": ["Person", "1"],
+  "second-person": ["Person", "2"],
+  "third-person": ["Person", "3"],
+  present: ["Tense", "Pres"],
+  past: ["Tense", "Past"],
+  preterite: ["Tense", "Past"],
+  indicative: ["Mood", "Ind"],
+  subjunctive: ["Mood", "Sub"],
+  imperative: ["Mood", "Imp"],
+  finite: ["VerbForm", "Fin"],
+  infinitive: ["VerbForm", "Inf"],
+  participle: ["VerbForm", "Part"],
+  active: ["Voice", "Act"],
+  mediopassive: ["Voice", "Mid"],
+  comparative: ["Degree", "Cmp"],
+  superlative: ["Degree", "Sup"],
+  positive: ["Degree", "Pos"],
+  definite: ["Definite", "Def"],
+  indefinite: ["Definite", "Ind"],
+  weak: ["Definite", "Def"],
+  strong: ["Definite", "Ind"],
 };
 
 const SKIP_TAGS = new Set(["table-tags", "inflection-template", "romanization", "class", "canonical"]);
 
-function msaFrom(pos: string, tags: string[] = []): string {
-  const parts = [POS[pos] ?? ""];
+function morphFrom(pos: string, tags: string[] = []): string {
+  const [upos = "", lexical = {}] = POS[pos] ?? [];
+  const feats: Record<string, string[]> = {};
+  for (const [name, value] of Object.entries(lexical)) feats[name] = [value];
   for (const t of tags) {
-    const code = TAG[t];
-    if (code && !parts.includes(code)) parts.push(code);
+    const tag = TAG[t];
+    if (tag) (feats[tag[0]] ??= []).push(tag[1]);
   }
-  if (tags.includes("finite") || parts.some((p) => /^m(IN|SU|IP)$/.test(p))) parts.splice(1, 0, "fF");
-  return parts.filter(Boolean).join(" ");
+  if (feats.Mood && !feats.VerbForm) feats.VerbForm = ["Fin"];
+  return formatMorph({ upos, feats });
 }
 
 interface WiktEntry {
@@ -110,7 +116,7 @@ export function indexWiktionary(jsonl: string, index: FormIndex): Map<string, Wi
     const pos = e.pos;
     const own = (e.senses ?? []).filter((s) => !s.form_of?.length && s.glosses?.length);
     if (own.length) {
-      index.add(e.word, [e.word, msaFrom(pos), "w"]);
+      index.add(e.word, [e.word, morphFrom(pos), "w"]);
       const k = fold(e.word);
       const list = glosses.get(k) ?? [];
       list.push({ pos, glosses: own.map((s) => s.glosses!.join("; ")).slice(0, 6) });
@@ -120,13 +126,13 @@ export function indexWiktionary(jsonl: string, index: FormIndex): Map<string, Wi
         for (const f of e.forms ?? []) {
           const tags = f.tags ?? [];
           if (!f.form || f.form === "-" || tags.some((t) => SKIP_TAGS.has(t))) continue;
-          for (const form of f.form.split(/\s*[,/]\s*/)) index.add(form, [e.word, msaFrom(pos, tags), "w"]);
+          for (const form of f.form.split(/\s*[,/]\s*/)) index.add(form, [e.word, morphFrom(pos, tags), "w"]);
         }
       }
     }
     for (const s of e.senses ?? []) {
       for (const fo of s.form_of ?? []) {
-        if (fo.word && !fo.word.startsWith("-")) index.add(e.word, [fo.word, msaFrom(pos, s.tags), "w"]);
+        if (fo.word && !fo.word.startsWith("-")) index.add(e.word, [fo.word, morphFrom(pos, s.tags), "w"]);
       }
     }
   }

@@ -3,7 +3,7 @@
 // Unmarked masculine a-/i-stems, general feminine ō-/i-stems, unmarked weak-feminine genitive plurals,
 // ambiguous j-/v-stems and unspecified contraction are intentionally refused. Definite forms are not inferred.
 import type { DictEntry } from "../../../src/lib/dict";
-import { fold } from "../../../src/lib/norse";
+import { fold } from "../../../src/lang/non/spelling";
 import type { Paradigm } from "../../../src/lib/paradigm";
 import { grammarNotes, type Generated, type GrammarNote } from "./zoega";
 import { isVowel, syllables, syncopate, uUmlaut } from "./phonology";

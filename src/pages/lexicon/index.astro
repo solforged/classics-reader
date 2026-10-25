@@ -1,6 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { decodeMsa, searchKey } from "../../lib/norse";
+import { lang } from "../../lang";
 import { base, LEXICON, lemmaSlugs } from "../../lib/site";
 
 const total = LEXICON.reduce((n, l) => n + l.count, 0);
@@ -28,9 +28,9 @@ const total = LEXICON.reduce((n, l) => n + l.count, 0);
       <tbody id="lex-body">
         {
           LEXICON.map((l, i) => (
-            <tr data-k={`${searchKey(l.lemma)} ${l.gloss.toLowerCase()}`} data-i={i} data-a={searchKey(l.lemma)}>
+            <tr data-k={`${lang.searchKey(l.lemma)} ${l.gloss.toLowerCase()}`} data-i={i} data-a={lang.searchKey(l.lemma)}>
               <td><a href={`${base}lexicon/${lemmaSlugs.get(l.lemma)}/`}>{l.lemma}</a></td>
-              <td class="pos">{decodeMsa(l.pos).pos}</td>
+              <td class="pos">{lang.describeMorph(l.morph).pos}</td>
               <td class="gloss">{l.gloss}</td>
               <td class="n">{l.count.toLocaleString("en")}</td>
             </tr>
@@ -42,7 +42,7 @@ const total = LEXICON.reduce((n, l) => n + l.count, 0);
 </Base>
 
 <script>
-  import { searchKey } from "../../lib/norse";
+  import { lang } from "../../lang";
 
   const body = document.getElementById("lex-body")!;
   const rows = [...body.querySelectorAll<HTMLTableRowElement>("tr")];
@@ -52,7 +52,7 @@ const total = LEXICON.reduce((n, l) => n + l.count, 0);
 
   function apply() {
     const q = filter.value.trim();
-    const key = searchKey(q);
+    const key = lang.searchKey(q);
     const low = q.toLowerCase();
     let shown = 0;
     for (const r of rows) {

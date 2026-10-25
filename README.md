@@ -50,14 +50,17 @@ bun run preview
 - `scripts/catalog.ts`: the works, their groups and which source sections make up each side.
 - `scripts/lib/`: parsers (`eae.ts`, `bugge.ts`, `bellows.ts`, `snorra.ts`), the form index
   (`analyses.ts`), dictionary loading (`lexicon.ts`), Bellows's name index (`names.ts`), Wiktionary tables
-  (`paradigms.ts`) and tables generated from Zoëga's grammar notes (`inflect/`, validated pattern by pattern
-  against Wiktionary).
-- `src/lib/entry.ts`, `src/lib/tables.ts`: render dictionary entries and inflection tables for the
+  (`paradigms.ts`), tables generated from Zoëga's grammar notes (`inflect/`, validated pattern by pattern
+  against Wiktionary), Menota tags to UD morphology (`menota.ts`) and dictionary entries to structured
+  articles (`articles.ts`).
+- `src/lang/`: the language pack. `types.ts` is the contract the shared code uses (spelling fold,
+  search key, morphology labels, dictionary list); `non/` is Old Norse; `index.ts` picks the pack.
+- `src/lib/entry.ts`, `src/lib/tables.ts`: render dictionary articles and inflection tables for the
   word panel and the lemma pages; `src/lib/paradigm.ts` defines the table cells.
+- `src/lib/morph.ts`: the analysis format. Word analyses carry Universal Dependencies morphology,
+  e.g. `NOUN Case=Acc|Definite=Ind|Gender=Masc|Number=Sing`.
 - `scripts/build-data.ts`: builds every output; fails if an alignment misses or repeats a unit.
 - `alignment/<slug>.json`: the curated row-by-row crosswalk between the two sides.
-- `src/lib/norse.ts`: spelling fold, search key and Menota morphology decoding, shared by the
-  build and the browser.
 - `src/pages/`: home, reader (`[slug]`), search, lexicon, sources.
 
 ## Alignment

@@ -1,5 +1,6 @@
-// Word analyses: per-work table of [lemma, msa, source] plus a form index for unannotated text.
-import { fold } from "../../src/lib/norse";
+// Word analyses: per-work table of [lemma, morph, source] plus a form index for unannotated text.
+import { withoutFeature } from "../../src/lib/morph";
+import { fold } from "../../src/lang/non/spelling";
 import type { Analysis } from "./types";
 
 /** Spelling differences between the Snorra Edda / Bugge texts and the Codex Regius edition's normalization. */
@@ -60,8 +61,8 @@ export class FormIndex {
   add(form: string, a: Analysis) {
     const k = fold(form);
     if (!k) return;
-    // The enclitic flag describes a particular occurrence, not the form.
-    const analysis: Analysis = [a[0], a[1].replace(/\s*eE\b/, ""), a[2]];
+    // The clitic flag describes a particular occurrence, not the form.
+    const analysis: Analysis = [a[0], withoutFeature(a[1], "Clitic"), a[2]];
     let m = this.forms.get(k);
     if (!m) this.forms.set(k, (m = new Map()));
     const id = `${analysis[0]}\t${analysis[1]}`;
@@ -148,7 +149,7 @@ export class AnalysisTable {
     const analyses = this.index.get(surface, this.diplomatic);
     if (!analyses.length && /^\p{Lu}/u.test(surface)) {
       const lemma = this.names?.(surface);
-      if (lemma) return [this.add([lemma, "xNP", "n"])];
+      if (lemma) return [this.add([lemma, "PROPN", "n"])];
     }
     return analyses.map((a) => this.add([a[0], a[1], a[2] === "e" ? "a" : a[2]]));
   }

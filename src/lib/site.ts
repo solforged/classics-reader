@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { GROUPS, WORKS, type WorkDef } from "../../scripts/catalog";
 import type { Work } from "../../scripts/lib/types";
 import lexicon from "../data/lexicon.json";
-import { fold, shardOf } from "./norse";
+import { lang, shardOf } from "../lang";
 import type { DictHit } from "./dict";
 import type { Paradigm } from "./paradigm";
 
@@ -22,7 +22,8 @@ export const workBySlug = new Map(WORKS.map((w) => [w.slug, w]));
 
 export interface LemmaStat {
   lemma: string;
-  pos: string;
+  /** The lemma's first analysis (UD morphology, src/lib/morph.ts). */
+  morph: string;
   count: number;
   works: Record<string, number>;
   occ: [string, string, string, number][];
@@ -62,7 +63,7 @@ export function dictionaryEntry(lemma: string): DictHit | undefined {
     }
     shards.set(shard, data);
   }
-  return data[fold(lemma)];
+  return data[lang.fold(lemma)];
 }
 
 const paradigmShards = new Map<string, Record<string, Paradigm[]>>();
@@ -79,7 +80,7 @@ export function paradigms(lemma: string): Paradigm[] {
     }
     paradigmShards.set(shard, data);
   }
-  const records = data[fold(lemma)] ?? [];
+  const records = data[lang.fold(lemma)] ?? [];
   const exact = records.filter((record) => record.lemma === lemma);
   return exact.length ? exact : records;
 }

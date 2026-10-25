@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { decodeMsa } from "../../lib/norse";
+import { lang } from "../../lang";
+import { parseMorph } from "../../lib/morph";
 import { dictionaryHtml } from "../../lib/entry";
 import {
   base, dictionaryEntry, LEXICON, lemmaSlugs, paradigms, type LemmaStat, workBySlug, WORKS,
@@ -16,7 +17,7 @@ const { stat } = Astro.props as { stat: LemmaStat };
 const dict = dictionaryEntry(stat.lemma);
 const parts = new Map(dict?.parts?.map((part) => [part, dictionaryEntry(part)]));
 const tables = paradigms(stat.lemma);
-const pos = decodeMsa(stat.pos).pos;
+const pos = lang.describeMorph(stat.morph).pos;
 const order = new Map(WORKS.map((w, i) => [w.slug, i]));
 const byWork = Object.entries(stat.works).sort((a, b) => order.get(a[0])! - order.get(b[0])!);
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -37,7 +38,7 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
     </p>
 
     <section class="dict" set:html={dictionaryHtml(dict, {
-      parts, fullTitles: true, properNoun: stat.pos.startsWith("xNP"),
+      parts, fullTitles: true, properNoun: parseMorph(stat.morph).upos === "PROPN",
     })} />
 
     {
@@ -113,7 +114,7 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
     color: var(--accent);
     margin-top: 1rem;
   }
-  .dict :global(.zoega-entry) {
+  .dict :global(.dict-article) {
     margin: 0.6rem 0 1rem;
     overflow-wrap: anywhere;
   }

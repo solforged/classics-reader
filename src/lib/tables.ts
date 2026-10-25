@@ -20,8 +20,8 @@ const esc = (value: string): string => value.replace(/&/g, "&amp;").replace(/</g
   .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
 /** The reading's word class and exact lemma take precedence over folded spelling matches. */
-export function selectParadigm(records: readonly Paradigm[], lemma: string, msa: string): Paradigm | undefined {
-  const kind = paradigmKind(msa, lemma);
+export function selectParadigm(records: readonly Paradigm[], lemma: string, morph: string): Paradigm | undefined {
+  const kind = paradigmKind(morph, lemma);
   return records.find((record) => record.kind === kind && record.lemma === lemma)
     ?? records.find((record) => record.kind === kind);
 }

@@ -1,12 +1,13 @@
 // Reader page behaviour: column view, word panel, translator's notes, go-to, citation links, reading position.
-import { decodeMsa, fold, shardOf } from "../lib/norse";
+import { lang, shardOf } from "../lang";
 import type { DictHit } from "../lib/dict";
 import { dictionaryHtml } from "../lib/entry";
+import { expandMorph, parseMorph } from "../lib/morph";
 import type { Paradigm } from "../lib/paradigm";
-import { msaCell } from "../lib/paradigm";
+import { morphCells } from "../lib/paradigm";
 import { paradigmHtml, selectParadigm } from "../lib/tables";
 
-type ClientAnalysis = [lemma: string, msa: string, source: "e" | "a" | "w" | "n", slug: string, count: number];
+type ClientAnalysis = [lemma: string, morph: string, source: "e" | "a" | "w" | "n", slug: string, count: number];
 
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const json = <T,>(id: string): T => JSON.parse(document.getElementById(id)?.textContent ?? "null") as T;
@@ -121,7 +122,7 @@ function dictionary(lemma: string): Promise<DictHit | undefined> {
     p = fetch(`${BASE}lex/${shard}.json`).then((r) => (r.ok ? r.json() : {}));
     shards.set(shard, p);
   }
-  return p.then((s) => s[fold(lemma)]);
+  return p.then((s) => s[lang.fold(lemma)]);
 }
 
 const paradigmShards = new Map<string, Promise<Record<string, Paradigm[]>>>();
@@ -132,7 +133,7 @@ function paradigms(lemma: string): Promise<Paradigm[]> {
     p = fetch(`${BASE}para/${shard}.json`).then((r) => (r.ok ? r.json() : {}));
     paradigmShards.set(shard, p);
   }
-  return p.then((data) => data[fold(lemma)] ?? []);
+  return p.then((data) => data[lang.fold(lemma)] ?? []);
 }
 
 const SOURCE_NOTE: Record<ClientAnalysis[2], string> = {
@@ -144,9 +145,10 @@ const SOURCE_NOTE: Record<ClientAnalysis[2], string> = {
 
 function readingsHtml(readings: ClientAnalysis[]): string {
   const seen = new Set<string>();
-  const unique = readings.map((reading) => ({
-    morph: decodeMsa(reading[1]),
-    features: new Map(reading[1].split(/\s+/).filter(Boolean).map((token) => [token[0]!, token.slice(1)])),
+  // An ambiguous reading ("Case=Acc,Nom") lists as one reading per value, so it merges with readings it overlaps.
+  const unique = readings.flatMap((reading) => expandMorph(reading[1])).map((morph) => ({
+    morph: lang.describeMorph(morph),
+    features: new Map(Object.entries(parseMorph(morph).feats).map(([name, values]) => [name, values.join(",")])),
   })).filter(({ morph }) => {
     const key = `${morph.pos}:${morph.form}`;
     if (seen.has(key)) return false;
@@ -208,7 +210,7 @@ async function showWord(el: HTMLElement) {
   // One card per lemma and word class: vit the noun and vit the pronoun are different words.
   const grouped = new Map<string, ClientAnalysis[]>();
   for (const item of items) {
-    const key = `${item[0]}\t${item[1].split(" ")[0]}`;
+    const key = `${item[0]}\t${lang.describeMorph(item[1]).pos}`;
     const readings = grouped.get(key);
     if (readings) readings.push(item);
     else grouped.set(key, [item]);
@@ -220,7 +222,7 @@ async function showWord(el: HTMLElement) {
   const candidates = items.some((item) => item[2] === "a" || item[2] === "w");
   const blocks = groups.map((readings, i) => {
     const [lemma, , source, lemmaSlug, count] = readings[0]!;
-    const morphs = readings.map((reading) => decodeMsa(reading[1]));
+    const morphs = readings.map((reading) => lang.describeMorph(reading[1]));
     const pos = [...new Set(morphs.map((m) => m.pos))].join(" / ");
     const props = [...new Set(morphs.flatMap((m) => m.props))];
     const href = lemmaSlug ? `${BASE}lexicon/${encodeURIComponent(lemmaSlug)}/` : "";
@@ -262,11 +264,10 @@ async function showWord(el: HTMLElement) {
   body.querySelectorAll<HTMLElement>(".an").forEach((block) => {
     const index = Number(block.dataset.i);
     const readings = groups[index]!;
-    const [lemma, msa, source] = readings[0]!;
-    const paradigm = selectParadigm(tables.get(lemma) ?? [], lemma, msa);
+    const [lemma, morph, source] = readings[0]!;
+    const paradigm = selectParadigm(tables.get(lemma) ?? [], lemma, morph);
     if (paradigm) {
-      const highlight = readings.map((reading) => msaCell(reading[1], reading[0]))
-        .filter((key): key is string => key !== undefined);
+      const highlight = readings.flatMap((reading) => morphCells(reading[1], reading[0]));
       const heading = paradigm.kind === "verb" ? "Conjugation" : "Declension";
       block.querySelector(".paradigm-slot")!.outerHTML =
         `<details class="paradigm-details"${index === 0 ? " open" : ""}><summary>${heading}</summary>`
@@ -274,7 +275,7 @@ async function showWord(el: HTMLElement) {
     } else {
       block.querySelector(".paradigm-slot")!.remove();
     }
-    const content = dictionaryHtml(hits.get(lemma), { msa, work: slug, parts, properNoun: source === "n" });
+    const content = dictionaryHtml(hits.get(lemma), { morph, work: slug, parts, properNoun: source === "n" });
     block.querySelector(".dict-slot")!.outerHTML = `<div class="dict">${content}</div>`;
   });
 }

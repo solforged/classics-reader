@@ -1,5 +1,14 @@
 import * as cheerio from "cheerio";
-import type { NameGloss } from "../../src/lib/dict";
+
+/** An entry in Bellows's "Pronouncing Index of Proper Names" (1923). */
+export interface NameGloss {
+  /** Bellows's spelling, e.g. "Grani", "Hreithmar". */
+  name: string;
+  /** His identification, e.g. "Sigurth's horse", without page references. */
+  desc: string;
+  /** Reader slugs whose Bellows pages the entry cites; empty when none map to a work. */
+  works: string[];
+}
 
 const clean = (text: string): string => text.replace(/\s+/g, " ").trim();
 

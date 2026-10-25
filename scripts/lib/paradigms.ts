@@ -1,6 +1,6 @@
 // Extracts Wiktionary tables and joins the reader's edition-annotated forms without changing its analyses.
-import { fold } from "../../src/lib/norse";
-import { msaCell, paradigmKind, type Paradigm, type ParadigmKind } from "../../src/lib/paradigm";
+import { fold } from "../../src/lang/non/spelling";
+import { morphCells, paradigmKind, type Paradigm, type ParadigmKind } from "../../src/lib/paradigm";
 import { looseDictionaryKey } from "./lexicon";
 import type { Analysis } from "./types";
 import type { DictEntry } from "../../src/lib/dict";
@@ -241,8 +241,8 @@ export class ParadigmBuilder {
   private readonly readings = new Map<string, Map<ParadigmKind, Paradigm["attested"]>>();
   private readonly personalAttested: Paradigm["attested"] = {};
 
-  use([lemma, msa]: Analysis): void {
-    const kind = paradigmKind(msa, lemma);
+  use([lemma, morph]: Analysis): void {
+    const kind = paradigmKind(morph, lemma);
     if (!kind || !fold(lemma)) return;
     let kinds = this.readings.get(lemma);
     if (!kinds) this.readings.set(lemma, kinds = new Map());
@@ -251,25 +251,26 @@ export class ParadigmBuilder {
 
   attest(surface: string, analyses: Analysis[]): void {
     const seen = new Set<string>();
-    for (const [lemma, msa, source] of analyses) {
+    for (const [lemma, morph, source] of analyses) {
       if (source !== "e") continue;
-      const kind = paradigmKind(msa, lemma);
-      const cell = msaCell(msa, lemma);
-      if (!kind || !cell) continue;
-      const key = `${lemma}\t${kind}\t${cell}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const attested = this.readings.get(lemma)?.get(kind);
+      const kind = paradigmKind(morph, lemma);
+      const attested = kind && this.readings.get(lemma)?.get(kind);
       if (!attested) continue;
       // Capitals at the start of a line or sentence are not part of a common word's form.
       const form = /^\p{Lu}/u.test(lemma) ? surface : surface.toLowerCase();
-      const forms = attested[cell] ??= {};
-      forms[form] = (forms[form] ?? 0) + 1;
-      // Every personal table displays all persons, so its markers share one corpus-wide count.
-      if (kind === "personal" && !seen.has(`personal\t${cell}`)) {
-        seen.add(`personal\t${cell}`);
-        const shared = this.personalAttested[cell] ??= {};
-        shared[form] = (shared[form] ?? 0) + 1;
+      // A syncretic annotation ("Case=Acc,Dat") attests the form in each of its cells.
+      for (const cell of morphCells(morph, lemma)) {
+        const key = `${lemma}\t${kind}\t${cell}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const forms = attested[cell] ??= {};
+        forms[form] = (forms[form] ?? 0) + 1;
+        // Every personal table displays all persons, so its markers share one corpus-wide count.
+        if (kind === "personal" && !seen.has(`personal\t${cell}`)) {
+          seen.add(`personal\t${cell}`);
+          const shared = this.personalAttested[cell] ??= {};
+          shared[form] = (shared[form] ?? 0) + 1;
+        }
       }
     }
   }
