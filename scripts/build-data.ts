@@ -1,14 +1,9 @@
-// Builds the site's data from the cached sources (run scripts/fetch-sources.ts first).
-//   src/data/works/<slug>.json   aligned rows, analyses, notes, intro per work
-//   src/data/lexicon.json        lemma frequencies and concordance (build-time only)
-//   public/lex/<shard>.json      dictionary entries, fetched by the word panel
-//   public/para/<shard>.json     inflection tables and edition-attested forms for corpus lemmas
-//   public/search.json           full-text search index
-//   .cache/raw/<slug>.json       unaligned units, input for alignment review
-import { mkdir, rm } from "node:fs/promises";
+// Builds the Edda Reader's data from the cached sources (run scripts/fetch-sources.ts first) into generated/edda/
+// (scripts/core/outputs.ts), plus .cache/raw/<slug>.json, the unaligned units used for alignment review.
+import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { WORKS, type WorkDef } from "./catalog";
-import { shardOf } from "../src/lang";
+import { Concordance, Outputs, ROOT, statsLine } from "./core/outputs";
 import { zoegaFits, zoegaGrammarPattern } from "../src/lang/non/dictionaries";
 import { fold } from "../src/lang/non/spelling";
 import type { DictEntry as PrintedEntry, DictHit } from "../src/lib/dict";
@@ -32,9 +27,8 @@ import {
   type WiktGloss,
 } from "./lib/lexicon";
 import { parseBrodeur, parseSnorra } from "./lib/snorra";
-import type { EnUnit, OnUnit, Piece, RawWork, Row, Work } from "./lib/types";
+import type { EnUnit, OnUnit, RawWork, Row, Work } from "./lib/types";
 
-const ROOT = join(import.meta.dir, "..");
 const SRC = join(ROOT, ".cache", "sources");
 const read = (rel: string) => Bun.file(join(SRC, rel)).text();
 
@@ -233,9 +227,6 @@ function missing(def: WorkDef, side: string, key: string): never {
 
 // ---------------------------------------------------------------- outputs
 
-const plain = (lines: Piece[][]) =>
-  lines.map((l) => l.map((p) => (typeof p === "string" ? p : p[0])).join("")).join(" / ");
-
 await mkdir(join(ROOT, ".cache", "raw"), { recursive: true });
 
 // `--raw <slug>...` only rewrites the unaligned units of those works (for alignment review).
@@ -248,24 +239,10 @@ if (rawOnly) {
   process.exit(0);
 }
 
-await rm(join(ROOT, "src", "data", "works"), { recursive: true, force: true });
-await rm(join(ROOT, "public", "lex"), { recursive: true, force: true });
-await rm(join(ROOT, "public", "para"), { recursive: true, force: true });
-await mkdir(join(ROOT, "src", "data", "works"), { recursive: true });
-await mkdir(join(ROOT, "public", "lex"), { recursive: true });
-await mkdir(join(ROOT, "public", "para"), { recursive: true });
+const outputs = new Outputs("edda");
+await outputs.reset();
 
-type SearchRow = [string, string, string, string]; // slug, row id, Old Norse, English
-const search: SearchRow[] = [];
-interface LemmaStat {
-  lemma: string;
-  /** The lemma's first analysis (UD morphology); lexicon pages show its word class. */
-  morph: string;
-  count: number;
-  works: Record<string, number>;
-  occ: [string, string, string, number][]; // slug, row id, line, 1 = probable (not edition-annotated)
-}
-const lemmas = new Map<string, LemmaStat>();
+const concordance = new Concordance();
 const usedLemmas = new Set<string>();
 const lemmaMorph = new Map<string, string>(); // a representative analysis, to rank dictionary homographs
 const stats: string[] = [];
@@ -276,11 +253,8 @@ for (const def of WORKS) {
   await Bun.write(join(ROOT, ".cache", "raw", `${def.slug}.json`), JSON.stringify(raw, null, 1));
   const rows = await align(def, raw);
   const work: Work = { slug: def.slug, rows, analyses: raw.analyses, notes: raw.notes, intro: raw.intro };
-  await Bun.write(join(ROOT, "src", "data", "works", `${def.slug}.json`), JSON.stringify(work));
+  await outputs.writeWork(work);
 
-  let words = 0;
-  let parsed = 0;
-  let annotated = 0;
   for (const a of raw.analyses) {
     usedLemmas.add(a[0]);
     paradigms.use(a);
@@ -288,52 +262,14 @@ for (const def of WORKS) {
     if (parseMorph(a[1]).upos === "PROPN" && a[2] !== "n") knownNames.add(a[0]);
   }
   for (const row of rows) {
-    search.push([def.slug, row.id, row.on.map((u) => plain(u.lines)).join(" / "), row.en.map((u) => u.lines.join(" / ")).join(" / ")]);
     for (const u of row.on) {
       for (const line of u.lines) {
-        const lineText = line.map((p) => (typeof p === "string" ? p : p[0])).join("");
-        for (const p of line) {
-          if (typeof p === "string") continue;
-          words++;
-          if (p[1].length) parsed++;
-          const as = p[1].map((id) => raw.analyses[id]!);
-          paradigms.attest(p[0], as);
-          if (as.some((a) => a[2] === "e")) annotated++;
-          // Concordance: edition-annotated words, plus candidates that agree on a single lemma.
-          const lemmaSet = new Set(as.filter((a) => a[2] === "e").map((a) => a[0]));
-          let probable = 0;
-          if (!lemmaSet.size) {
-            const cands = new Set(as.map((a) => a[0]));
-            if (cands.size === 1) {
-              lemmaSet.add([...cands][0]!);
-              probable = 1;
-            }
-          }
-          for (const lemma of lemmaSet) {
-            const k = lemma;
-            let st = lemmas.get(k);
-            if (!st) {
-              st = { lemma, morph: as.find((a) => a[0] === lemma)?.[1] ?? "", count: 0, works: {}, occ: [] };
-              lemmas.set(k, st);
-            }
-            st.count++;
-            st.works[def.slug] = (st.works[def.slug] ?? 0) + 1;
-            if (st.occ.length < 400) st.occ.push([def.slug, row.id, lineText.replace(p[0], `⟦${p[0]}⟧`), probable]);
-          }
-        }
+        for (const p of line) if (typeof p !== "string") paradigms.attest(p[0], p[1].map((id) => raw.analyses[id]!));
       }
     }
   }
-  stats.push(
-    `${def.slug.padEnd(28)} rows ${String(rows.length).padStart(4)}  words ${String(words).padStart(6)}  annotated ${pct(annotated, words)}  with analysis ${pct(parsed, words)}`,
-  );
+  stats.push(statsLine(def.slug, rows.length, concordance.addWork(def.slug, rows, raw.analyses)));
 }
-
-function pct(a: number, b: number) {
-  return `${b ? ((100 * a) / b).toFixed(1) : "0.0"}%`.padStart(6);
-}
-
-await Bun.write(join(ROOT, "public", "search.json"), JSON.stringify(search));
 
 // Dictionary shards: corpus lemmas, plus the headwords needed to explain compounds.
 const zoegaEntries = JSON.parse(await read("lex/zoega.json")) as DictEntry[];
@@ -354,7 +290,7 @@ interface RawHit {
   via?: string;
   parts?: string[];
 }
-const shards = new Map<string, Record<string, RawHit>>();
+const shards = new Map<string, RawHit>(); // fold(lemma) → hit
 const shortGloss = new Map<string, string>();
 
 function dictionaryHit(lemma: string, morph = ""): RawHit {
@@ -483,18 +419,15 @@ function compoundParts(lemma: string, morph: string): [CompoundPart, CompoundPar
 }
 
 function writeHit(lemma: string, hit: RawHit, overwrite = false) {
-  const shard = shardOf(lemma);
-  const rec = shards.get(shard) ?? {};
   const k = fold(lemma);
-  const old = rec[k];
-  if (!old) rec[k] = hit;
+  const old = shards.get(k);
+  if (!old) shards.set(k, hit);
   else if (overwrite) {
     // fold() lowercases, so a proper noun and a common noun (Askr, askr) share one record: merge, don't replace.
     const merged: RawHit = { ...old };
     for (const [key, value] of Object.entries(hit)) if (value !== undefined) Object.assign(merged, { [key]: value });
-    rec[k] = merged;
+    shards.set(k, merged);
   }
-  shards.set(shard, rec);
 }
 
 let withGloss = 0;
@@ -522,27 +455,17 @@ for (const lemma of usedLemmas) {
   if (gloss) shortGloss.set(lemma, gloss.length > 70 ? `${gloss.slice(0, 70)}…` : gloss);
   writeHit(lemma, hit, true);
 }
-for (const [s, rec] of shards) {
-  const records = Object.fromEntries(Object.entries(rec).map(([k, hit]) => [k, shardRecord(hit)]));
-  await Bun.write(join(ROOT, "public", "lex", `${s}.json`), JSON.stringify(records));
-}
+await outputs.writeShards("lex", new Map([...shards].map(([k, hit]) => [k, shardRecord(hit)])));
 
-const paraShards = new Map<string, Record<string, Paradigm[]>>();
+const tables = new Map<string, Paradigm[]>();
 for (const paradigm of paradigms.build(wiktionary, (lemma) => dictionaryHit(lemma, lemmaMorph.get(lemma)).z)) {
-  const shard = shardOf(paradigm.lemma);
-  const rec = paraShards.get(shard) ?? {};
-  (rec[fold(paradigm.lemma)] ??= []).push(paradigm);
-  paraShards.set(shard, rec);
+  const k = fold(paradigm.lemma);
+  tables.set(k, [...(tables.get(k) ?? []), paradigm]);
 }
-for (const [s, rec] of paraShards) await Bun.write(join(ROOT, "public", "para", `${s}.json`), JSON.stringify(rec));
+await outputs.writeShards("para", tables);
 
-await Bun.write(
-  join(ROOT, "src", "data", "lexicon.json"),
-  JSON.stringify(
-    [...lemmas.values()].sort((a, b) => b.count - a.count).map((l) => ({ ...l, gloss: shortGloss.get(l.lemma) ?? "" })),
-  ),
-);
+await concordance.write(outputs, (lemma) => shortGloss.get(lemma) ?? "");
 
 console.log(stats.join("\n"));
-console.log(`lemmas in corpus: ${usedLemmas.size}, with a dictionary entry: ${withGloss}; concordance lemmas: ${lemmas.size}`);
+console.log(`lemmas in corpus: ${usedLemmas.size}, with a dictionary entry: ${withGloss}; concordance lemmas: ${concordance.size}`);
 console.timeEnd("total");

@@ -1,20 +1,18 @@
 ---
 import Base from "../layouts/Base.astro";
-import { base, GROUPS, LEXICON, WORKS } from "../lib/site";
+import { lang } from "../lang";
+import { base, GROUPS, LEXICON, site, WORKS } from "../lib/site";
 
 const workTitles = Object.fromEntries(WORKS.map((w) => [w.slug, w.title]));
-const roman = ["I", "II", "III"];
+const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 ---
 
-<Base title="The Edda Reader: the Poetic and Prose Eddas in Old Norse and English" bodyClass="home">
+<Base title={site.homeTitle} bodyClass="home">
   <main class="page wide">
     <header class="hero">
-      <p class="eyebrow">Eddukvæði · Snorra Edda</p>
-      <h1>The Edda Reader</h1>
-      <p class="lede">
-        The Poetic and Prose Eddas in Old Norse with a facing English translation, stanza by stanza. Click any Old Norse
-        word for its lemma, grammar and dictionary entry.
-      </p>
+      <p class="eyebrow">{site.eyebrow}</p>
+      <h1>{site.name}</h1>
+      <p class="lede" set:html={site.lede} />
     </header>
 
     <div class="cards">
@@ -25,7 +23,7 @@ const roman = ["I", "II", "III"];
       </a>
       <a class="card" href={`${base}search/`}>
         <span class="card-title">Search</span>
-        <span class="eyebrow-muted">Old Norse &amp; English · all works</span>
+        <span class="eyebrow-muted">{lang.name} &amp; {site.translation} · all works</span>
         <span class="chev">›</span>
       </a>
       <a class="card" href={`${base}lexicon/`}>
@@ -58,8 +56,7 @@ const roman = ["I", "II", "III"];
     </section>
 
     <footer class="site-foot">
-      Old Norse: Codex Regius, EAE electronic edition (CC BY-SA 4.0); Bugge (1867); Snorra Edda ed. Guðni Jónsson.
-      English: Bellows (1923); Brodeur (1916). Dictionaries: Zoëga (1910), Cleasby–Vigfússon (1874), Wiktionary.
+      <Fragment set:html={site.credits} />
       <a href={`${base}sources/`}>Sources &amp; licences</a>.
     </footer>
   </main>
@@ -67,7 +64,8 @@ const roman = ["I", "II", "III"];
 
 <script>
   const card = document.getElementById("resume") as HTMLAnchorElement | null;
-  const last = localStorage.getItem("edda-last");
+  const LAST_KEY = `${import.meta.env.PUBLIC_READER}-last`;
+  const last = localStorage.getItem(LAST_KEY);
   if (card && last) {
     try {
       const { slug, row } = JSON.parse(last) as { slug: string; row?: string };
@@ -78,7 +76,7 @@ const roman = ["I", "II", "III"];
         card.hidden = false;
       }
     } catch {
-      localStorage.removeItem("edda-last");
+      localStorage.removeItem(LAST_KEY);
     }
   }
 </script>

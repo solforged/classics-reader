@@ -4,9 +4,8 @@ import { lang } from "../../lang";
 import { parseMorph } from "../../lib/morph";
 import { dictionaryHtml } from "../../lib/entry";
 import {
-  base, dictionaryEntry, LEXICON, lemmaSlugs, paradigms, type LemmaStat, workBySlug, WORKS,
+  base, dictionaryEntry, LEXICON, lemmaSlugs, paradigms, site, type LemmaStat, workBySlug, WORKS,
 } from "../../lib/site";
-import { paradigmHtml } from "../../lib/tables";
 import "../../styles/paradigm.css";
 
 export function getStaticPaths() {
@@ -16,7 +15,8 @@ export function getStaticPaths() {
 const { stat } = Astro.props as { stat: LemmaStat };
 const dict = dictionaryEntry(stat.lemma);
 const parts = new Map(dict?.parts?.map((part) => [part, dictionaryEntry(part)]));
-const tables = paradigms(stat.lemma);
+const tableSet = lang.tables;
+const tables = tableSet ? paradigms(stat.lemma) : [];
 const pos = lang.describeMorph(stat.morph).pos;
 const order = new Map(WORKS.map((w, i) => [w.slug, i]));
 const byWork = Object.entries(stat.works).sort((a, b) => order.get(a[0])! - order.get(b[0])!);
@@ -26,8 +26,8 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
 ---
 
 <Base
-  title={`${stat.lemma}${stat.gloss ? `: ${stat.gloss}` : ""} · Old Norse lexicon · The Edda Reader`}
-  description={`${stat.lemma} (${pos}) in the Eddas: ${stat.count} occurrences, dictionary entries and concordance.`}
+  title={`${stat.lemma}${stat.gloss ? `: ${stat.gloss}` : ""} · ${lang.name} lexicon · ${site.name}`}
+  description={`${stat.lemma} (${pos}) in ${site.corpus}: ${stat.count} occurrences, dictionary entries and concordance.`}
   crumbs={[{ href: `${base}lexicon/`, label: "Lexicon" }, { label: stat.lemma }]}
 >
   <main class="page">
@@ -42,10 +42,10 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
     })} />
 
     {
-      tables.map((table, index) => (
+      tableSet && tables.map((table, index) => (
         <section class="lemma-paradigm">
-          <h2>{table.kind === "verb" ? "Conjugation" : "Declension"}</h2>
-          <div set:html={paradigmHtml(table, { id: `lemma-paradigm-${index}` })} />
+          <h2>{tableSet.heading(table.kind)}</h2>
+          <div set:html={tableSet.html(table, { id: `lemma-paradigm-${index}` })} />
         </section>
       ))
     }
@@ -73,7 +73,7 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
               <a class="ref" href={`${base}${slug}/?w=${encodeURIComponent(form(line))}#${row}`}>
                 {workBySlug.get(slug)?.abbr} {row}
               </a>
-              <span lang="non" set:html={mark(line)} />
+              <span lang={lang.code} set:html={mark(line)} />
               {probable ? <span class="tag" title="Not annotated by the edition; all possible analyses agree on this lemma">probable</span> : null}
             </li>
           ))

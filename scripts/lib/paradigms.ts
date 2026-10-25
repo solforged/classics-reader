@@ -1,6 +1,6 @@
 // Extracts Wiktionary tables and joins the reader's edition-annotated forms without changing its analyses.
 import { fold } from "../../src/lang/non/spelling";
-import { morphCells, paradigmKind, type Paradigm, type ParadigmKind } from "../../src/lib/paradigm";
+import { morphCells, paradigmKind, type NorseParadigm as Paradigm, type ParadigmKind } from "../../src/lang/non/paradigm";
 import { parseMorph } from "../../src/lib/morph";
 import { looseDictionaryKey } from "./lexicon";
 import type { Analysis } from "./types";

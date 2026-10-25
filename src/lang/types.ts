@@ -1,6 +1,7 @@
 // What a language pack supplies to the shared reader: spelling keys, labels for its morphology, and the dictionaries
 // its build writes into the lexicon shards. Build-side parsers (sources, tagset conversion, dictionary structuring)
 // live with the pack's build scripts.
+import type { Paradigm } from "../lib/paradigm";
 
 export interface MorphLabel {
   /** Word class, e.g. "noun", "personal pronoun". */
@@ -47,8 +48,26 @@ export interface Dictionary {
   fits?: (morph: string, grammar: string) => boolean;
 }
 
+export interface TableOptions {
+  /** Unique within the page, so native radio switches do not affect another table. */
+  id: string;
+  /** Cells of the clicked reading. */
+  highlight?: readonly string[];
+}
+
+/** Inflection tables (src/lib/paradigm.ts shards) for packs whose build writes them. */
+export interface Tables {
+  /** Table kind for an analysis, or undefined for classes without tables. */
+  kind(morph: string, lemma: string): string | undefined;
+  /** Cells an analysis occupies; an ambiguous one occupies several. */
+  cells(morph: string, lemma: string): string[];
+  /** Heading of the panel's table block, e.g. "Declension". */
+  heading(kind: string): string;
+  html(paradigm: Paradigm, options: TableOptions): string;
+}
+
 export interface LanguagePack {
-  /** ISO 639-3 code, e.g. "non". */
+  /** BCP 47 tag for lang attributes on source-language text, e.g. "non", "sa-Latn". */
   code: string;
   /** English name, e.g. "Old Norse". */
   name: string;
@@ -60,4 +79,6 @@ export interface LanguagePack {
   describeMorph(morph: string): MorphLabel;
   /** Dictionaries in display order. */
   dictionaries: readonly Dictionary[];
+  /** Inflection tables; absent when the pack has none. */
+  tables?: Tables;
 }

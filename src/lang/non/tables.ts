@@ -1,11 +1,6 @@
-import type { Paradigm } from "./paradigm";
-import { paradigmKind } from "./paradigm";
-
-export interface ParadigmOptions {
-  /** Unique within the page, so native radio switches do not affect another table. */
-  id: string;
-  highlight?: readonly string[];
-}
+// Old Norse inflection tables for the word panel and the lemma pages.
+import type { Paradigm } from "../../lib/paradigm";
+import type { TableOptions } from "../types";
 
 const CASES = [["n", "nominative"], ["a", "accusative"], ["d", "dative"], ["g", "genitive"]] as const;
 const GENDERS = [["m", "masculine"], ["f", "feminine"], ["n", "neuter"]] as const;
@@ -19,15 +14,8 @@ const VERB_ROWS = ["1sg", "2sg", "3sg", "1pl", "2pl", "3pl"] as const;
 const esc = (value: string): string => value.replace(/&/g, "&amp;").replace(/</g, "&lt;")
   .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
-/** The reading's word class and exact lemma take precedence over folded spelling matches. */
-export function selectParadigm(records: readonly Paradigm[], lemma: string, morph: string): Paradigm | undefined {
-  const kind = paradigmKind(morph, lemma);
-  return records.find((record) => record.kind === kind && record.lemma === lemma)
-    ?? records.find((record) => record.kind === kind);
-}
-
 /** Shared, framework-free inflection tables. Switches use native radios and CSS; no client script is needed. */
-export function paradigmHtml(paradigm: Paradigm, options: ParadigmOptions): string {
+export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string {
   const highlighted = new Set(options.highlight ?? []);
   const keys = [...new Set([...Object.keys(paradigm.cells), ...Object.keys(paradigm.attested)])];
   const has = (key: string): boolean => Boolean(paradigm.cells[key]?.length)

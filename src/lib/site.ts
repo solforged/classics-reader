@@ -1,36 +1,38 @@
-// Build-time access to the catalog, work data and lexicon for Astro pages.
+// Build-time access to the active site's works, lexicon and shards (generated/<site>/, scripts/core/outputs.ts).
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { GROUPS, WORKS, type WorkDef } from "../../scripts/catalog";
-import type { Work } from "../../scripts/lib/types";
-import lexicon from "../data/lexicon.json";
+import type { LemmaStat, Work } from "../../scripts/lib/types";
 import { lang, shardOf } from "../lang";
+import { site } from "../sites";
+import type { WorkInfo } from "../sites/types";
 import type { DictHit } from "./dict";
 import type { Paradigm } from "./paradigm";
 
-export { GROUPS, WORKS, type WorkDef };
+export { site, type LemmaStat, type WorkInfo };
+export const WORKS = site.works;
+export const GROUPS = site.groups;
 
-const workFiles = import.meta.glob<Work>("../data/works/*.json", { eager: true, import: "default" });
+const DATA = join(process.cwd(), "generated", site.id, "data");
+const PUBLIC = join(process.cwd(), "generated", site.id, "public");
+const readJson = <T,>(path: string): T => JSON.parse(readFileSync(path, "utf8")) as T;
 
+const works = new Map<string, Work>();
 export function loadWork(slug: string): Work {
-  const w = workFiles[`../data/works/${slug}.json`];
-  if (!w) throw new Error(`no data for ${slug}; run bun run data`);
+  let w = works.get(slug);
+  if (!w) {
+    try {
+      w = readJson<Work>(join(DATA, "works", `${slug}.json`));
+    } catch {
+      throw new Error(`no data for ${slug}; run the ${site.id} data build`);
+    }
+    works.set(slug, w);
+  }
   return w;
 }
 
 export const workBySlug = new Map(WORKS.map((w) => [w.slug, w]));
 
-export interface LemmaStat {
-  lemma: string;
-  /** The lemma's first analysis (UD morphology, src/lib/morph.ts). */
-  morph: string;
-  count: number;
-  works: Record<string, number>;
-  occ: [string, string, string, number][];
-  gloss: string;
-}
-
-export const LEXICON = lexicon as LemmaStat[];
+export const LEXICON = readJson<LemmaStat[]>(join(DATA, "lexicon.json"));
 
 /** URL slugs for lemma pages: lowercase, unique even on case-insensitive file systems. */
 export const lemmaSlugs = (() => {
@@ -57,7 +59,7 @@ export function dictionaryEntry(lemma: string): DictHit | undefined {
   let data = shards.get(shard);
   if (!data) {
     try {
-      data = JSON.parse(readFileSync(join(process.cwd(), "public", "lex", `${shard}.json`), "utf8")) as Record<string, DictHit>;
+      data = readJson<Record<string, DictHit>>(join(PUBLIC, "lex", `${shard}.json`));
     } catch {
       data = {}; // no corpus lemma with a dictionary entry starts with this letter
     }
@@ -73,8 +75,7 @@ export function paradigms(lemma: string): Paradigm[] {
   let data = paradigmShards.get(shard);
   if (!data) {
     try {
-      data = JSON.parse(readFileSync(join(process.cwd(), "public", "para", `${shard}.json`), "utf8")) as
-        Record<string, Paradigm[]>;
+      data = readJson<Record<string, Paradigm[]>>(join(PUBLIC, "para", `${shard}.json`));
     } catch {
       data = {};
     }
@@ -83,20 +84,4 @@ export function paradigms(lemma: string): Paradigm[] {
   const records = data[lang.fold(lemma)] ?? [];
   const exact = records.filter((record) => record.lemma === lemma);
   return exact.length ? exact : records;
-}
-
-export function sourceLine(def: WorkDef): { on: string; en: string } {
-  const on = def.snorra
-    ? "Snorra Edda, ed. Guðni Jónsson (via Icelandic Wikisource / Heimskringla.no)"
-    : def.eae && def.bugge
-      ? "Codex Regius, EAE electronic edition (2024); stanzas 30–37 from Bugge (1867)"
-      : def.eae
-        ? "Codex Regius (GKS 2365 4to), EAE electronic edition (2024)"
-        : "Sophus Bugge, Norrœn fornkvæði (1867)";
-  const en = def.bellows
-    ? "Henry Adams Bellows (1923)"
-    : def.brodeur
-      ? "Arthur Gilchrist Brodeur (1916)"
-      : "No public-domain English translation";
-  return { on, en };
 }

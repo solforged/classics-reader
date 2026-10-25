@@ -2,7 +2,8 @@
 import type { EnUnit, OnUnit, Piece } from "../../../scripts/lib/types";
 import Base from "../../layouts/Base.astro";
 import WordPanel from "../../components/WordPanel.astro";
-import { base, lemmaCounts, lemmaSlugs, loadWork, sourceLine, WORKS } from "../../lib/site";
+import { lang } from "../../lang";
+import { base, lemmaCounts, lemmaSlugs, loadWork, site, WORKS } from "../../lib/site";
 
 export function getStaticPaths() {
   return WORKS.map((w) => ({ params: { slug: w.slug } }));
@@ -14,8 +15,7 @@ const def = WORKS[index]!;
 const prev = WORKS[index - 1];
 const next = WORKS[index + 1];
 const work = loadWork(def.slug);
-const src = sourceLine(def);
-const isProse = def.collection === "prose" && def.slug !== "hattatal";
+const isProse = def.prose;
 const hasEnglish = work.rows.some((r) => r.en.length);
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -58,32 +58,35 @@ function enUnit(u: EnUnit): string {
   return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${enText(l)}</div>`).join("")}${notes}</div>`;
 }
 
-const analyses = work.analyses.map(([lemma, morph, s]) => [lemma, morph, s, lemmaSlugs.get(lemma) ?? "", lemmaCounts.get(lemma) ?? 0]);
+// [lemma, morph, source, lemma page slug, corpus count, segmented word]; src/scripts/reader.ts reads these.
+const analyses = work.analyses.map(([lemma, morph, s, word]) => {
+  const a = [lemma, morph, s, lemmaSlugs.get(lemma) ?? "", lemmaCounts.get(lemma) ?? 0];
+  return word ? [...a, word] : a;
+});
 const chapters = isProse ? work.rows.filter((r) => /^\d+$/.test(r.id)).map((r) => r.id) : [];
-const collection = def.collection === "poetic" ? "Poetic Edda" : "Prose Edda";
 const ids = new Set(work.rows.map((r) => r.id));
 ---
 
 <Base
-  title={`${def.title}: ${def.english} · The Edda Reader`}
-  description={`${def.title} (${def.english}) in Old Norse with a facing English translation. ${def.summary}`}
+  title={`${def.title}: ${def.english} · ${site.name}`}
+  description={`${def.title} (${def.english}) in ${lang.name} with a facing ${site.translation} translation. ${def.summary}`}
   crumbs={[{ label: def.title }]}
   bodyClass="reader view-both"
 >
   <main>
     <header class="work-head page">
-      <p class="eyebrow">{collection} · {def.abbr}</p>
+      <p class="eyebrow">{def.collection} · {def.abbr}</p>
       <h1>{def.title}</h1>
       <p class="english">{def.english}</p>
       <p class="summary">{def.summary}</p>
       <dl class="sources">
-        <dt>Old Norse</dt><dd>{src.on}</dd>
-        <dt>English</dt><dd>{src.en}</dd>
+        <dt>{lang.name}</dt><dd>{def.sources.on}</dd>
+        <dt>{site.translation}</dt><dd>{def.sources.en}</dd>
       </dl>
       {
-        work.intro && work.intro.length > 0 && (
+        site.notes && work.intro && work.intro.length > 0 && (
           <details class="intro">
-            <summary>Translator’s introductory note (Bellows)</summary>
+            <summary>{site.notes.introLabel}</summary>
             {work.intro.map((p) => <p set:html={p} />)}
           </details>
         )
@@ -96,15 +99,15 @@ const ids = new Set(work.rows.map((r) => r.id));
           {WORKS.map((w) => <option value={w.slug} selected={w.slug === def.slug}>{w.title}</option>)}
         </select>
         <form id="goto" class="goto">
-          <label for="goto-input">{isProse ? "Chapter" : "Stanza"}</label>
+          <label for="goto-input">{def.unit}</label>
           <input id="goto-input" name="row" inputmode="numeric" autocomplete="off" placeholder={isProse ? "12" : "1"} />
         </form>
         {
           hasEnglish && (
             <div class="segmented" role="group" aria-label="Columns">
-              <button type="button" data-view="on" aria-pressed="false">Old Norse</button>
+              <button type="button" data-view="on" aria-pressed="false">{lang.name}</button>
               <button type="button" data-view="both" aria-pressed="true">Both</button>
-              <button type="button" data-view="en" aria-pressed="false">English</button>
+              <button type="button" data-view="en" aria-pressed="false">{site.translation}</button>
             </div>
           )
         }
@@ -126,7 +129,7 @@ const ids = new Set(work.rows.map((r) => r.id));
             <a class="cite no-print" href={`#${r.id}`} title="Link to this passage">
               {r.id}
             </a>
-            <div class="col on" lang="non" set:html={r.on.map(onUnit).join("")} />
+            <div class="col on" lang={lang.code} set:html={r.on.map(onUnit).join("")} />
             {hasEnglish && <div class="col en" lang="en" set:html={r.en.map(enUnit).join("")} />}
           </section>
         ))
@@ -143,6 +146,9 @@ const ids = new Set(work.rows.map((r) => r.id));
   <script type="application/json" id="analyses" set:html={JSON.stringify(analyses).replace(/</g, "\\u003c")} />
   <script type="application/json" id="notes" set:html={JSON.stringify(work.notes).replace(/</g, "\\u003c")} />
   <script type="application/json" id="row-ids" set:html={JSON.stringify([...ids])} />
+  <script type="application/json" id="site" set:html={JSON.stringify({
+    sourceNotes: site.sourceNotes, noteCredit: site.notes?.credit ?? "",
+  }).replace(/</g, "\\u003c")} />
 </Base>
 
 <script>

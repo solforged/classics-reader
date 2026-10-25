@@ -1,31 +1,36 @@
 ---
 import Base from "../layouts/Base.astro";
-import { WORKS } from "../lib/site";
+import { lang } from "../lang";
+import { site, WORKS } from "../lib/site";
 
 const meta = Object.fromEntries(WORKS.map((w) => [w.slug, { title: w.title, abbr: w.abbr, c: w.collection }]));
+const collections = [...new Set(WORKS.map((w) => w.collection))];
 ---
 
-<Base title="Search · The Edda Reader" crumbs={[{ label: "Search" }]}>
+<Base title={`Search · ${site.name}`} crumbs={[{ label: "Search" }]}>
   <main class="page">
     <p class="eyebrow">Search</p>
-    <h1>Search the Eddas</h1>
+    <h1>Search {site.corpus}</h1>
     <p class="prose-note">
-      Searches the Old Norse and the English of every work. Accents and Old Norse letters are optional: <i>voluspa</i>{" "}
-      finds <i>Völuspá</i>, <i>thorr</i> finds <i>Þórr</i>. All words must occur in the passage; put a phrase in quotes.
+      Searches the {lang.name} and the {site.translation} of every work. <Fragment set:html={site.searchHint} /> All
+      words must occur in the passage; put a phrase in quotes.
     </p>
     <form id="search-form" role="search">
-      <input type="search" id="q" name="q" placeholder="e.g. Yggdrasill, “ask veit ek”, hammer" autocomplete="off" />
+      <input type="search" id="q" name="q" placeholder={site.searchPlaceholder} autocomplete="off" />
       <div class="filters">
         <div class="segmented" role="group" aria-label="Language">
           <button type="button" data-side="all" aria-pressed="true">Both</button>
-          <button type="button" data-side="on" aria-pressed="false">Old Norse</button>
-          <button type="button" data-side="en" aria-pressed="false">English</button>
+          <button type="button" data-side="on" aria-pressed="false">{lang.name}</button>
+          <button type="button" data-side="en" aria-pressed="false">{site.translation}</button>
         </div>
-        <div class="segmented" role="group" aria-label="Collection">
-          <button type="button" data-coll="all" aria-pressed="true">All works</button>
-          <button type="button" data-coll="poetic" aria-pressed="false">Poetic Edda</button>
-          <button type="button" data-coll="prose" aria-pressed="false">Snorri’s Edda</button>
-        </div>
+        {
+          collections.length > 1 && (
+            <div class="segmented" role="group" aria-label="Collection">
+              <button type="button" data-coll="all" aria-pressed="true">All works</button>
+              {collections.map((c) => <button type="button" data-coll={c} aria-pressed="false">{c}</button>)}
+            </div>
+          )
+        }
       </div>
     </form>
     <p id="status" class="prose-note"></p>
@@ -138,7 +143,7 @@ const meta = Object.fromEntries(WORKS.map((w) => [w.slug, { title: w.title, abbr
       if (hits.length >= 300) continue;
       const href = `${BASE}${r.row[0]}/#${encodeURIComponent(r.row[1])}`;
       hits.push(`<li><a class="ref" href="${href}">${esc(m.title)} <span>${esc(r.row[1])}</span></a>
-        ${on ? `<p class="on" lang="non">${on}</p>` : ""}${en ? `<p class="en">${en}</p>` : ""}</li>`);
+        ${on ? `<p class="on" lang="${lang.code}">${on}</p>` : ""}${en ? `<p class="en">${en}</p>` : ""}</li>`);
     }
     results.innerHTML = hits.join("");
     status.textContent = total

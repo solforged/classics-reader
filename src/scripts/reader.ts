@@ -3,23 +3,26 @@ import { lang, shardOf } from "../lang";
 import type { DictHit } from "../lib/dict";
 import { dictionaryHtml } from "../lib/entry";
 import { expandMorph, parseMorph } from "../lib/morph";
-import type { Paradigm } from "../lib/paradigm";
-import { morphCells } from "../lib/paradigm";
-import { paradigmHtml, selectParadigm } from "../lib/tables";
+import { selectParadigm, type Paradigm } from "../lib/paradigm";
 
-type ClientAnalysis = [lemma: string, morph: string, source: "e" | "a" | "w" | "n", slug: string, count: number];
+/** [lemma, morph, source, lemma page slug, corpus count, segmented word] (see src/pages/[slug]/index.astro). */
+type ClientAnalysis = [
+  lemma: string, morph: string, source: "e" | "a" | "w" | "n", slug: string, count: number, word?: string,
+];
 
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const json = <T,>(id: string): T => JSON.parse(document.getElementById(id)?.textContent ?? "null") as T;
 const analyses = json<ClientAnalysis[]>("analyses");
 const notes = json<Record<string, string>>("notes");
 const rowIds = new Set(json<string[]>("row-ids"));
+const site = json<{ sourceNotes: Record<string, string>; noteCredit: string }>("site");
+const READER = import.meta.env.PUBLIC_READER;
 const text = document.querySelector<HTMLElement>(".text")!;
 const slug = text.dataset.slug!;
 const abbr = text.dataset.abbr!;
 
 // ------------------------------------------------------------ view toggle
-const VIEW_KEY = "edda-view";
+const VIEW_KEY = `${READER}-view`;
 function setView(view: string) {
   document.body.classList.remove("view-on", "view-both", "view-en");
   document.body.classList.add(`view-${view}`);
@@ -90,7 +93,7 @@ function toast(msg: string) {
 const seen = new IntersectionObserver(
   (entries) => {
     const top = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-    if (top) localStorage.setItem("edda-last", JSON.stringify({ slug, row: (top.target as HTMLElement).id }));
+    if (top) localStorage.setItem(`${READER}-last`, JSON.stringify({ slug, row: (top.target as HTMLElement).id }));
   },
   { rootMargin: "-20% 0px -70% 0px" },
 );
@@ -135,13 +138,6 @@ function paradigms(lemma: string): Promise<Paradigm[]> {
   }
   return p.then((data) => data[lang.fold(lemma)] ?? []);
 }
-
-const SOURCE_NOTE: Record<ClientAnalysis[2], string> = {
-  e: "",
-  a: `<span class="badge" title="Not annotated here; this spelling is annotated this way elsewhere in the Codex Regius edition">candidate</span>`,
-  w: `<span class="badge" title="Not annotated here; candidate from Wiktionary inflection tables">candidate</span>`,
-  n: `<span class="badge" title="Not annotated here; read as a proper name from its spelling, with no grammatical analysis">name</span>`,
-};
 
 function readingsHtml(readings: ClientAnalysis[]): string {
   const seen = new Set<string>();
@@ -218,10 +214,14 @@ async function showWord(el: HTMLElement) {
   const groups = [...grouped.values()];
   const lemmasShown = new Set(items.map((item) => item[0]));
   const editionLemmas = new Set(items.filter((item) => item[2] === "e").map((item) => item[0]));
-  const enclitic = editionLemmas.size > 1;
+  // A sandhi or compound token lists its words in order; an Old Norse enclitic form shows as several lemmas.
+  const segmented = items.filter((item) => item[5]).length;
+  const combined = segmented || editionLemmas.size;
+  const enclitic = combined > 1;
   const candidates = items.some((item) => item[2] === "a" || item[2] === "w");
   const blocks = groups.map((readings, i) => {
     const [lemma, , source, lemmaSlug, count] = readings[0]!;
+    const words = [...new Set(readings.map((reading) => reading[5]).filter(Boolean))];
     const morphs = readings.map((reading) => lang.describeMorph(reading[1]));
     const pos = [...new Set(morphs.map((m) => m.pos))].join(" / ");
     const props = [...new Set(morphs.flatMap((m) => m.props))];
@@ -235,8 +235,9 @@ async function showWord(el: HTMLElement) {
     const dictionaryBlock = i > 0 && candidates && !enclitic
       ? `<details class="candidate-dictionary"><summary>Dictionary</summary>${slot}</details>`
       : slot;
+    const seg = words.length ? `<div class="seg" lang="${lang.code}">${esc(words.join(" / "))}</div>` : "";
     return `<div class="an" data-i="${i}">
-      <div><span class="lemma">${lemmaHtml}</span> <span class="pos">${esc(pos)}</span>${SOURCE_NOTE[source]}</div>
+      ${seg}<div><span class="lemma">${lemmaHtml}</span> <span class="pos">${esc(pos)}</span>${site.sourceNotes[source] ?? ""}</div>
       ${readingsHtml(readings)}
       ${props.length ? `<div class="props">${esc(props.join(" · "))}</div>` : ""}
       ${occurs}
@@ -245,16 +246,16 @@ async function showWord(el: HTMLElement) {
     </div>`;
   });
   const note = enclitic
-    ? `<p class="props">This written form combines ${editionLemmas.size} grammatical words.</p>`
+    ? `<p class="props">This written form combines ${combined} grammatical words.</p>`
     : candidates
       ? `<p class="props">Possible analyses (the edition does not annotate this word):</p>`
       : "";
   body.innerHTML = note + blocks.join("");
-  const [hits, tables] = await Promise.all([
+  const [hits, tableRecords] = await Promise.all([
     Promise.all([...lemmasShown].map(async (lemma) => [lemma, await dictionary(lemma)] as const)).then(
       (entries) => new Map(entries),
     ),
-    Promise.all([...lemmasShown].map(async (lemma) => [lemma, await paradigms(lemma)] as const)).then(
+    Promise.all([...lemmasShown].map(async (lemma) => [lemma, lang.tables ? await paradigms(lemma) : []] as const)).then(
       (entries) => new Map(entries),
     ),
   ]);
@@ -265,13 +266,13 @@ async function showWord(el: HTMLElement) {
     const index = Number(block.dataset.i);
     const readings = groups[index]!;
     const [lemma, morph, source] = readings[0]!;
-    const paradigm = selectParadigm(tables.get(lemma) ?? [], lemma, morph);
-    if (paradigm) {
-      const highlight = readings.flatMap((reading) => morphCells(reading[1], reading[0]));
-      const heading = paradigm.kind === "verb" ? "Conjugation" : "Declension";
+    const tables = lang.tables;
+    const paradigm = tables && selectParadigm(tableRecords.get(lemma) ?? [], lemma, tables.kind(morph, lemma));
+    if (tables && paradigm) {
+      const highlight = readings.flatMap((reading) => tables.cells(reading[1], reading[0]));
       block.querySelector(".paradigm-slot")!.outerHTML =
-        `<details class="paradigm-details"${index === 0 ? " open" : ""}><summary>${heading}</summary>`
-        + paradigmHtml(paradigm, { id: `word-paradigm-${index}`, highlight }) + "</details>";
+        `<details class="paradigm-details"${index === 0 ? " open" : ""}><summary>${tables.heading(paradigm.kind)}</summary>`
+        + tables.html(paradigm, { id: `word-paradigm-${index}`, highlight }) + "</details>";
     } else {
       block.querySelector(".paradigm-slot")!.remove();
     }
@@ -284,7 +285,7 @@ function showNote(key: string) {
   selected?.classList.remove("sel");
   selected = null;
   title.textContent = "Translator’s note";
-  body.innerHTML = `<div class="wp-note">${notes[key] ?? ""}</div><p class="props">Henry Adams Bellows, The Poetic Edda (1923).</p>`;
+  body.innerHTML = `<div class="wp-note">${notes[key] ?? ""}</div><p class="props">${site.noteCredit}</p>`;
   panel.hidden = false;
   document.body.classList.add("panel-open");
 }
