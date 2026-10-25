@@ -68,14 +68,17 @@ export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string 
     choices: readonly (readonly [string, string])[],
     selected: string,
     content: (value: string) => string,
+    holdsReading = (value: string) => [...highlighted].some((key) => key.startsWith(`${value}|`)),
   ): string {
     if (choices.length === 1) return content(choices[0]![0]);
     return `<div class="para-tabs" role="group" aria-label="${esc(name)}">`
       + choices.map(([value, label]) => {
         const id = `${options.id}-${value}`;
+        const marker = holdsReading(value) ? '<span class="para-tab-reading"><span aria-hidden="true">·</span>'
+          + '<span class="para-sr"> has the clicked reading</span></span>' : "";
         return `<label class="para-tab" for="${esc(id)}"><input type="radio" id="${esc(id)}" `
           + `name="${esc(options.id)}" value="${esc(value)}"${value === selected ? " checked" : ""}>`
-          + `<span>${esc(label)}</span></label><div class="para-variant">${content(value)}</div>`;
+          + `<span class="para-tab-chip">${esc(label)}${marker}</span></label><div class="para-variant">${content(value)}</div>`;
       }).join("") + "</div>";
   }
 
@@ -159,8 +162,11 @@ export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string 
         + ["s", "d", "p"].map((number) => cell(`|${person}${code}${number}`)).join("") + "</tr>").join(""));
   }
 
+  const indeclinable = paradigm.kind === "adj" && paradigm.label === "indeclinable adjective";
   let html: string;
-  if (paradigm.kind === "noun") {
+  if (indeclinable) {
+    html = "<p>Indeclinable: the same form in every case, gender and number.</p>";
+  } else if (paradigm.kind === "noun") {
     const definite = keys.some((key) => /^\|[nadg][sp]d$/.test(key) && has(key));
     const open = [...highlighted].some((key) => /^\|[nadg][sp]d$/.test(key));
     html = noun("i") + (definite ? `<details class="para-article"${open ? " open" : ""}>`
@@ -175,22 +181,31 @@ export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string 
       .filter(([mode]) => mode === "act" || hasPrefix(`${mode}|`));
     const selected = voices.find(([mode]) => [...highlighted].some((key) => key.startsWith(`${mode}|`)))?.[0]
       ?? (hasPrefix("act|") ? "act" : voices.at(-1)![0]);
-    html = tabs("Verb voice", voices, selected, verb);
+    html = tabs("Verb voice", voices, selected, verb, (mode) => [...highlighted].some((key) =>
+      key.startsWith(`${mode}|`) || mode === "act" && key.startsWith("pp_")));
   } else if (paradigm.kind === "personal") {
     const persons = PERSONS.filter(([person]) => hasPrefix(`|${person}`));
     const selected = persons.find(([person]) => [...highlighted].some((key) => key.startsWith(`|${person}`)))?.[0]
       ?? persons.find(([person]) => person === DEFAULT_PERSON[paradigm.lemma])?.[0]
       ?? persons[0]?.[0] ?? "1";
-    html = tabs("Personal pronoun", persons, selected, personal);
+    html = tabs("Personal pronoun", persons, selected, personal,
+      (person) => [...highlighted].some((key) => key.startsWith(`|${person}`)));
   } else {
     html = genderTables("");
   }
   const label = paradigm.label ? `<p class="para-label">${esc(paradigm.label)}</p>` : "";
-  const source = paradigm.source === "edition"
+  const unattested = "Forms without a dot are not attested in the annotated poems; check them against a grammar.";
+  // Compounds note their head as "declined like X", whether or not Zoëga lists the compound itself.
+  const head = paradigm.note?.match(/^declined like (.+)$/)?.[1];
+  const source = indeclinable
+    ? `${paradigm.source === "zoega" ? "Zoëga" : "Wiktionary"} lists it as indeclinable.`
+    : head
+      ? `Generated ${paradigm.source === "zoega" ? "from Zoëga’s entry " : ""}by declining the compound like `
+        + `<i lang="non">${esc(head)}</i>. ${unattested}`
+    : paradigm.source === "edition"
     ? "Forms attested in the Eddas; no full table available"
     : paradigm.source === "zoega"
-      ? `Generated from Zoëga’s entry${paradigm.note ? `: <span lang="non">${esc(paradigm.note)}</span>` : "."} `
-        + "Forms without a dot are not attested in the annotated poems; check them against a grammar."
+      ? `Generated from Zoëga’s entry${paradigm.note ? `: <span lang="non">${esc(paradigm.note)}</span>` : "."} ${unattested}`
       : paradigm.source === "name"
         ? `Generated from the name’s ending and gender${paradigm.note ? ` (${esc(paradigm.note)})` : ""}. `
           + "Forms without a dot are not attested in the annotated poems; check them against a grammar."

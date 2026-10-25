@@ -24,11 +24,12 @@ export interface NorseParadigm extends Paradigm {
   /** Inflection class as Wiktionary gives it, e.g. "strong a-stem", "strong verb, class 5". */
   label?: string;
   /**
-   * "wiktionary": full table from Wiktionary; "zoega": generated from Zoëga's headword and grammar note;
-   * "name": generated from a proper name's ending and gender; "edition": only forms attested in the edition.
+   * "wiktionary": table or indeclinability from Wiktionary; "zoega": from Zoëga's headword and grammar note;
+   * "compound": declined like a dictionary head; "name": from a proper name's ending and gender;
+   * "edition": only forms attested in the edition.
    */
-  source: "wiktionary" | "zoega" | "name" | "edition";
-  /** For generated tables, the Zoëga grammar note or the proper-name inflection rule used. */
+  source: "wiktionary" | "zoega" | "compound" | "name" | "edition";
+  /** The Zoëga grammar note, compound head or proper-name inflection rule used. */
   note?: string;
 }
 

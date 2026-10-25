@@ -2,7 +2,7 @@
 import { DOMParser, type Element } from "@xmldom/xmldom";
 import type { OnUnit, Piece, UnitKind } from "./types";
 import type { AnalysisTable } from "./analyses";
-import { menotaToUd } from "./menota";
+import { menotaLemma, menotaToUd } from "./menota";
 
 const TEI = "http://www.tei-c.org/ns/1.0";
 const ME = "http://www.menota.org/ns/1.0";
@@ -28,6 +28,11 @@ export function parseEae(xml: string, entityText: string): Map<string, El> {
   const divs = new Map<string, El>();
   const bodyEl = doc.getElementsByTagNameNS(TEI, "body")[0];
   if (!bodyEl) throw new Error("EAE XML has no <body>");
+  // Normalize before either the form index or a work's analyses reads the annotation.
+  for (const word of Array.from(bodyEl.getElementsByTagNameNS(TEI, "w")) as El[]) {
+    const lemma = word.getAttribute("lemma");
+    if (lemma) word.setAttribute("lemma", menotaLemma(lemma, word.getAttributeNS(ME, "msa") || ""));
+  }
   for (const div of children(bodyEl)) {
     if (div.localName === "div" && div.getAttribute("n")) {
       divs.set(div.getAttributeNS(XML_NS, "id") || div.getAttribute("xml:id") || "", div);

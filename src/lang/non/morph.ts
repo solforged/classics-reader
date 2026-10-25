@@ -73,12 +73,14 @@ export function describeMorph(morph: string, options: { tableLabel?: string } = 
     } else form.push(v("Person"), v("Number"), v("Tense"), v("Mood"), middle);
     if (feats.InflClass && !options.tableLabel) props.push(`${v("InflClass")} verb`);
   } else {
+    const definite = feats.Definite?.length === 1 ? feats.Definite[0] : undefined;
+    if (upos === "ADJ" && !has("Degree", "Cmp") && definite) {
+      form.push(definite === "Def" ? "weak" : "strong");
+    }
     if (noun) props.push(v("Gender"));
     else form.push(v("Degree"), v("Gender"));
     if (upos === "PRON" && feats.Person) form.unshift(v("Person"));
     form.push(v("Case"), v("Number"));
-    const definite = feats.Definite?.length === 1 ? feats.Definite[0] : undefined;
-    if (upos === "ADJ" && definite) form.push(definite === "Def" ? "weak" : "strong");
     if (noun && definite === "Def") form.push("with suffixed article");
     props.push(v("Govern"));
   }

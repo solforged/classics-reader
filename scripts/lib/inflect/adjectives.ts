@@ -194,6 +194,19 @@ function checkedTable(
   return { cells, label, note: note.text };
 }
 
+/** Nominal cells of a verb's attested -inn participle, not the lexical adjective's variable accusative. */
+export function inflectPastParticiple(headword: string): Cells | undefined {
+  headword = spelling(headword.toLowerCase());
+  if (!headword.endsWith("inn") || /(?:ll|v)inn$/.test(headword)) return undefined;
+  const s = stems(headword, {});
+  if (s?.pattern !== "inn") return undefined;
+  s.vowel = s.vowel.replace(/nnn$/, "nn");
+  s.u = uUmlaut(s.vowel);
+  s.nominativePlural = s.vowel + "ir";
+  s.accusative = [headword];
+  return positive(headword, s);
+}
+
 /** Generate only inflecting adjectives with a recognized Zoëga grammar note and consistent edition evidence. */
 export function inflectAdjective(
   headword: string,
@@ -206,10 +219,21 @@ export function inflectAdjective(
   const note = notes[0]!;
   const parts = principalParts(note, headword);
   if (!parts) return undefined;
-  const degree = entry.d.join(" ").replace(/<[^>]+>/g, "").match(/\ba\.\s*(compar\.|superl\.)/)?.[1];
+  const text = spelling(entry.d.join(" ").replace(/<[^>]+>/g, ""));
+  const degree = text.match(/\ba\.\s*(compar\.|superl\.)/)?.[1];
   if (degree === "compar.") {
     const cells = comparative(headword);
-    return cells ? checkedTable(cells, "comparative adjective", note, attested) : undefined;
+    if (!cells) return undefined;
+    const printed = text.match(new RegExp(`\\ba\\.\\s*compar\\.\\s*\\(answering to superl\\.\\s+(${FORM})\\)`))?.[1];
+    // Contracted -str superlatives match all 25 complete Wiktionary comparison tables in this class.
+    const superlatives: Cells = {};
+    for (const form of parts.superlative ?? (printed ? [printed] : [])) {
+      if (!/(?<!a)str$/.test(form)) continue;
+      const sup = stems(form, {});
+      if (sup) Object.assign(superlatives, positive(form, sup, "str_sup", "wk_sup"));
+    }
+    if (checkedTable(superlatives, "superlative adjective", note, attested)) Object.assign(cells, superlatives);
+    return checkedTable(cells, "comparative adjective", note, attested);
   }
   const s = stems(headword, parts);
   if (!s) return undefined;

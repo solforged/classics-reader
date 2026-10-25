@@ -52,7 +52,8 @@ export function grammarNotes(entry: DictEntry): GrammarNote[] {
       }
     }
     const pos = rest.match(POS)?.[0] ?? "";
-    const printed = `${paren ? `(${paren})` : ""}${paren && pos ? ", " : ""}${pos}`;
+    const indeclinable = rest.slice(pos.length).match(/^\s*indecl\./)?.[0].trim() ?? "";
+    const printed = `${paren ? `(${paren})` : ""}${paren && pos ? ", " : ""}${pos}${indeclinable ? ` ${indeclinable}` : ""}`;
     return { paren, pos, text: printed };
   });
 }

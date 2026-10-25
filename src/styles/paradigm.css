@@ -111,21 +111,37 @@
   overflow: hidden;
   opacity: 0;
 }
-.para-tab span {
+.para-tab > .para-tab-chip {
   display: block;
   padding: 0.15rem 0.4rem;
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--muted);
 }
-.para-tab:has(input:checked) span {
+.para-tab:has(input:checked) > .para-tab-chip {
   color: var(--accent);
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 7%, transparent);
 }
-.para-tab:has(input:focus-visible) span {
+.para-tab:has(input:focus-visible) > .para-tab-chip {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+/* A filled dot on a tab whose table holds another clicked reading. */
+.para-tab-reading {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-left: 0.35rem;
+  vertical-align: 0.1em;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.para-tab-reading > [aria-hidden] {
+  display: none;
+}
+.para-tab:has(input:checked) .para-tab-reading {
+  display: none;
 }
 .para-variant {
   flex-basis: 100%;

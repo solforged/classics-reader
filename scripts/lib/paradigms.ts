@@ -6,10 +6,11 @@ import { looseDictionaryKey } from "./lexicon";
 import type { Analysis } from "./types";
 import type { DictEntry } from "../../src/lib/dict";
 import { inflectAdjective } from "./inflect/adjectives";
+import { CompoundAdjectives } from "./inflect/compounds";
 import { inflectNoun } from "./inflect/nouns";
 import { inflectName } from "./inflect/names";
 import { inflectVerb } from "./inflect/verbs";
-import type { Generated } from "./inflect/zoega";
+import { grammarNotes, type Generated } from "./inflect/zoega";
 
 const GENERATORS: Partial<Record<ParadigmKind, typeof inflectNoun>> = {
   noun: inflectNoun,
@@ -47,6 +48,8 @@ interface WiktTemplate {
 export interface WiktEntry {
   word: string;
   pos: string;
+  tags?: string[];
+  senses?: { tags?: string[] }[];
   forms?: WiktForm[];
   inflection_templates?: WiktTemplate[];
   head_templates?: WiktTemplate[];
@@ -178,7 +181,7 @@ function inflectionLabel(entry: WiktEntry, kind: ParadigmKind, cells: Paradigm["
   return kind === "personal" ? "personal pronouns" : "pronominal declension";
 }
 
-/** Wiktionary table of one entry, or undefined when it has none. */
+/** Wiktionary table or explicit indeclinability of one entry, or undefined when it has neither. */
 export function extract(entry: WiktEntry): Candidate | undefined {
   const kind: ParadigmKind | undefined = entry.pos === "noun" || entry.pos === "name" ? "noun"
     : entry.pos === "adj" ? "adj" : entry.pos === "verb" ? "verb"
@@ -250,7 +253,12 @@ export function extract(entry: WiktEntry): Candidate | undefined {
     if (kind === "verb" && formTables > 1 && !declined) tags = [...tags, "mediopassive"];
     for (const key of taggedCells(kind, tags)) addForms(cells, key, form.form);
   }
-  if (!Object.keys(cells).length) return undefined;
+  if (!Object.keys(cells).length) {
+    const indeclinable = kind === "adj" && (entry.tags?.includes("indeclinable")
+      || entry.head_templates?.some((t) => t.name === "head" && t.args["3"] === "indeclinable")
+      || Boolean(entry.senses?.length && entry.senses.every((sense) => sense.tags?.includes("indeclinable"))));
+    return indeclinable ? { word: entry.word, kind, label: "indeclinable adjective", cells } : undefined;
+  }
   return { word: entry.word, kind, label: inflectionLabel(entry, kind, cells), cells };
 }
 
@@ -359,6 +367,19 @@ export class ParadigmBuilder {
         }
       }
     }
+    const compounds = new CompoundAdjectives(new Set([...exact.values()].flat()), (word) => zoegaFor?.(word));
+    const comparisons = new Map<string, Candidate[]>();
+    const formKey = (form: string) => fold(form.replace(/ǿ/g, "œ"));
+    for (const candidates of exact.values()) for (const candidate of candidates) {
+      if (candidate.kind !== "adj" || !candidate.cells["str|nsm"]?.length
+        || !candidate.cells["str_sup|nsm"]?.length) continue;
+      for (const form of candidate.cells["comp|nsm"] ?? []) {
+        if (formKey(form) === formKey(candidate.word)) continue;
+        const parents = comparisons.get(formKey(form)) ?? [];
+        if (!parents.includes(candidate)) parents.push(candidate);
+        comparisons.set(formKey(form), parents);
+      }
+    }
     const out: Paradigm[] = [];
     for (const [lemma, kinds] of this.readings) for (const [kind, attested] of kinds) {
       // As in dictionary lookup, a common noun is not a table for a capitalized proper name.
@@ -368,6 +389,29 @@ export class ParadigmBuilder {
       if (!candidates.length) {
         candidates = loose.get(looseDictionaryKey(lemma))
           ?.filter((c) => c.kind === kind && (!proper || /^\p{Lu}/u.test(c.word))) ?? [];
+      }
+      if (kind === "adj") {
+        let parent: Candidate | undefined;
+        let parentMatches = -1;
+        let parentFrequency = -1;
+        for (const candidate of comparisons.get(formKey(lemma)) ?? []) {
+          let matches = 0;
+          for (const [cell, forms] of Object.entries(attested)) {
+            if (!/^(?:str|wk)_sup\|/.test(cell)) continue;
+            const expected = new Set(candidate.cells[cell]?.map(formKey));
+            for (const [form, count] of Object.entries(forms)) if (expected.has(formKey(form))) matches += count;
+          }
+          const own = this.readings.get(candidate.word)?.get("adj") ?? {};
+          const frequency = Object.values(own).reduce((sum, forms) =>
+            sum + Object.values(forms).reduce((n, count) => n + count, 0), 0);
+          if (matches > parentMatches || matches === parentMatches && (frequency > parentFrequency
+            || frequency === parentFrequency && (!parent || candidate.word < parent.word))) {
+            parent = candidate;
+            parentMatches = matches;
+            parentFrequency = frequency;
+          }
+        }
+        if (parent) candidates = [parent];
       }
       let best: Candidate | undefined;
       let bestScore = -1;
@@ -406,11 +450,21 @@ export class ParadigmBuilder {
           ? inflectName(lemma, name.gender, name.plural && !name.singular, attested) : undefined;
         if (named) out.push({ lemma, kind, ...named, attested: marks, source: "name" });
         else {
+          const indeclinable = kind === "adj" && !proper ? zoegaFor?.(lemma)?.flatMap(grammarNotes)
+            .find((note) => note.pos === "a." && /\bindecl\./.test(note.text)) : undefined;
+          if (indeclinable) {
+            out.push({ lemma, kind, label: "indeclinable adjective", cells: {}, attested: marks,
+              source: "zoega", note: indeclinable.text });
+            continue;
+          }
           const generated = zoegaFor && !proper ? generate(lemma, kind, attested, zoegaFor) : undefined;
+          const compound = !generated && kind === "adj" && !proper ? compounds.inflect(lemma, attested) : undefined;
           // The citation-form marker duplicates a declined participle's nominal cell, not a second attestation.
           const cells = Object.keys(attested);
           const distinct = cells.filter((cell) => cell !== "act|past_part" || !cells.some((key) => key.startsWith("pp_")));
           if (generated) out.push({ lemma, kind, ...generated, attested: marks, source: "zoega" });
+          else if (compound) out.push({ lemma, kind, ...compound, attested: marks,
+            source: zoegaFor?.(lemma)?.length ? "zoega" : "compound" });
           else if (distinct.length >= 2) {
             out.push({ lemma, kind, cells: {}, attested: marks, source: "edition" });
           }

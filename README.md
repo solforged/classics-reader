@@ -46,7 +46,10 @@ Inflection tables count each word of an enclitic group by its own written part,
 so *skulu*'s table lists *skal* for *skalat*, not the whole written form. Verb
 tables open the block holding the clicked form, decline past participles where
 Wiktionary gives the participle's table, and note the text's spelling when the
-table spells the form differently (*skoðask*, here *skoðast*).
+table spells the form differently (*skoðask*, here *skoðast*). Comparatives the
+edition files under their own headword (*betri*, *meiri*) use the positive's
+table, so superlatives such as *beztr* land on a cell, and compound adjectives
+without a table are declined like their last part (*ósnjallr* like *snjallr*).
 
 ## The Gītā Reader
 

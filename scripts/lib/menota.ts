@@ -11,6 +11,34 @@
 // ("cA cD cG") become comma-joined alternatives.
 import { formatMorph } from "../../src/lib/morph";
 
+/** Numeric headwords in the edition stand for different cardinal and ordinal words. */
+const NUMERAL_LEMMAS: Record<string, readonly [cardinal: string, ordinal?: string]> = {
+  "2": ["tveir", "annarr"],
+  "3": ["þrír", "þriði"],
+  "4": ["fjórir", "fjórði"],
+  "5": ["fimm", "fimmti"],
+  "6": ["sex", "sétti"],
+  "7": ["sjau", "sjaundi"],
+  "8": ["átta", "átti"],
+  "9": ["níu", "níundi"],
+  "10": ["tíu", "tíundi"],
+  "11": ["ellifu", "ellifti"],
+  "12": ["tólf", "tólfti"],
+  "13": ["þrettán", "þrettándi"],
+  "14": ["fjórtán", "fjórtándi"],
+  "15": ["fimmtán", "fimmtándi"],
+  "16": ["sextán", "sextándi"],
+  "17": ["sjautján", "sjautjándi"],
+  "18": ["átján", "átjándi"],
+  "30": ["þrír tigir"],
+  "100": ["hundrað"],
+};
+
+export function menotaLemma(lemma: string, msa: string): string {
+  const numeral = NUMERAL_LEMMAS[lemma];
+  return (numeral?.[/\bxNO\b/.test(msa) ? 1 : 0] ?? lemma).normalize("NFC");
+}
+
 const WORD_CLASS: Record<string, [upos: string, feats?: Record<string, string>]> = {
   NC: ["NOUN"],
   NP: ["PROPN"],
