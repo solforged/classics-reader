@@ -49,7 +49,9 @@ bun run preview
 
 - `scripts/catalog.ts`: the works, their groups and which source sections make up each side.
 - `scripts/lib/`: parsers (`eae.ts`, `bugge.ts`, `bellows.ts`, `snorra.ts`), the form index
-  (`analyses.ts`), dictionary loading (`lexicon.ts`) and Bellows's name index (`names.ts`).
+  (`analyses.ts`), dictionary loading (`lexicon.ts`), Bellows's name index (`names.ts`), Wiktionary tables
+  (`paradigms.ts`) and tables generated from Zoëga's grammar notes (`inflect/`, validated pattern by pattern
+  against Wiktionary).
 - `src/lib/entry.ts`, `src/lib/tables.ts`: render dictionary entries and inflection tables for the
   word panel and the lemma pages; `src/lib/paradigm.ts` defines the table cells.
 - `scripts/build-data.ts`: builds every output; fails if an alignment misses or repeats a unit.

@@ -496,7 +496,7 @@ for (const lemma of usedLemmas) {
 for (const [s, rec] of shards) await Bun.write(join(ROOT, "public", "lex", `${s}.json`), JSON.stringify(rec));
 
 const paraShards = new Map<string, Record<string, Paradigm[]>>();
-for (const paradigm of paradigms.build(wiktionary)) {
+for (const paradigm of paradigms.build(wiktionary, (lemma) => dictionaryHit(lemma, lemmaMsa.get(lemma)).z)) {
   const shard = shardOf(paradigm.lemma);
   const rec = paraShards.get(shard) ?? {};
   (rec[fold(paradigm.lemma)] ??= []).push(paradigm);

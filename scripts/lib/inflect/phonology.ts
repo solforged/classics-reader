@@ -20,10 +20,11 @@ export function syllables(word: string): number {
 }
 
 /**
- * u-umlaut before an ending with u (or a lost u): stressed a → ö (land → lönd); in a second syllable a → u and the
- * stressed a → ö (hérað → héruð, kallaðr → kölluð). Only short a changes; á, au and other vowels are untouched.
+ * u-umlaut of the last stressed a → ö (land → lönd, bardag → bardög), without mutating a compound's prefix.
+ * For a known unstressed final syllable, pass true: its a → u and the preceding a → ö (kallað → kölluð).
+ * Only single short a changes; á, au and other vowel groups are untouched.
  */
-export function uUmlaut(stem: string): string {
+export function uUmlaut(stem: string, unstressedLast = false): string {
   const chars = [...stem];
   const groups: [number, number][] = [];
   for (let i = 0; i < chars.length; ) {
@@ -37,12 +38,12 @@ export function uUmlaut(stem: string): string {
     i = j;
   }
   const single = (g: [number, number]) => g[1] - g[0] === 1 && chars[g[0]] === "a";
-  if (groups.length >= 2) {
-    const last = groups[groups.length - 1]!;
-    if (single(last)) chars[last[0]] = "u";
-    const first = groups[groups.length - 2]!;
-    if (single(first)) chars[first[0]] = "ö";
-  } else if (groups.length === 1 && single(groups[0]!)) chars[groups[0]![0]] = "ö";
+  const last = groups.at(-1);
+  if (last && single(last)) {
+    chars[last[0]] = unstressedLast && groups.length > 1 ? "u" : "ö";
+    const previous = groups.at(-2);
+    if (unstressedLast && previous && single(previous)) chars[previous[0]] = "ö";
+  }
   return chars.join("");
 }
 
@@ -71,25 +72,29 @@ export function iUmlaut(stem: string): string {
 }
 
 /**
- * Nominative -r after a stem: assimilated after a long vowel + l/n (stóll, steinn), after s (íss, lauss) and r (bjórr),
- * dropped after a consonant + l/n/s/r is not added (fagr has no -r ending: fag-r is the stem).
+ * Nominative -r: assimilated after long-vowel l/n (stóll, steinn) and after s/r (íss, bjórr).
+ * Single l/n after a consonant drop the ending (jarl, forn); doubled l/n retain it (fullr, þunnr).
  */
 export function withR(stem: string): string {
   const last = stem.at(-1) ?? "";
   const before = stem.at(-2) ?? "";
-  if ((last === "l" || last === "n") && isVowel(before) && /[áéíóúýæœei]|au|ey/.test(stem.slice(-3, -1))) return stem + last;
+  if ((last === "l" || last === "n") && isVowel(before) && /[áéíóúýæœ]|ei|au|ey/.test(stem.slice(-3, -1))) {
+    return stem + last;
+  }
   if (last === "s" || last === "r") return isVowel(before) ? stem + last : stem;
+  if ((last === "l" || last === "n") && !isVowel(before) && before !== last) return stem;
   return `${stem}r`;
 }
 
-/** Neuter -t: ð/d/t merge (góðr → gott, harðr → hart), long vowels shorten before tt (hár → hátt). */
+/** Neuter -t: fríð → frítt, harð → hart, blind → blint; t merges and geminate p/g/s/r simplify. */
 export function withT(stem: string): string {
-  if (stem.endsWith("ð")) {
+  if (stem.endsWith("ð") || stem.endsWith("d")) {
     const s = stem.slice(0, -1);
-    return isVowel(s.at(-1)) ? `${shorten(s)}tt` : `${s}t`;
+    return isVowel(s.at(-1)) ? `${s}tt` : `${s}t`;
   }
-  if (stem.endsWith("tt") || stem.endsWith("t")) return stem.endsWith("tt") ? stem : `${stem}t`;
+  if (stem.endsWith("t")) return isVowel(stem.at(-2)) ? `${stem}t` : stem;
   if (isVowel(stem.at(-1))) return `${stem}tt`;
+  if (/([pgsr])\1$/.test(stem)) return `${stem.slice(0, -1)}t`;
   return `${stem}t`;
 }
 
@@ -105,4 +110,40 @@ export function syncopate(stem: string): string {
   const at = lastVowelGroup(stem);
   if (at <= 0 || syllables(stem) < 2) return stem;
   return stem.slice(0, at) + stem.slice(at + 1);
+}
+
+/** Strong-past second-person -t: bað → bazt, bauð/reið → bautt/reitt, batt → bazt, brá → brátt. */
+export function withPastT(stem: string): string {
+  if (stem.endsWith("st")) return `${stem}t`;
+  if (stem.endsWith("tt")) return `${stem.slice(0, -2)}zt`;
+  if (stem.endsWith("t")) return `${stem.slice(0, -1)}zt`;
+  if (stem.endsWith("ð")) {
+    const ending = /(?:au|ei)ð$/.test(stem) || !/[aeiouyö]ð$/.test(stem) ? "tt" : "zt";
+    return `${stem.slice(0, -1)}${ending}`;
+  }
+  if (isVowel(stem.at(-1))) return `${stem}tt`;
+  return `${stem.replace(/rr$/, "r").replace(/rg$/, "r")}t`;
+}
+
+/** Bare strong imperative: final nd → tt (bind → bitt), ld → lt (hald → halt). */
+export function imperativeStem(stem: string): string {
+  return stem.replace(/nd$/, "tt").replace(/ld$/, "lt");
+}
+
+/** Middle -sk after a stem: s + sk → sk, dental + sk → zk, doubled l/n/r simplify before sk. */
+export function withSk(stem: string): string {
+  if (stem.endsWith("s")) return `${stem}k`;
+  if (/[ðdt]$/.test(stem)) return `${stem.replace(/[ðdt]+$/, "")}zk`.replace(/zzk$/, "zk");
+  return `${stem.replace(/([lnr])\1$/, "$1")}sk`;
+}
+
+/** Weak dental clusters: ð + d → dd; doubled g/k/p/s/r simplify before a different dental. */
+export function dentalCluster(stem: string): string {
+  return stem.replace(/ðdd$/, "dd").replace(/([gkpsr])\1([ðdt])$/, "$1$2");
+}
+
+/** A verbal u-ending loses v after a consonant and contracts ó/ú + u: stöðv + um → stöðum, trú + um → trúm. */
+export function verbUEnding(stem: string, ending: string, unstressedLast = false): string {
+  const changed = uUmlaut(stem, unstressedLast).replace(/([^aeiouyáéíóúýæœö])v(?=u|$)/, "$1");
+  return changed + (/[óú]$/.test(changed) ? ending.replace(/^u/, "") : ending);
 }

@@ -3,6 +3,33 @@ import { fold } from "../../src/lib/norse";
 import { msaCell, paradigmKind, type Paradigm, type ParadigmKind } from "../../src/lib/paradigm";
 import { looseDictionaryKey } from "./lexicon";
 import type { Analysis } from "./types";
+import type { DictEntry } from "../../src/lib/dict";
+import { inflectAdjective } from "./inflect/adjectives";
+import { inflectNoun } from "./inflect/nouns";
+import { inflectVerb } from "./inflect/verbs";
+import type { Generated } from "./inflect/zoega";
+
+const GENERATORS: Partial<Record<ParadigmKind, typeof inflectNoun>> = {
+  noun: inflectNoun,
+  adj: inflectAdjective,
+  verb: inflectVerb,
+};
+
+/** A table generated from the first Zoëga entry whose grammar note a generator can use without contradiction. */
+function generate(
+  lemma: string,
+  kind: ParadigmKind,
+  attested: Paradigm["attested"],
+  zoegaFor: (lemma: string) => DictEntry[] | undefined,
+): Generated | undefined {
+  const inflect = GENERATORS[kind];
+  if (!inflect) return undefined;
+  for (const entry of zoegaFor(lemma) ?? []) {
+    const generated = inflect(entry.w, entry, attested);
+    if (generated) return generated;
+  }
+  return undefined;
+}
 
 interface WiktForm {
   form: string;
@@ -247,7 +274,8 @@ export class ParadigmBuilder {
     }
   }
 
-  build(jsonl: string): Paradigm[] {
+  /** `zoegaFor` gives a lemma's Zoëga entries (best-fitting homograph first) for tables Wiktionary lacks. */
+  build(jsonl: string, zoegaFor?: (lemma: string) => DictEntry[] | undefined): Paradigm[] {
     const exact = new Map<string, Candidate[]>();
     const loose = new Map<string, Candidate[]>();
     for (const line of jsonl.split("\n")) {
@@ -299,8 +327,10 @@ export class ParadigmBuilder {
       }
       const marks = kind === "personal" ? this.personalAttested : attested;
       if (best) out.push({ lemma, kind, label: best.label, cells: best.cells, attested: marks, source: "wiktionary" });
-      else if (Object.keys(attested).length >= 2) {
-        out.push({ lemma, kind, cells: {}, attested: marks, source: "edition" });
+      else {
+        const generated = zoegaFor && !proper ? generate(lemma, kind, attested, zoegaFor) : undefined;
+        if (generated) out.push({ lemma, kind, ...generated, attested: marks, source: "zoega" });
+        else if (Object.keys(attested).length >= 2) out.push({ lemma, kind, cells: {}, attested: marks, source: "edition" });
       }
     }
     return out;

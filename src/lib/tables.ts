@@ -171,7 +171,11 @@ export function paradigmHtml(paradigm: Paradigm, options: ParadigmOptions): stri
   }
   const label = paradigm.label ? `<p class="para-label">${esc(paradigm.label)}</p>` : "";
   const source = paradigm.source === "edition"
-    ? "Forms attested in the Eddas; no full table available" : "Table: Wiktionary";
+    ? "Forms attested in the Eddas; no full table available"
+    : paradigm.source === "zoega"
+      ? `Generated from Zoëga’s entry${paradigm.note ? `: <span lang="non">${esc(paradigm.note)}</span>` : "."} `
+        + "Forms without a dot are not attested in the annotated poems; check them against a grammar."
+      : "Table: Wiktionary";
   return `<div class="paradigm" data-kind="${paradigm.kind}">${label}${html}`
     + `<p class="para-source">${source}</p></div>`;
 }
