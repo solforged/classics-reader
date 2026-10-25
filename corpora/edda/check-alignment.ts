@@ -4,7 +4,8 @@
 // Reads .cache/raw/<slug>.json (written by corpora/edda/build.ts).
 import { join } from "node:path";
 import { ROOT } from "../../scripts/core/outputs";
-import type { EnUnit, OnUnit, Piece, RawWork } from "../../scripts/core/types";
+import type { TextUnit, SourceUnit, Piece } from "../../scripts/core/types";
+import type { RawWork } from "./raw";
 
 const [cmd, slug] = process.argv.slice(2);
 if (!cmd || !slug) {
@@ -13,8 +14,8 @@ if (!cmd || !slug) {
 }
 const raw = (await Bun.file(join(ROOT, ".cache", "raw", `${slug}.json`)).json()) as RawWork;
 
-const onText = (u: OnUnit) => u.lines.map((l: Piece[]) => l.map((p) => (typeof p === "string" ? p : p[0])).join("")).join(" / ");
-const enText = (u: EnUnit) => u.lines.join(" / ");
+const onText = (u: SourceUnit) => u.lines.map((l: Piece[]) => l.map((p) => (typeof p === "string" ? p : p[0])).join("")).join(" / ");
+const enText = (u: TextUnit) => u.lines.join(" / ");
 
 if (cmd === "dump") {
   console.log(`# ${slug}\n\n## Old Norse units (on)\n`);
@@ -56,8 +57,8 @@ for (const u of raw.on) if (!seen.has(`on:${u.key}`)) errors.push(`on unit ${u.k
 for (const u of raw.en) if (!seen.has(`en:${u.key}`)) errors.push(`en unit ${u.key} is not in any row`);
 
 for (const [i, r] of spec.rows.entries()) {
-  const on = (r.on ?? []).map((k) => onBy.get(k)).filter(Boolean) as OnUnit[];
-  const en = (r.en ?? []).map((k) => enBy.get(k)).filter(Boolean) as EnUnit[];
+  const on = (r.on ?? []).map((k) => onBy.get(k)).filter(Boolean) as SourceUnit[];
+  const en = (r.en ?? []).map((k) => enBy.get(k)).filter(Boolean) as TextUnit[];
   const left = on.map((u) => `[${u.label ?? u.kind[0]}] ${onText(u)}`).join(" ‖ ").slice(0, 70);
   const right = en.map((u) => `[${u.label ?? u.kind[0]}] ${enText(u)}`).join(" ‖ ").slice(0, 70);
   console.log(`${String(i).padStart(3)} ${(r.id ?? "").padEnd(5)} ${left.padEnd(72)} | ${right}`);

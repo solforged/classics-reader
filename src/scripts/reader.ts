@@ -23,17 +23,22 @@ const slug = text.dataset.slug!;
 const abbr = text.dataset.abbr!;
 
 // ------------------------------------------------------------ view toggle
+// "all" shows every side; a side id shows only that column (the page's inline style hides the others).
 const VIEW_KEY = `${READER}-view`;
+const viewButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-view]")];
+const views = viewButtons.map((b) => b.dataset.view!);
 function setView(view: string) {
-  document.body.classList.remove("view-on", "view-both", "view-en");
+  for (const v of views) document.body.classList.remove(`view-${v}`);
   document.body.classList.add(`view-${view}`);
-  for (const b of document.querySelectorAll<HTMLButtonElement>("[data-view]"))
-    b.setAttribute("aria-pressed", String(b.dataset.view === view));
+  document.body.classList.toggle("view-single", view !== "all");
+  for (const b of viewButtons) b.setAttribute("aria-pressed", String(b.dataset.view === view));
   localStorage.setItem(VIEW_KEY, view);
 }
-if (document.querySelector("[data-view]")) setView(localStorage.getItem(VIEW_KEY) ?? "both");
-for (const b of document.querySelectorAll<HTMLButtonElement>("[data-view]"))
-  b.addEventListener("click", () => setView(b.dataset.view!));
+if (views.length) {
+  const saved = localStorage.getItem(VIEW_KEY);
+  setView(saved && views.includes(saved) ? saved : "all");
+}
+for (const b of viewButtons) b.addEventListener("click", () => setView(b.dataset.view!));
 
 // ------------------------------------------------------------ navigation
 document.getElementById("work-select")?.addEventListener("change", (e) => {
@@ -53,11 +58,12 @@ function jump(id: string) {
 document.getElementById("goto")?.addEventListener("submit", (e) => {
   e.preventDefault();
   const input = document.getElementById("goto-input") as HTMLInputElement;
-  const want = input.value.trim();
+  // "1 23", "1,23" and "1:23" cite like "1.23".
+  const want = input.value.trim().replace(/\s*[\s,:]\s*/g, ".");
   if (!want) return;
   // Exact row id, else the row containing a stanza with that label.
   if (rowIds.has(want) && jump(want)) return;
-  for (const lab of text.querySelectorAll<HTMLElement>(".col.on .slabel, .col.on .chap, .col.en .slabel")) {
+  for (const lab of text.querySelectorAll<HTMLElement>(".col.source .slabel, .col.source .chap, .col.translation .slabel")) {
     if (lab.textContent === want) {
       const row = lab.closest<HTMLElement>(".row");
       if (row && jump(row.id)) return;

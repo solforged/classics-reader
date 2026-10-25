@@ -2,7 +2,7 @@
 import * as cheerio from "cheerio";
 import type { AnalysisTable } from "../../../scripts/core/analyses";
 import { inline } from "../../../scripts/core/html";
-import type { OnUnit, Piece } from "../../../scripts/core/types";
+import type { SourceUnit, Piece } from "../../../scripts/core/types";
 
 const WORD = /[\p{L}\p{M}]+/gu;
 
@@ -28,9 +28,9 @@ export interface BuggeOptions {
   head?: string;
 }
 
-export function parseBugge(html: string, table: AnalysisTable, opts: BuggeOptions): OnUnit[] {
+export function parseBugge(html: string, table: AnalysisTable, opts: BuggeOptions): SourceUnit[] {
   const $ = cheerio.load(html);
-  const units: OnUnit[] = [];
+  const units: SourceUnit[] = [];
   let n = 0;
   if (opts.head) units.push({ key: `${opts.keyPrefix}h0`, kind: "head", lines: [tokenize(opts.head, table)] });
   for (const tr of $("table").first().find("tr").toArray()) {

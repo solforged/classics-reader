@@ -23,7 +23,7 @@ const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
       </a>
       <a class="card" href={`${base}search/`}>
         <span class="card-title">Search</span>
-        <span class="eyebrow-muted">{lang.name} &amp; {site.translation} · all works</span>
+        <span class="eyebrow-muted">{site.sides.map((side) => side.label).join(" & ")} · all works</span>
         <span class="chev">›</span>
       </a>
       <a class="card" href={`${base}lexicon/`}>

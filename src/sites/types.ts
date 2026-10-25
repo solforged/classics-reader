@@ -1,6 +1,26 @@
 // A reader site: one corpus in one language, built from the shared pages. The build for site `id` writes its data to
-// generated/<id>/ (see scripts/core/outputs.ts); `READER=<id> astro build` builds it into dist/<id>/. The site's
-// language pack is registered in src/lang/index.ts.
+// generated/<id>/ (see scripts/core/outputs.ts); `READER=<id> astro build` builds it into dist/<id>/. The site and
+// its language pack are listed in src/sites/registry.ts.
+
+/** One level of a work's citations, outermost first: a row id joins one value per level with ".". */
+export interface CitationLevel {
+  /** What a value of this level is called, e.g. "Book", "Chapter", "Stanza", "Verse". */
+  name: string;
+  /** List this level's divisions above the text and number their headings, e.g. the chapters of a prose work. */
+  list?: boolean;
+}
+
+/** One column of the reader: a source text in the site's language or a translation. */
+export interface SideSpec {
+  /** Key under Row.sides and WorkInfo.sources, and the column's view value, e.g. "non", "en". */
+  id: string;
+  /** Source sides hold words with analyses, in the pack's language; translation sides hold plain text and notes. */
+  role: "source" | "translation";
+  /** Column toggle, search filter and edition label, e.g. "Old Norse", "English". */
+  label: string;
+  /** BCP 47 tag of a translation side, e.g. "en"; source sides use the pack's code. */
+  lang?: string;
+}
 
 export interface WorkInfo {
   slug: string;
@@ -15,12 +35,10 @@ export interface WorkInfo {
   collection: string;
   /** Home-page group, one of the site's `groups`. */
   group: string;
-  /** Prose works number their rows by chapter; verse works by stanza or verse. */
-  prose: boolean;
-  /** What a row is called in the go-to box, e.g. "Stanza", "Chapter", "Verse". */
-  unit: string;
-  /** Editions of the two sides, shown above the text. */
-  sources: { on: string; en: string };
+  /** How rows are cited, outermost level first; ["Stanza"] for a poem, ["Book", "Line"] for a long epic. */
+  levels: readonly CitationLevel[];
+  /** Edition of each side (by side id), shown above the text. */
+  sources: Readonly<Record<string, string>>;
 }
 
 export interface ReaderSite {
@@ -42,14 +60,14 @@ export interface ReaderSite {
   credits: string;
   /** The corpus in running text, e.g. "the Eddas": "Search the Eddas", "12 occurrences in the Eddas". */
   corpus: string;
-  /** Search-page help after "Searches the <lang> and the <translation> of every work." (HTML). */
+  /** Search-page help after "Searches the <sides> of every work." (HTML). */
   searchHint: string;
   /** Search box placeholder, e.g. "e.g. Yggdrasill, “ask veit ek”, hammer". */
   searchPlaceholder: string;
   /** Lexicon-page note on what the counts include (HTML). */
   countNote: string;
-  /** Name of the translation side, e.g. "English". */
-  translation: string;
+  /** The reader's columns in display order; at least one source side. */
+  sides: readonly SideSpec[];
   /** Home-page groups in order. */
   groups: readonly string[];
   works: readonly WorkInfo[];

@@ -1,4 +1,4 @@
-// Intermediate (pre-alignment) and final data shapes shared by the build scripts and the site.
+// Data shapes shared by the build scripts and the site.
 
 /** A displayed source-language piece: plain text (spaces, punctuation) or a clickable word. */
 export type Piece = string | WordPiece;
@@ -7,7 +7,8 @@ export type WordPiece = [string, number[]] | [string, number[], number];
 
 export type UnitKind = "stanza" | "prose" | "head";
 
-export interface OnUnit {
+/** A unit of a source side: lines of pieces, whose words open the word panel. */
+export interface SourceUnit {
   key: string;
   kind: UnitKind;
   /** Edition label shown in the margin (stanza number, chapter number). */
@@ -15,7 +16,8 @@ export interface OnUnit {
   lines: Piece[][];
 }
 
-export interface EnUnit {
+/** A unit of a translation side. */
+export interface TextUnit {
   key: string;
   kind: UnitKind;
   label?: string;
@@ -24,6 +26,9 @@ export interface EnUnit {
   /** Translator's note keys attached to this unit. */
   notes?: string[];
 }
+
+/** A row's units on one side; the side's role (src/sites/types.ts SideSpec) says which kind. */
+export type SideUnits = SourceUnit[] | TextUnit[];
 
 /** Source of a word analysis. e = the edition's own annotation for this occurrence;
  * a = attested elsewhere in the annotated edition with this spelling; w = Wiktionary form table;
@@ -38,24 +43,17 @@ export type AnalysisSource = "e" | "a" | "w" | "n";
  */
 export type Analysis = [lemma: string, morph: string, source: AnalysisSource, word?: string];
 
-export interface RawSide<U> {
-  units: U[];
-}
-
-export interface RawWork {
-  slug: string;
-  on: OnUnit[];
-  en: EnUnit[];
-  analyses: Analysis[];
-  notes: Record<string, string>; // note key → sanitized HTML
-  intro?: string[]; // translator's introductory note, sanitized HTML paragraphs
-}
 
 export interface Row {
-  id: string; // citation anchor, e.g. "12" or "p-before-1"
-  on: OnUnit[];
-  en: EnUnit[];
+  id: string; // citation anchor, e.g. "12", "1.23" or "p-before-1"
+  /** Units per side id (ReaderSite.sides); a side with nothing in this row has an empty list. */
+  sides: Record<string, SideUnits>;
 }
+
+/** A row's units on a source side. */
+export const sourceUnits = (row: Row, side: string): SourceUnit[] => (row.sides[side] ?? []) as SourceUnit[];
+/** A row's units on a translation side. */
+export const textUnits = (row: Row, side: string): TextUnit[] => (row.sides[side] ?? []) as TextUnit[];
 
 export interface Work {
   slug: string;
@@ -65,9 +63,12 @@ export interface Work {
   intro?: string[];
 }
 
-/** [slug, row id, source-language text, translation text, segments: [start, end, words] where a written form's
- *  words differ from it (scripts/core/outputs.ts)] */
-export type SearchRow = [string, string, string, string, ([number, number, string][])?];
+/** A written form's separate words: [start, end, words] over its side's text (scripts/core/outputs.ts). */
+export type Segment = [number, number, string];
+/** One side's search text, with segments when written forms differ from their words. */
+export type SearchText = string | [string, Segment[]];
+/** [slug, row id, text per side in ReaderSite.sides order] */
+export type SearchRow = [string, string, SearchText[]];
 
 /** A lexicon entry (data/lexicon.json). */
 export interface LemmaStat {

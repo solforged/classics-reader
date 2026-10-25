@@ -1,6 +1,6 @@
 // Parses the EAE Codex Regius TEI (normalized level, with lemma + Menota morphosyntax, converted to UD).
 import { DOMParser, type Element } from "@xmldom/xmldom";
-import type { OnUnit, Piece, UnitKind } from "../../../scripts/core/types";
+import type { SourceUnit, Piece, UnitKind } from "../../../scripts/core/types";
 import type { AnalysisTable } from "../../../scripts/core/analyses";
 import { menotaLemma, menotaToUd } from "../../../packs/non/build/menota";
 
@@ -162,7 +162,7 @@ function mergeEnclitics(pieces: Piece[]): Piece[] {
   return out;
 }
 
-export interface EaeUnit extends OnUnit {
+export interface EaeUnit extends SourceUnit {
   /** Conventional stanza number from the edition's xml:id (v.Vsp.17 → "17"), when present. */
   ref?: string;
 }
@@ -213,7 +213,7 @@ export function eaeUnits(div: El, table: AnalysisTable, keyPrefix = ""): EaeUnit
   return units;
 }
 
-export function headText(u: OnUnit): string {
+export function headText(u: SourceUnit): string {
   return u.lines
     .flat()
     .map((p) => (typeof p === "string" ? p : p[0]))

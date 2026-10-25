@@ -1,4 +1,4 @@
-import type { EnUnit, OnUnit, Row } from "../../scripts/core/types";
+import type { TextUnit, SourceUnit, Row } from "../../scripts/core/types";
 
 // Besant Discourse 13 opens with Arjuna's question, "Matter and Spirit, also the Field and the Knower of the
 // Field ...", numbered (1). DCS chapter 13 instead begins "idaṃ śarīraṃ kaunteya", Besant's numbered (2).
@@ -7,7 +7,7 @@ const NUMBERING: Readonly<Record<number, { offset: number; extra: readonly { ver
   13: { offset: 1, extra: [{ verse: 1, row: "0" }] },
 };
 
-export function alignEnglish(chapter: number, sanskrit: ReadonlyMap<number, OnUnit[]>, english: ReadonlyMap<number, EnUnit[]>): Row[] {
+export function alignEnglish(chapter: number, sanskrit: ReadonlyMap<number, SourceUnit[]>, english: ReadonlyMap<number, TextUnit[]>): Row[] {
   const numbering = NUMBERING[chapter];
   const offset = numbering?.offset ?? 0;
   const used = new Set<number>();
@@ -17,7 +17,7 @@ export function alignEnglish(chapter: number, sanskrit: ReadonlyMap<number, OnUn
     if (!en?.some((unit) => unit.kind !== "head" && unit.lines.some((line) => line.trim()))) {
       throw new Error(`Missing extra Besant verse ${chapter}.${extra.verse}`);
     }
-    rows.push({ id: extra.row, on: [], en });
+    rows.push({ id: extra.row, sides: { sa: [], en } });
     used.add(extra.verse);
   }
   for (const [verse, on] of [...sanskrit].sort(([a], [b]) => a - b)) {
@@ -27,7 +27,7 @@ export function alignEnglish(chapter: number, sanskrit: ReadonlyMap<number, OnUn
     if (!en.some((unit) => unit.kind !== "head" && unit.lines.some((line) => line.trim()))) {
       throw new Error(`Empty Besant verse ${chapter}.${number}`);
     }
-    rows.push({ id: String(verse), on, en });
+    rows.push({ id: String(verse), sides: { sa: on, en } });
     used.add(number);
   }
   for (const verse of english.keys()) {

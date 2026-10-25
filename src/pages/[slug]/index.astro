@@ -1,5 +1,5 @@
 ---
-import type { EnUnit, OnUnit, Piece } from "../../../scripts/core/types";
+import { sourceUnits, textUnits, type TextUnit, type SourceUnit, type Piece } from "../../../scripts/core/types";
 import Base from "../../layouts/Base.astro";
 import WordPanel from "../../components/WordPanel.astro";
 import { lang } from "../../lang";
@@ -15,8 +15,19 @@ const def = WORKS[index]!;
 const prev = WORKS[index - 1];
 const next = WORKS[index + 1];
 const work = loadWork(def.slug);
-const isProse = def.prose;
-const hasEnglish = work.rows.some((r) => r.en.length);
+const levels = def.levels;
+// A listed outermost level (chapters) gets a strip of links, and its heads show their number.
+const listed = levels[0]?.list ?? false;
+// Columns: the site's sides that have text in this work.
+const sides = site.sides.filter((side) => work.rows.some((r) => r.sides[side.id]?.length));
+const views = sides.length > 1
+  ? [{ id: sides[0]!.id, label: sides[0]!.label }, { id: "all", label: sides.length === 2 ? "Both" : "All" },
+    ...sides.slice(1).map((side) => ({ id: side.id, label: side.label }))]
+  : [];
+// Showing one side hides the others; side ids are plain tokens, so they are safe in selectors.
+const viewCss = sides.map((side) => `.view-${side.id} .col:not([data-side="${side.id}"]){display:none}`).join("");
+const labels = (role: string) => site.sides.filter((side) => side.role === role).map((side) => side.label).join(" and ");
+const translations = labels("translation");
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -30,9 +41,9 @@ function pieces(line: Piece[]): string {
     .join("");
 }
 
-function onUnit(u: OnUnit): string {
+function sourceUnit(u: SourceUnit): string {
   if (u.kind === "head") {
-    const label = u.label && isProse ? `<span class="chap">${esc(u.label)}</span> ` : "";
+    const label = u.label && listed ? `<span class="chap">${esc(u.label)}</span> ` : "";
     return `<h3 class="rubric">${label}${u.lines.map(pieces).join(" ")}</h3>`;
   }
   if (u.kind === "prose") return `<p class="prose">${u.lines.map(pieces).join(" ")}</p>`;
@@ -40,22 +51,22 @@ function onUnit(u: OnUnit): string {
   return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${pieces(l)}</div>`).join("")}</div>`;
 }
 
-function enText(s: string): string {
+function plainText(s: string): string {
   return esc(s).replace(/ \| /g, '<span class="cz" aria-hidden="true"></span>');
 }
 
-function enUnit(u: EnUnit): string {
+function textUnit(u: TextUnit): string {
   const notes = (u.notes ?? [])
     .map((k) => `<button class="note-btn" type="button" data-note="${esc(k)}" title="Translator’s note">n</button>`)
     .join("");
   if (u.kind === "head") {
     const label = u.label ? `<span class="chap">${esc(u.label)}</span>` : "";
-    const text = u.lines.map(enText).join(" ");
+    const text = u.lines.map(plainText).join(" ");
     return `<h3 class="rubric">${label}${label && text ? " " : ""}${text}${notes}</h3>`;
   }
-  if (u.kind === "prose") return `<p class="prose">${u.lines.map(enText).join(" ")}${notes}</p>`;
+  if (u.kind === "prose") return `<p class="prose">${u.lines.map(plainText).join(" ")}${notes}</p>`;
   const label = u.label ? `<span class="slabel">${esc(u.label)}</span>` : "";
-  return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${enText(l)}</div>`).join("")}${notes}</div>`;
+  return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${plainText(l)}</div>`).join("")}${notes}</div>`;
 }
 
 // [lemma, morph, source, lemma page slug, corpus count, segmented word]; src/scripts/reader.ts reads these.
@@ -64,15 +75,24 @@ const analyses = work.analyses.map(([lemma, morph, s, word]) => {
   const a = [lemma, morph, s, page?.slug ?? "", page?.count ?? 0];
   return word ? [...a, word] : a;
 });
-const chapters = isProse ? work.rows.filter((r) => /^\d+$/.test(r.id)).map((r) => r.id) : [];
+// Rows cited by a full citation (one number per level, "12" or "1.23"); the strip links the first row of each
+// outermost division.
+const citation = new RegExp(`^${levels.map(() => "\\d+[a-z]?").join("\\.")}$`);
+const divisions = new Map<string, string>();
+if (listed) {
+  for (const r of work.rows) {
+    const top = r.id.split(".")[0]!;
+    if (citation.test(r.id) && !divisions.has(top)) divisions.set(top, r.id);
+  }
+}
 const ids = new Set(work.rows.map((r) => r.id));
 ---
 
 <Base
   title={`${def.title}: ${def.english} · ${site.name}`}
-  description={`${def.title} (${def.english}) in ${lang.name} with a facing ${site.translation} translation. ${def.summary}`}
+  description={`${def.title} (${def.english}) in ${labels("source")}${translations ? ` with a facing ${translations} translation` : ""}. ${def.summary}`}
   crumbs={[{ label: def.title }]}
-  bodyClass="reader view-both"
+  bodyClass="reader view-all"
 >
   <main>
     <header class="work-head page">
@@ -81,8 +101,7 @@ const ids = new Set(work.rows.map((r) => r.id));
       <p class="english">{def.english}</p>
       <p class="summary">{def.summary}</p>
       <dl class="sources">
-        <dt>{lang.name}</dt><dd>{def.sources.on}</dd>
-        <dt>{site.translation}</dt><dd>{def.sources.en}</dd>
+        {site.sides.map((side) => <><dt>{side.label}</dt><dd>{def.sources[side.id]}</dd></>)}
       </dl>
       {
         site.notes && work.intro && work.intro.length > 0 && (
@@ -100,38 +119,43 @@ const ids = new Set(work.rows.map((r) => r.id));
           {WORKS.map((w) => <option value={w.slug} selected={w.slug === def.slug}>{w.title}</option>)}
         </select>
         <form id="goto" class="goto">
-          <label for="goto-input">{def.unit}</label>
-          <input id="goto-input" name="row" inputmode="numeric" autocomplete="off" placeholder={isProse ? "12" : "1"} />
+          <label for="goto-input">{levels.map((level) => level.name).join(".")}</label>
+          <input id="goto-input" name="row" inputmode="numeric" autocomplete="off"
+            placeholder={levels.map((level) => (level.list ? "12" : "1")).join(".")} />
         </form>
         {
-          hasEnglish && (
+          views.length > 0 && (
             <div class="segmented" role="group" aria-label="Columns">
-              <button type="button" data-view="on" aria-pressed="false">{lang.name}</button>
-              <button type="button" data-view="both" aria-pressed="true">Both</button>
-              <button type="button" data-view="en" aria-pressed="false">{site.translation}</button>
+              {views.map((view) => (
+                <button type="button" data-view={view.id} aria-pressed={String(view.id === "all")}>{view.label}</button>
+              ))}
             </div>
           )
         }
         <button class="btn print" type="button" onclick="window.print()">Print</button>
       </div>
       {
-        chapters.length > 0 && (
-          <nav class="chapters" aria-label="Chapters">
-            {chapters.map((c) => <a href={`#${c}`}>{c}</a>)}
+        divisions.size > 0 && (
+          <nav class="chapters" aria-label={`${levels[0]!.name}s`}>
+            {[...divisions].map(([value, id]) => <a href={`#${id}`}>{value}</a>)}
           </nav>
         )
       }
     </div>
 
-    <div class={`text ${hasEnglish ? "" : "single"}`} data-slug={def.slug} data-abbr={def.abbr} data-title={def.title}>
+    <div class={`text ${sides.length > 1 ? "" : "single"}`} style={`--cols: ${sides.length}`} data-slug={def.slug}
+      data-abbr={def.abbr} data-title={def.title}>
       {
         work.rows.map((r) => (
           <section class="row" id={r.id}>
             <a class="cite no-print" href={`#${r.id}`} title="Link to this passage">
               {r.id}
             </a>
-            <div class="col on" lang={lang.code} set:html={r.on.map(onUnit).join("")} />
-            {hasEnglish && <div class="col en" lang="en" set:html={r.en.map(enUnit).join("")} />}
+            {sides.map((side) => side.role === "source"
+              ? <div class="col source" data-side={side.id} lang={lang.code}
+                  set:html={sourceUnits(r, side.id).map(sourceUnit).join("")} />
+              : <div class="col translation" data-side={side.id} lang={side.lang}
+                  set:html={textUnits(r, side.id).map(textUnit).join("")} />)}
           </section>
         ))
       }
@@ -143,6 +167,7 @@ const ids = new Set(work.rows.map((r) => r.id));
     </nav>
   </main>
 
+  <style is:inline set:html={viewCss} />
   <WordPanel />
   <script type="application/json" id="analyses" set:html={JSON.stringify(analyses).replace(/</g, "\\u003c")} />
   <script type="application/json" id="notes" set:html={JSON.stringify(work.notes).replace(/</g, "\\u003c")} />
@@ -277,21 +302,16 @@ const ids = new Set(work.rows.map((r) => r.id));
   .row {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
     gap: 2.5rem;
     padding: 0.55rem 0;
     border-top: 1px solid transparent;
     scroll-margin-top: 7rem;
   }
   .text.single .row,
-  .view-on .row,
-  .view-en .row {
+  .view-single .row {
     grid-template-columns: minmax(0, 40rem);
     justify-content: center;
-  }
-  .view-on .col.en,
-  .view-en .col.on {
-    display: none;
   }
   .row:target,
   .row.flash {
@@ -341,10 +361,10 @@ const ids = new Set(work.rows.map((r) => r.id));
     line-height: 2.2;
     color: var(--faint);
   }
-  .col.en .slabel {
+  .col.translation .slabel {
     color: var(--faint);
   }
-  .col.en {
+  .col.translation {
     color: color-mix(in srgb, var(--fg) 88%, var(--muted));
   }
   .prose {
@@ -429,11 +449,11 @@ const ids = new Set(work.rows.map((r) => r.id));
       padding-left: 2.2rem;
       padding-right: 0.9rem;
     }
-    .view-both .row {
+    .view-all .row {
       grid-template-columns: 1fr;
       gap: 0.2rem;
     }
-    .view-both .col.en {
+    .view-all .col.translation {
       border-left: 2px solid var(--border);
       padding-left: 0.7rem;
       font-size: 0.92em;

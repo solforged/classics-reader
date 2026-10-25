@@ -4,7 +4,7 @@ import type { AnyNode, Element } from "domhandler";
 import type { AnalysisTable } from "../../../scripts/core/analyses";
 import { tokenize } from "./bugge";
 import { hasClass, inline } from "../../../scripts/core/html";
-import type { EnUnit, OnUnit } from "../../../scripts/core/types";
+import type { TextUnit, SourceUnit } from "../../../scripts/core/types";
 
 function cleanWiki(s: string): string {
   return s
@@ -20,8 +20,8 @@ function cleanWiki(s: string): string {
 const ROMAN = /^(?:[IVXL]+)$/;
 
 /** Old Norse chapters: `'''12. Title.'''` headings (Háttatal uses `'''I.'''` parts), paragraphs and numbered verse blockquotes. */
-export function parseSnorra(wiki: string, table: AnalysisTable): OnUnit[] {
-  const units: OnUnit[] = [];
+export function parseSnorra(wiki: string, table: AnalysisTable): SourceUnit[] {
+  const units: SourceUnit[] = [];
   const body = wiki.replace(/^\{\{Verk[^\n]*\n/, "").replace(/<div[^>]*>[\s\S]*?<\/div>/g, "");
   let chapter = "0";
   let n = 0;
@@ -75,11 +75,11 @@ const skipWs = (el: Element) =>
   hasClass(el, "pagenum") || hasClass(el, "ws-noexport") || hasClass(el, "reference") || el.name === "sup";
 
 /** Brodeur: paragraphs whose bold Roman numeral starts a chapter, and <dl><dd> verse blocks. */
-export function parseBrodeur(html: string): EnUnit[] {
+export function parseBrodeur(html: string): TextUnit[] {
   const $ = cheerio.load(html);
   const root = $(".mw-parser-output").first();
   const scope = root.length ? root : $("body");
-  const units: EnUnit[] = [];
+  const units: TextUnit[] = [];
   let chapter = "0";
   let n = 0;
   const elements = scope.find("p, dl, div.wst-center").toArray();

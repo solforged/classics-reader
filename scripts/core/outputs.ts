@@ -9,33 +9,42 @@ import { cp, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { shardFile } from "../../src/lib/shard";
 import { parseMorph } from "../../src/lib/morph";
-import type { Analysis, LemmaStat, Row, SearchRow, Work } from "./types";
+import type { SideSpec } from "../../src/sites/types";
+import {
+  sourceUnits, textUnits, type Analysis, type LemmaStat, type Row, type SearchRow, type SearchText, type Segment,
+  type Work,
+} from "./types";
 
 export const ROOT = join(import.meta.dir, "..", "..");
 
 /**
- * A row's search entry. The source-language text joins units and lines with " / ". Written forms whose edition
- * analyses give the words differently (sandhi, compounds: parayopetāste = parayā upetāḥ te) add a segment
- * [start, end, words] over the text, so a query in the separate words finds the written form.
+ * A source side's search text: units and lines joined with " / ". Written forms whose edition analyses give the
+ * words differently (sandhi, compounds: parayopetāste = parayā upetāḥ te) add a segment [start, end, words] over the
+ * text, so a query in the separate words finds the written form.
  */
-function searchRow(slug: string, row: Row, analyses: readonly Analysis[]): SearchRow {
-  let on = "";
-  const segments: [number, number, string][] = [];
-  row.on.forEach((unit, u) => unit.lines.forEach((line, l) => {
-    if (u || l) on += " / ";
+function sourceSearchText(row: Row, side: string, analyses: readonly Analysis[]): SearchText {
+  let text = "";
+  const segments: Segment[] = [];
+  sourceUnits(row, side).forEach((unit, u) => unit.lines.forEach((line, l) => {
+    if (u || l) text += " / ";
     for (const piece of line) {
       if (typeof piece === "string") {
-        on += piece;
+        text += piece;
         continue;
       }
       const words = piece[1].map((id) => analyses[id]!).filter((a) => a[2] === "e" && a[3]).map((a) => a[3]!).join(" ");
-      const start = on.length;
-      on += piece[0];
-      if (words && words !== piece[0]) segments.push([start, on.length, words]);
+      const start = text.length;
+      text += piece[0];
+      if (words && words !== piece[0]) segments.push([start, text.length, words]);
     }
   }));
-  const en = row.en.map((u) => u.lines.join(" / ")).join(" / ");
-  return segments.length ? [slug, row.id, on, en, segments] : [slug, row.id, on, en];
+  return segments.length ? [text, segments] : text;
+}
+
+function searchRow(slug: string, row: Row, sides: readonly SideSpec[], analyses: readonly Analysis[]): SearchRow {
+  return [slug, row.id, sides.map((side) => side.role === "source"
+    ? sourceSearchText(row, side.id, analyses)
+    : textUnits(row, side.id).map((u) => u.lines.join(" / ")).join(" / "))];
 }
 
 export class Outputs {
@@ -98,18 +107,23 @@ interface LemmaBucket {
   occ: [string, string, string, number, number][];
 }
 
-/** Full-text search rows and the lexicon's frequencies and concordance lines. */
+/** Full-text search rows and the lexicon's frequencies and concordance lines. Source sides supply the words. */
 export class Concordance {
   private readonly search: SearchRow[] = [];
   private readonly lemmas = new Map<string, Map<string, LemmaBucket>>();
   private occurrence = 0;
+  private readonly sources: readonly string[];
+
+  constructor(private readonly sides: readonly SideSpec[]) {
+    this.sources = sides.filter((side) => side.role === "source").map((side) => side.id);
+  }
 
   /** Counts a work's words: edition-annotated lemmas, plus candidates that agree on a single lemma. */
   addWork(slug: string, rows: readonly Row[], analyses: readonly Analysis[]): WorkCounts {
     const counts: WorkCounts = { words: 0, parsed: 0, annotated: 0 };
     for (const row of rows) {
-      this.search.push(searchRow(slug, row, analyses));
-      for (const u of row.on) {
+      this.search.push(searchRow(slug, row, this.sides, analyses));
+      for (const u of this.sources.flatMap((side) => sourceUnits(row, side))) {
         for (const line of u.lines) {
           const lineText = line.map((p) => (typeof p === "string" ? p : p[0])).join("");
           for (const p of line) {

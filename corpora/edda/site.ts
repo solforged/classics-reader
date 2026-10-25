@@ -2,7 +2,7 @@
 import { GROUPS, WORKS, type WorkDef } from "./catalog";
 import type { ReaderSite } from "../../src/sites/types";
 
-function sources(def: WorkDef): { on: string; en: string } {
+function sources(def: WorkDef): { non: string; en: string } {
   const on = def.snorra
     ? "Snorra Edda, ed. Guðni Jónsson (via Icelandic Wikisource / Heimskringla.no)"
     : def.eae && def.bugge
@@ -15,7 +15,7 @@ function sources(def: WorkDef): { on: string; en: string } {
     : def.brodeur
       ? "Arthur Gilchrist Brodeur (1916)"
       : "No public-domain English translation";
-  return { on, en };
+  return { non: on, en };
 }
 
 export const site: ReaderSite = {
@@ -37,7 +37,7 @@ export const site: ReaderSite = {
   countNote: "Counts come from the Codex Regius edition’s own annotation, plus words elsewhere whose possible " +
     "analyses all agree on one lemma. Glosses from Zoëga’s <i>Concise Dictionary of Old Icelandic</i> (1910) or " +
     "Wiktionary.",
-  translation: "English",
+  sides: [{ id: "non", role: "source", label: "Old Norse" }, { id: "en", role: "translation", label: "English", lang: "en" }],
   groups: GROUPS,
   works: WORKS.map((def) => {
     const prose = def.collection === "prose" && def.slug !== "hattatal";
@@ -49,8 +49,7 @@ export const site: ReaderSite = {
       summary: def.summary,
       collection: def.collection === "poetic" ? "Poetic Edda" : "Prose Edda",
       group: def.group,
-      prose,
-      unit: prose ? "Chapter" : "Stanza",
+      levels: [prose ? { name: "Chapter", list: true } : { name: "Stanza" }],
       sources: sources(def),
     };
   }),

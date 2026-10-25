@@ -6,7 +6,7 @@ import { pack as sanskrit } from "../../packs/san";
 import { site as gita } from "./site";
 import { AnalysisTable } from "../../scripts/core/analyses";
 import { Concordance, Outputs, statsLine } from "../../scripts/core/outputs";
-import type { OnUnit, Piece, Work } from "../../scripts/core/types";
+import { sourceUnits, type SourceUnit, type Piece, type Work } from "../../scripts/core/types";
 import { readDcsChapter } from "./alignment";
 import { alignEnglish } from "./english-alignment";
 import { CACHE, CHAPTERS, SOURCES } from "./fetch";
@@ -86,7 +86,7 @@ for (const source of CHAPTERS) {
   const sanskritDisplay = chapter <= 2 ? parseBesantSanskrit(chapter, pageWiki) : undefined;
   const table = new AnalysisTable();
   tables.set(definition.slug, table);
-  const on = new Map<number, OnUnit[]>();
+  const on = new Map<number, SourceUnit[]>();
   for (const [verse, sourceVerse] of dcs) {
     if (sanskritDisplay) {
       const display = sanskritDisplay.get(verse);
@@ -95,7 +95,7 @@ for (const source of CHAPTERS) {
       const stanzaLines = aligned.filter((unit) => unit.kind === "stanza").reduce((count, unit) => count + unit.lines.length, 0);
       let lineNumber = 0;
       let labelled = false;
-      on.set(verse, aligned.map((unit, index): OnUnit => {
+      on.set(verse, aligned.map((unit, index): SourceUnit => {
         const lines = unit.lines.map((tokens) => {
           const pieces = piecesFor(tokens, `${chapter}.${verse}`, table);
           if (unit.kind === "head") pieces.push(" |");
@@ -111,7 +111,7 @@ for (const source of CHAPTERS) {
       }));
       continue;
     }
-    const units: OnUnit[] = sourceVerse.heads.map((head) => ({
+    const units: SourceUnit[] = sourceVerse.heads.map((head) => ({
       key: `dcs-${head.id}`, kind: "head", lines: [piecesFor(head.tokens, head.id, table)],
     }));
     const lines = sourceVerse.lines.map((line, index) => [
@@ -139,7 +139,7 @@ if (works.length !== 18 || gita.works.length !== 18) throw new Error("The Gītā
 type Tally = Map<string, { lemma: string; morph: string; count: number }>;
 const attested = { head: new Map<string, Tally>(), any: new Map<string, Tally>() };
 function eachWord(work: Work, visit: (piece: [string, number[]], head: boolean) => void): void {
-  for (const row of work.rows) for (const unit of row.on) for (const line of unit.lines) {
+  for (const row of work.rows) for (const unit of sourceUnits(row, "sa")) for (const line of unit.lines) {
     for (const piece of line) if (typeof piece !== "string") visit(piece as [string, number[]], unit.kind === "head");
   }
 }
@@ -185,7 +185,7 @@ for (const [key, matches] of lemmaRows) {
 
 const outputs = new Outputs("gita");
 await outputs.reset();
-const concordance = new Concordance();
+const concordance = new Concordance(gita.sides);
 const stats: string[] = [];
 for (const work of works) {
   await outputs.writeWork(work);

@@ -114,7 +114,13 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
 - `src/sites/registry.ts` lists the readers and each one's pack. `READER` picks one;
   `astro.config.mjs` aliases `@reader/site`, `@reader/pack` and `@reader/sources` to its files,
   so each browser bundle ships only its own pack. `scripts/run.ts` runs a reader's `fetch.ts`
-  or `build.ts`. `src/sites/types.ts` is the site contract.
+  or `build.ts`.
+- `src/sites/types.ts` is the site contract. A site lists its columns as `sides`, each a source
+  text (words with analyses, in the pack's language) or a translation; rows store their units per
+  side id, and the reader's column toggle, the search filter and `search.json` follow the list.
+  Each work names its citation `levels`, outermost first (`["Stanza"]`, or `["Book", "Line"]` with
+  row ids like `1.23`); a listed level (a prose work's chapters) gets a strip of links above the
+  text, and the go-to box accepts `1.23`, `1 23` or `1:23`.
 - `src/lang/types.ts` is the pack contract the shared code uses (spelling fold, search key,
   morphology labels, dictionary list, optional inflection tables and scripts); `src/lang/index.ts`
   exposes the reader's pack as `lang`.

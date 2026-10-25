@@ -2,11 +2,11 @@
 import * as cheerio from "cheerio";
 import type { Element } from "domhandler";
 import { hasClass, inline } from "../../../scripts/core/html";
-import type { EnUnit } from "../../../scripts/core/types";
+import type { TextUnit } from "../../../scripts/core/types";
 
 export interface BellowsPoem {
   intro: string[];
-  units: EnUnit[];
+  units: TextUnit[];
   notes: Record<string, string>;
 }
 
@@ -26,8 +26,8 @@ export function parseBellows(html: string): Map<string, BellowsPoem> {
       .map((p) => inline(p, { italics: true, skip: skipPage }))
       .filter(Boolean);
 
-    const units: EnUnit[] = [];
-    const byAnchor = new Map<string, EnUnit>();
+    const units: TextUnit[] = [];
+    const byAnchor = new Map<string, TextUnit>();
     let n = 0;
     const bodies = $ch.find("div.div2.section").not(".introNote").not(".endNotes").toArray();
     for (const body of bodies) {
@@ -44,7 +44,7 @@ export function parseBellows(html: string): Map<string, BellowsPoem> {
           if (el.name === "p") {
             const t = inline(el, { skip: skipPage });
             if (!t) return;
-            const u: EnUnit = { key: `p${++n}`, kind: "prose", lines: [t.replace(/\n/g, " ")] };
+            const u: TextUnit = { key: `p${++n}`, kind: "prose", lines: [t.replace(/\n/g, " ")] };
             units.push(u);
             if (el.attribs.id) byAnchor.set(el.attribs.id, u);
             return;
@@ -61,7 +61,7 @@ export function parseBellows(html: string): Map<string, BellowsPoem> {
             )
             .filter(Boolean);
           if (!lines.length) return;
-          const u: EnUnit = { key: `s${++n}`, kind: "stanza", label: num || undefined, lines };
+          const u: TextUnit = { key: `s${++n}`, kind: "stanza", label: num || undefined, lines };
           units.push(u);
           if (el.attribs.id) byAnchor.set(el.attribs.id, u);
         });

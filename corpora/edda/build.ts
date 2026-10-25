@@ -29,7 +29,9 @@ import {
   type WiktGloss,
 } from "../../packs/non/build/lexicon";
 import { parseBrodeur, parseSnorra } from "./lib/snorra";
-import type { EnUnit, OnUnit, RawWork, Row, Work } from "../../scripts/core/types";
+import { sourceUnits, type TextUnit, type SourceUnit, type Row, type Work } from "../../scripts/core/types";
+import type { RawWork } from "./raw";
+import { site } from "./site";
 
 const SRC = join(ROOT, ".cache", "sources");
 const read = (rel: string) => Bun.file(join(SRC, rel)).text();
@@ -43,7 +45,7 @@ const wiktGlosses = indexWiktionary(wiktionary, index);
 console.log(`form index: ${index.size.toLocaleString()} spellings`);
 
 const bellows = parseBellows(await read("bellows/bellows.html"));
-const brodeur: Record<string, EnUnit[]> = {};
+const brodeur: Record<string, TextUnit[]> = {};
 for (const s of ["prologue", "gylfaginning", "skaldskaparmal"]) brodeur[s] = parseBrodeur(await read(`brodeur/${s}.html`));
 
 // Bellows's index of names glosses proper nouns and names unanalysed capitalized words in the prose.
@@ -57,8 +59,8 @@ const nameFor = (surface: string) => names.lemmaFor(surface, knownNames);
 
 // ---------------------------------------------------------------- raw works
 
-function eaeSide(def: WorkDef, table: AnalysisTable): OnUnit[] {
-  const out: OnUnit[] = [];
+function eaeSide(def: WorkDef, table: AnalysisTable): SourceUnit[] {
+  const out: SourceUnit[] = [];
   def.eae!.forEach((entry, i) => {
     const spec = typeof entry === "string" ? { div: entry } : entry;
     const div = eae.get(spec.div);
@@ -116,8 +118,8 @@ const analysisTable = (diplomatic: boolean) =>
 async function rawWork(def: WorkDef): Promise<RawWork> {
   const diplomatic = !def.eae && !!def.bugge;
   const table = analysisTable(diplomatic);
-  let on: OnUnit[] = [];
-  let en: EnUnit[] = [];
+  let on: SourceUnit[] = [];
+  let en: TextUnit[] = [];
   let notes: Record<string, string> = {};
   let intro: string[] | undefined;
 
@@ -220,7 +222,7 @@ async function align(def: WorkDef, raw: RawWork): Promise<Row[]> {
     let id = r.id ?? firstStanza?.label ?? `r${i + 1}`;
     while (ids.has(id)) id += "b";
     ids.add(id);
-    rows.push({ id, on, en });
+    rows.push({ id, sides: { non: on, en } });
   }
   const leftover = [
     ...raw.on.filter((u) => !used.has(`on:${u.key}`)).map((u) => `on:${u.key}`),
@@ -251,7 +253,7 @@ if (rawOnly) {
 const outputs = new Outputs("edda");
 await outputs.reset();
 
-const concordance = new Concordance();
+const concordance = new Concordance(site.sides);
 const usedLemmas = new Set<string>();
 const lemmaMorph = new Map<string, string>(); // a representative analysis, to rank dictionary homographs
 const classMorphs = new Map<string, Map<string, string>>();
@@ -289,7 +291,7 @@ for (const def of WORKS) {
     if (upos === "PROPN" && a[2] !== "n") knownNames.add(a[0]);
   }
   for (const row of rows) {
-    for (const u of row.on) {
+    for (const u of sourceUnits(row, "non")) {
       for (const line of u.lines) {
         for (const p of line) if (typeof p !== "string") paradigms.attest(p[0], p[1].map((id) => raw.analyses[id]!));
       }
@@ -561,7 +563,7 @@ await outputs.writeShards("para", tables);
 // Name candidates need the completed tables; infer each written form before deduplicating its reading.
 for (const work of works) {
   const readings = new AnalysisTable();
-  for (const row of work.rows) for (const unit of row.on) for (const line of unit.lines) for (const piece of line) {
+  for (const row of work.rows) for (const unit of sourceUnits(row, "non")) for (const line of unit.lines) for (const piece of line) {
     if (typeof piece === "string") continue;
     piece[1] = piece[1].map((id) => {
       const analysis = work.analyses[id]!;

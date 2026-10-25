@@ -5,6 +5,9 @@ import { site, WORKS } from "../lib/site";
 
 const meta = Object.fromEntries(WORKS.map((w) => [w.slug, { title: w.title, abbr: w.abbr, c: w.collection }]));
 const collections = [...new Set(WORKS.map((w) => w.collection))];
+// Side order matches each search row's texts (scripts/core/outputs.ts).
+const sides = site.sides.map((side) => ({ id: side.id, role: side.role, lang: side.role === "source" ? lang.code : side.lang ?? "" }));
+const searched = new Intl.ListFormat("en", { type: "conjunction" }).format(site.sides.map((side) => `the ${side.label}`));
 ---
 
 <Base title={`Search · ${site.name}`} crumbs={[{ label: "Search" }]}>
@@ -12,16 +15,15 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
     <p class="eyebrow">Search</p>
     <h1>Search {site.corpus}</h1>
     <p class="prose-note">
-      Searches the {lang.name} and the {site.translation} of every work. <Fragment set:html={site.searchHint} /> All
+      Searches {searched} of every work. <Fragment set:html={site.searchHint} /> All
       words must occur in the passage; put a phrase in quotes.
     </p>
     <form id="search-form" role="search">
       <input type="search" id="q" name="q" placeholder={site.searchPlaceholder} autocomplete="off" />
       <div class="filters">
         <div class="segmented" role="group" aria-label="Language">
-          <button type="button" data-side="all" aria-pressed="true">Both</button>
-          <button type="button" data-side="on" aria-pressed="false">{lang.name}</button>
-          <button type="button" data-side="en" aria-pressed="false">{site.translation}</button>
+          <button type="button" data-side="all" aria-pressed="true">{site.sides.length === 2 ? "Both" : "All"}</button>
+          {site.sides.map((side) => <button type="button" data-side={side.id} aria-pressed="false">{side.label}</button>)}
         </div>
         {
           collections.length > 1 && (
@@ -37,32 +39,43 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
     <ol id="results"></ol>
   </main>
   <script type="application/json" id="meta" set:html={JSON.stringify(meta)} />
+  <script type="application/json" id="sides" set:html={JSON.stringify(sides)} />
 </Base>
 
 <script>
   import { lang } from "../lang";
   import { activeScript, applyScript } from "../scripts/script";
 
-  /** [slug, row id, source-language text, translation text, segments] (scripts/core/outputs.ts). A segment
-   *  [start, end, words] gives the separate words of a written form joined by sandhi or compounding. */
-  type Row = [slug: string, id: string, on: string, en: string, segments?: [number, number, string][]];
+  /** [slug, row id, text per side] (scripts/core/outputs.ts). A source text may carry segments [start, end, words]:
+   *  the separate words of a written form joined by sandhi, compounding or an enclitic. */
+  type SearchText = string | [string, [number, number, string][]];
+  type Row = [slug: string, id: string, texts: SearchText[]];
   /** A search key; key character i came from text characters start[i]..end[i]. */
   interface Keyed {
     key: string;
     start: number[];
     end: number[];
   }
+  /** One side of a row: its text and keys (the text, plus the text with segmented forms in their separate words). */
+  interface IndexedSide {
+    text: string;
+    keys: Keyed[];
+  }
   interface Indexed {
     row: Row;
-    /** The source-language text, plus the same text with segmented forms in their separate words. */
-    on: Keyed[];
-    en: Keyed[];
+    sides: IndexedSide[];
+  }
+  interface Side {
+    id: string;
+    role: "source" | "translation";
+    lang: string;
   }
   const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
   const meta = JSON.parse(document.getElementById("meta")!.textContent!) as Record<
     string,
     { title: string; abbr: string; c: string }
   >;
+  const sides = JSON.parse(document.getElementById("sides")!.textContent!) as Side[];
   const input = document.getElementById("q") as HTMLInputElement;
   const status = document.getElementById("status")!;
   const results = document.getElementById("results")!;
@@ -106,8 +119,10 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
       .then((r) => r.json() as Promise<Row[]>)
       .then((rows) => rows.map((row) => ({
         row,
-        on: [keyed(textChars(row[2])), ...(row[4] ? [keyed(segmentedChars(row[2], row[4]))] : [])],
-        en: [keyed(textChars(row[3]))],
+        sides: row[2].map((entry): IndexedSide => {
+          const [text, segments] = typeof entry === "string" ? [entry, undefined] : entry;
+          return { text, keys: [keyed(textChars(text)), ...(segments ? [keyed(segmentedChars(text, segments))] : [])] };
+        }),
       }))));
 
   function terms(q: string): string[] {
@@ -179,14 +194,19 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
     for (const r of rows) {
       const m = meta[r.row[0]];
       if (!m || (coll !== "all" && m.c !== coll)) continue;
-      const on = side !== "en" ? snippet(r.row[2], r.on, ts, Boolean(activeScript())) : undefined;
-      const en = side !== "on" ? snippet(r.row[3], r.en, ts) : undefined;
-      if (!on && !en) continue;
+      // Source text shown in another script is marked word by word (see snippet).
+      const shown = sides.flatMap((s, i) => {
+        if (side !== "all" && side !== s.id) return [];
+        const entry = r.sides[i];
+        const html = entry && snippet(entry.text, entry.keys, ts, s.role === "source" && Boolean(activeScript()));
+        return html ? [`<p class="${s.role}" lang="${s.lang}">${html}</p>`] : [];
+      });
+      if (!shown.length) continue;
       total++;
       if (hits.length >= 300) continue;
       const href = `${BASE}${r.row[0]}/#${encodeURIComponent(r.row[1])}`;
       hits.push(`<li><a class="ref" href="${href}">${esc(m.title)} <span>${esc(r.row[1])}</span></a>
-        ${on ? `<p class="on" lang="${lang.code}">${on}</p>` : ""}${en ? `<p class="en">${en}</p>` : ""}</li>`);
+        ${shown.join("")}</li>`);
     }
     results.innerHTML = hits.join("");
     applyScript(results);
@@ -258,7 +278,7 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
     margin: 0.25rem 0 0;
     line-height: 1.45;
   }
-  #results :global(p.en) {
+  #results :global(p.translation) {
     color: var(--muted);
   }
 </style>

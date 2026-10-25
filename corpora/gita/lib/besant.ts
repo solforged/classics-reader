@@ -1,4 +1,4 @@
-import type { EnUnit } from "../../../scripts/core/types";
+import type { TextUnit } from "../../../scripts/core/types";
 import { CHAPTERS } from "../sources";
 
 const ORDINALS = [
@@ -124,12 +124,12 @@ function english(wiki: string, page: number): string {
 
 export interface BesantChapter {
   title: string;
-  verses: Map<number, EnUnit[]>;
+  verses: Map<number, TextUnit[]>;
 }
 
 /** Keep speakers in source order, including those within verses 1.21 and 1.28. */
-function verseUnits(text: string, verse: number): EnUnit[] {
-  const units: EnUnit[] = [];
+function verseUnits(text: string, verse: number): TextUnit[] {
+  const units: TextUnit[] = [];
   let cursor = 0;
   let stanzas = 0;
   let heads = 0;
@@ -205,7 +205,7 @@ export function parseBesant(chapterWiki: string, pageWiki: readonly string[], ch
     title = "The yoga of the indestructible supreme eternal";
   }
   text = text.slice(0, colophon.index).trim();
-  const verses = new Map<number, EnUnit[]>();
+  const verses = new Map<number, TextUnit[]>();
   let next = 1;
   let cursor = 0;
   for (const marker of text.matchAll(/\u0004(\d+)(?:-(\d+))?\u0005/gu)) {

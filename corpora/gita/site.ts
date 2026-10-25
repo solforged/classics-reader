@@ -66,7 +66,7 @@ export const site: ReaderSite = {
   countNote: "Counts use DCS annotation. Each written token counts once for each lemma it contains, including " +
     "words joined by sandhi or in compounds. Forms DCS leaves unannotated count as probable when all their candidate " +
     "analyses agree on one lemma. Glosses come from the DCS dictionary (Oliver Hellwig, CC BY 4.0).",
-  translation: "English",
+  sides: [{ id: "sa", role: "source", label: "Sanskrit" }, { id: "en", role: "translation", label: "English", lang: "en" }],
   groups: GROUPS,
   works: DISCOURSES.map(([english, summary], index) => ({
     slug: `bhagavad-gita-${index + 1}`,
@@ -76,10 +76,9 @@ export const site: ReaderSite = {
     summary,
     collection: "Mahābhārata, Bhīṣmaparvan",
     group: GROUPS[Math.floor(index / 6)]!,
-    prose: false,
-    unit: "Verse",
+    levels: [{ name: "Verse" }],
     sources: {
-      on: "Digital Corpus of Sanskrit (Hellwig), CC BY 4.0",
+      sa: "Digital Corpus of Sanskrit (Hellwig), CC BY 4.0",
       en: "Annie Besant (4th ed., 1922)",
     },
   })),
