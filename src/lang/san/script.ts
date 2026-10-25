@@ -33,6 +33,12 @@ export function iastToDevanagari(input: string): string {
   const text = input.normalize("NFC").toLowerCase();
   let out = "";
   for (let i = 0; i < text.length;) {
+    // The sacred syllable is written ॐ at the start of a word (oṃ, oṃkāra), as a vowel and anusvāra elsewhere.
+    if (text.startsWith("oṃ", i) && (i === 0 || !/\p{L}/u.test(text[i - 1]!))) {
+      out += "ॐ";
+      i += 2;
+      continue;
+    }
     const consonant = match(text, i, CONSONANTS);
     if (consonant) {
       out += CONSONANTS[consonant];

@@ -1,5 +1,6 @@
 import type { Article } from "../../../src/lib/dict";
 import { fold } from "../../../src/lang/san/spelling";
+import { repairSpelling } from "./repair";
 
 export interface DictionaryRow {
   id: string;
@@ -26,9 +27,9 @@ export function parseDictionary(source: string): DcsDictionary {
     if (cols.length !== 5) throw new Error(`Expected five DCS dictionary columns: ${line}`);
     const [id, word, grammar, preverbs, meanings] = cols as [string, string, string, string, string];
     if (byId.has(id)) throw new Error(`Duplicate DCS dictionary id ${id}`);
-    const row = { id, word, grammar, preverbs, meanings: meanings.split(";").map((sense) => sense.trim()).filter(Boolean) };
+    const row = { id, word: repairSpelling(word), grammar, preverbs, meanings: meanings.split(";").map((sense) => sense.trim()).filter(Boolean) };
     byId.set(id, row);
-    const key = fold(word);
+    const key = fold(row.word);
     const group = byWord.get(key) ?? [];
     group.push(row);
     byWord.set(key, group);

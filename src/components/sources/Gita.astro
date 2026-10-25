@@ -1,27 +1,108 @@
 ---
 // Sources and licences of the Gītā Reader (src/pages/sources.astro).
+import { CHAPTERS, DCS_COMMIT } from "../../../scripts/gita/sources";
+
+const dcsBase = `https://raw.githubusercontent.com/OliverHellwig/sanskrit/${DCS_COMMIT}/`;
+const chapterTwo = CHAPTERS.find((source) => source.chapter === 2)!;
 ---
 <h2>Sanskrit</h2>
 <dl>
   <dt>Oliver Hellwig, <i>Digital Corpus of Sanskrit</i> (DCS)</dt>
   <dd>
-    Bhagavadgītā chapter 12 (Mahābhārata 6, BhaGī 12) from the DCS CoNLL-U release,
-    <a href="https://github.com/OliverHellwig/sanskrit">OliverHellwig/sanskrit</a>, commit <code>8aeed5a</code>. Licensed
-    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. The reader shows the DCS surface text in IAST,
-    split into half-verses at the DCS sentence boundaries, with the speaker lines as headings. Lemmas and
-    segmentation are used unchanged; the morphological tags are converted to Universal Dependencies spelling
-    (<i>CONJ</i> becomes <i>CCONJ</i>), keeping the DCS-specific values <i>Case=Cpd</i> (compound member) and
-    <i>Tense=Impf</i>.
+    All eighteen chapters of the Bhagavadgītā, with 700 Sanskrit verses, from the DCS CoNLL-U release.
+    The repository is <a href="https://github.com/OliverHellwig/sanskrit">OliverHellwig/sanskrit</a>, pinned to
+    commit <code>{DCS_COMMIT}</code>. The text, annotation and dictionary are licensed
+    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+  </dd>
+  <dt>Display and morphology</dt>
+  <dd>
+    The reader uses DCS written tokens in IAST, with sentence boundaries as verse-line boundaries and speaker
+    sentences as headings. Multiword-token ranges preserve sandhi and compounds. Revised syntactic passages
+    in chapters 1 and 2 already have segmented spellings. Those spellings are retained; sandhi is not invented.
+    A source sentence can span a whole verse or less than a half-verse, so not every verse occupies two lines.
+    <i>CONJ</i> becomes <i>CCONJ</i>. DCS-specific values such as <i>Case=Cpd</i> (compound member),
+    <i>Tense=Impf</i> (imperfect), <i>Mood=Jus</i> (jussive), <i>Mood=Cond</i> (conditional) and
+    <i>Formation=peri/s</i> (periphrastic or sigmatic formation) are retained and labelled.
   </dd>
 </dl>
+<details>
+  <summary>Pinned Sanskrit chapter files</summary>
+  <ol>
+    {CHAPTERS.map((source) => <li>
+      <a href={dcsBase + source.dcsFile}><code>{source.dcsFile.split("/").at(-1)}</code></a>
+    </li>)}
+  </ol>
+  <p>
+    Chapter 2 also uses the same-commit
+    <a href={dcsBase + chapterTwo.dcsFile + "_parsed"}><code>.conllu_parsed</code> companion</a>
+    for the missing first half of verse 21, as described below.
+  </p>
+</details>
 
 <h2>English</h2>
 <dl>
-  <dt>Annie Besant, <i>The Bhagavad-Gita</i>, 4th edition (Adyar: Theosophical Publishing House, 1922)</dt>
+  <dt>Annie Besant, <i>The Bhagavad-Gita</i>, fourth edition (Adyar: Theosophical Publishing House, 1922)</dt>
   <dd>
-    Public domain (published 1922; Besant died 1933). From
-    <a href="https://en.wikisource.org/wiki/Bhagavad-Gita_(Besant_4th)/Discourse_12">English Wikisource</a>. Only the
-    English is used; Besant’s footnotes are left out. Her verse numbers match the DCS verses one to one.
+    Public domain, published in 1922; Besant died in 1933.
+    The English comes from all eighteen discourses on
+    <a href="https://en.wikisource.org/wiki/Bhagavad-Gita_(Besant_4th)">English Wikisource</a>.
+    Each discourse and each transcluded scan page has its own pinned revision.
+    Pages are joined before numbered verses are extracted, because English sentences can cross page boundaries.
+    Historical wording is retained; the chapter 8 title corrects the transcription’s “indesctructible”.
+    Translator’s footnotes are omitted.
+  </dd>
+</dl>
+<details>
+  <summary>Pinned Wikisource revisions</summary>
+  <ol>
+    {CHAPTERS.map((source) => <li>
+      <a href={`https://en.wikisource.org/w/index.php?title=${encodeURIComponent(`Bhagavad-Gita (Besant 4th)/Discourse ${source.chapter}`)}&oldid=${source.discourseOldid}`}>
+        Discourse {source.chapter}
+      </a>: <code>{source.discourseOldid}</code>.
+      Scan pages: {source.pages.map(([page, oldid], index) => <>
+        {index ? "; " : ""}
+        <a href={`https://en.wikisource.org/w/index.php?title=${encodeURIComponent(`Page:Bhagavad Gita - Annie Besant 4th edition.djvu/${page}`)}&oldid=${oldid}`}>{page}</a>
+        {" "}<code>{oldid}</code>
+      </>)}.
+    </li>)}
+  </ol>
+</details>
+
+<h2>Alignment and source exceptions</h2>
+<dl>
+  <dt>Verse numbering</dt>
+  <dd>
+    Row numbers follow DCS. Besant has an additional opening question by Arjuna in chapter 13.
+    Her verse 13.1 therefore has its own row, <code>0</code>, with English only.
+    Every DCS verse 13.N faces Besant verse 13.N+1. The reader retains all 701 numbered English verses.
+  </dd>
+  <dt>Revised DCS passages</dt>
+  <dd>
+    Some revised syntactic sentences in chapters 1 and 2 have no verse counters.
+    A checked-in table maps their exact sentence ids and text to the corresponding verses.
+    DCS verse 2.21 lacks its first half in the main file: sentence <code>230721_1</code> (2.20b)
+    is followed by <code>230723_1</code> (2.21b).
+    Its first half is recovered from the same-commit companion sentence <code>229134_1_0</code>,
+    including that witness’s seven annotated words. No replacement analyses are generated.
+  </dd>
+  <dt>Four forms without usable annotation</dt>
+  <dd>
+    DCS sentence <code>231624</code> (13.11b) includes <i>proktam ajñānaṃ</i> in its text comment
+    but lacks their word rows. Sentence <code>231635</code> (13.17a) similarly lacks rows for
+    <i>tajjyotis tamasaḥ</i>. These four written forms remain in their text positions, with no analyses.
+    Clicking them reports that no analysis is available. The chapter 13 companion has corrupted token-to-analysis
+    assignments at these positions and is not used for recovery.
+    The full English verses, Besant 13.12 and 13.18, remain alongside them.
+  </dd>
+  <dt>Wikisource transcription</dt>
+  <dd>
+    Explicit source exceptions repair malformed labels at 3.42, 6.23, 8.20, 9.14 and 18.32, and recover the
+    omitted labels at 10.31 and 11.8. English 17.19 is misnumbered 20, and 18.14 is misnumbered 15;
+    the adjacent Sanskrit numbers and neighbouring verses establish the intended labels.
+    No English verse paragraphs are merged or omitted.
+    The source colophon for chapter 8 spells <i>indesctructible</i>; that transcription is retained.
+    The transcription’s truncated wording in 11.25 is retained too.
+    English speaker headings are not added where the transcription omits them, at 6.33 and 11.32.
   </dd>
 </dl>
 
@@ -29,19 +110,29 @@
 <dl>
   <dt>Word analyses</dt>
   <dd>
-    Every word carries the DCS lemma and morphology for that occurrence. A written form that joins several words by
-    sandhi or in a compound lists its words in order, each with its own analysis and dictionary entry.
+    Annotated words carry the DCS lemma and morphology for that occurrence.
+    A written form that joins several words lists its constituents in order, each with its own analysis.
+    No grammatical analysis is inferred for the four explicitly listed unannotated forms.
   </dd>
   <dt>DCS dictionary</dt>
   <dd>
-    The dictionary that accompanies the DCS (<code>dcs/data/conllu/lookup/dictionary.csv</code>), by Oliver Hellwig,
-    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Entries are matched to lemmas through the
-    DCS lemma ids.
+    The dictionary is <a href={dcsBase + "dcs/data/conllu/lookup/dictionary.csv"}><code>dictionary.csv</code></a>,
+    matched through DCS lemma ids and licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+    Despite its filename, it has tab-separated columns. Some fields contain unquoted newlines.
+    Its compact meanings are split into senses at semicolons. Headwords without meanings receive no invented entry.
+  </dd>
+  <dt>Damaged source lemma spellings</dt>
+  <dd>
+    Three DCS lemmas and headwords store a vocalic letter as a halfwidth-forms code point: <code>k[U+FFB1]p</code>,
+    <code>āp[U+FFDE]</code> and <code>atit[U+FFDE]</code> (at 2.15, 14.26 and 18.53; 2.70; and 13.25). The reader
+    repairs them to <i>kḷp</i>, <i>āpṝ</i> and <i>atitṝ</i>; the corpus forms <i>kalpate</i>, <i>āpūryamāṇam</i> and
+    <i>atitaranti</i> confirm the roots.
   </dd>
 </dl>
 
 <h2>Licence of this site’s data</h2>
 <p>
   The aligned text, word analyses and lexicon are derived from CC BY 4.0 sources and are shared under the same
-  licence. Besant’s translation remains in the public domain.
+  licence. Citation mappings, companion-source recovery and transcription-marker repairs are this reader’s
+  modifications. Besant’s translation remains in the public domain.
 </p>

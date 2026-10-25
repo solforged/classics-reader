@@ -5,7 +5,7 @@ Each reader is one site built from the same pages: the original language sits be
 public-domain English translation, one aligned stanza, verse or chapter per row.
 
 - **The Edda Reader**: the Poetic and Prose Eddas in Old Norse.
-- **The Gītā Reader**: Bhagavadgītā chapter 12 in Sanskrit (IAST).
+- **The Gītā Reader**: the Bhagavadgītā, all 18 chapters, in Sanskrit (IAST or Devanagari).
 
 ## The Edda Reader
 
@@ -40,9 +40,10 @@ opens the homograph section that fits the reading (`src/lib/entry.ts`).
 
 ## The Gītā Reader
 
-The Sanskrit is the surface text of the Digital Corpus of Sanskrit (Oliver Hellwig, CC BY 4.0),
-with its lemma and morphology for every word; the English is Annie Besant's fourth edition (1922),
-aligned verse by verse. A written form that joins words by sandhi or in a compound
+The Sanskrit of all 700 verses is the surface text of the Digital Corpus of Sanskrit (Oliver Hellwig,
+CC BY 4.0), with its lemma and morphology for every word; the English is Annie Besant's fourth edition
+(1922), aligned verse by verse. DCS gives chapters 1 and 2 only in a revised, word-segmented form, so
+those verses show the words without sandhi. A written form that joins words by sandhi or in a compound
 (*parayopetāste*) opens one card per word, each with its segmented form, grammar and entry from the
 DCS dictionary. Search ignores IAST diacritics (`sraddha` finds *śraddhā*). The top-bar toggle shows the
 Sanskrit in Devanagari on every page (`src/lang/san/script.ts`, `src/scripts/script.ts`); text is
@@ -57,7 +58,7 @@ bun run data           # parse, align, index → generated/edda/
 bun run build          # static site → dist/edda/
 bun run preview
 
-bun run fetch:gita     # DCS chapter, DCS dictionary, Besant pages → .cache/sources/gita
+bun run fetch:gita     # DCS chapters, DCS dictionary, Besant pages → .cache/sources/gita
 bun run data:gita      # → generated/gita/
 bun run build:gita     # → dist/gita/ (READER=gita astro build)
 ```
@@ -84,8 +85,10 @@ bun run build:gita     # → dist/gita/ (READER=gita astro build)
   generated from Zoëga's grammar notes and from proper names (`inflect/`, validated against
   Wiktionary), Menota tags to UD morphology (`menota.ts`) and structured dictionary articles
   (`articles.ts`). It fails if an alignment misses or repeats a unit.
-- `scripts/gita/`: the Gītā build: pinned fetch, CoNLL-U and DCS dictionary parsers, DCS tags to UD,
-  Besant's pages. It fails if a verse is missing or repeated on either side.
+- `scripts/gita/`: the Gītā build: pinned sources (`sources.ts`), CoNLL-U and DCS dictionary parsers,
+  DCS tags to UD, Besant's pages, and the exceptions: DCS blocks without verse numbers, recovered and
+  unanalysed words (`alignment.ts`), and Besant's extra verse 13.1 (`english-alignment.ts`). It fails if a
+  verse is missing or repeated on either side, or on a morphology value with no English label.
 - `alignment/<slug>.json`: the curated row-by-row crosswalk between the two sides of the Eddas.
 - `src/pages/`: home, reader (`[slug]`), search, lexicon, sources.
 

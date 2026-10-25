@@ -1,3 +1,5 @@
+import { repairSpelling } from "./repair";
+
 export interface DcsWord {
   id: number;
   form: string;
@@ -10,14 +12,23 @@ export interface DcsWord {
 export interface DcsToken {
   form: string;
   words: DcsWord[];
+  /** Only alignment.ts may mark the four explicitly missing chapter 13 forms. */
+  unanalysed?: true;
 }
 
-export interface DcsSentence {
+/** Unresolved citations occur in DCS's syntactically revised source blocks. */
+export interface DcsSourceSentence {
   id: string;
-  verse: number;
-  part: number;
+  verse: number | null;
+  part: number | null;
   text: string;
   tokens: DcsToken[];
+}
+
+/** Citation resolution and source exceptions belong to gita/alignment.ts. */
+export interface DcsSentence extends DcsSourceSentence {
+  verse: number;
+  part: number;
 }
 
 function fields(text: string): Record<string, string> {
@@ -32,9 +43,19 @@ function fields(text: string): Record<string, string> {
   return out;
 }
 
-/** Range rows are written tokens; the integer rows they cover are ordered grammatical words. */
-export function parseConllu(source: string): DcsSentence[] {
-  const sentences: DcsSentence[] = [];
+function counter(value: string | undefined, id: string): number | null {
+  if (value === undefined) return null;
+  if (!/^[1-9]\d*$/u.test(value)) throw new Error(`Invalid DCS citation in ${id}: ${value}`);
+  return Number(value);
+}
+
+/**
+ * Range rows are written tokens; their integer rows are ordered grammatical words.
+ * This reads source structure only. readDcsChapter validates citations and #text
+ * against the explicitly documented source omissions in alignment.ts.
+ */
+export function parseConllu(source: string): DcsSourceSentence[] {
+  const sentences: DcsSourceSentence[] = [];
   const ids = new Set<string>();
   for (const block of source.trim().split(/\r?\n\s*\r?\n/u)) {
     const meta: Record<string, string> = {};
@@ -43,7 +64,10 @@ export function parseConllu(source: string): DcsSentence[] {
     for (const line of block.split(/\r?\n/u)) {
       if (line.startsWith("#")) {
         const match = /^# (\w+)\s*=\s*(.*)$/u.exec(line);
-        if (match) meta[match[1]!] = match[2]!;
+        if (match) {
+          if (Object.hasOwn(meta, match[1]!)) throw new Error(`Duplicate DCS metadata: ${line}`);
+          meta[match[1]!] = match[2]!;
+        }
         continue;
       }
       if (!line.trim()) continue;
@@ -54,7 +78,7 @@ export function parseConllu(source: string): DcsSentence[] {
       if (range) {
         const start = Number(range[1]);
         const end = Number(range[2]);
-        if (start !== words.length + 1 || end <= start || ranges.has(start)) {
+        if (!form || form === "_" || start !== words.length + 1 || end <= start || ranges.has(start)) {
           throw new Error(`Invalid CoNLL-U token range ${id} in ${meta.sent_id}`);
         }
         ranges.set(start, { end, form });
@@ -62,17 +86,21 @@ export function parseConllu(source: string): DcsSentence[] {
         if (!/^\d+$/u.test(id) || Number(id) !== words.length + 1) {
           throw new Error(`Nonconsecutive CoNLL-U word ${id} in ${meta.sent_id}`);
         }
-        if (!form || form === "_" || !lemma || lemma === "_") throw new Error(`Unanalysed DCS word in ${meta.sent_id}: ${id}`);
-        words.push({ id: Number(id), form, lemma, upos, features, misc: fields(misc) });
+        if (!form || form === "_" || !lemma || lemma === "_" || !upos || upos === "_") {
+          throw new Error(`Unanalysed DCS word in ${meta.sent_id}: ${id}`);
+        }
+        words.push({ id: Number(id), form, lemma: repairSpelling(lemma), upos, features, misc: fields(misc) });
       }
     }
-    if (!words.length) continue;
-    const id = meta.sent_id;
-    const verse = Number(meta.sent_counter);
-    const part = Number(meta.sent_subcounter);
-    if (!id || !Number.isInteger(verse) || verse < 1 || !Number.isInteger(part) || part < 1) {
-      throw new Error(`Missing DCS citation metadata: ${JSON.stringify(meta)}`);
+    if (!words.length) {
+      if (meta.sent_id || ranges.size) throw new Error(`Empty DCS sentence ${meta.sent_id}`);
+      continue;
     }
+    const id = meta.sent_id;
+    if (!id) throw new Error(`Missing DCS sentence id: ${JSON.stringify(meta)}`);
+    const verse = counter(meta.sent_counter, id);
+    const part = counter(meta.sent_subcounter, id);
+    if ((verse === null) !== (part === null)) throw new Error(`Incomplete DCS citation in ${id}`);
     if (ids.has(id)) throw new Error(`Duplicate DCS sentence ${id}`);
     ids.add(id);
     const tokens: DcsToken[] = [];
@@ -88,9 +116,7 @@ export function parseConllu(source: string): DcsSentence[] {
       index = end;
     }
     const text = meta.text;
-    if (!text || tokens.map((token) => token.form).join(" ") !== text) {
-      throw new Error(`DCS surface tokens do not reproduce sentence ${id}`);
-    }
+    if (!text) throw new Error(`Missing DCS sentence text in ${id}`);
     sentences.push({ id, verse, part, text, tokens });
   }
   return sentences;

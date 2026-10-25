@@ -39,7 +39,9 @@ export const lemmaSlugs = (() => {
   const map = new Map<string, string>();
   const taken = new Set<string>();
   for (const { lemma } of LEXICON) {
-    const base = lemma.normalize("NFC").toLowerCase().replace(/[\s/?#%\\]+/g, "-");
+    // Unassigned and control characters (a stray U+FFDE in one DCS lemma) cannot be file names.
+    const base = lemma.normalize("NFC").toLowerCase().replace(/[\p{Cn}\p{Cc}\p{Co}\p{Cs}]/gu, "")
+      .replace(/[\s/?#%\\]+/g, "-");
     let slug = base;
     for (let i = 2; taken.has(slug); i++) slug = `${base}-${i}`;
     taken.add(slug);
