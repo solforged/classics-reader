@@ -1,4 +1,4 @@
-// Dictionary shard records (public/lex/<shard>.json), written by scripts/build-data.ts and read by the word panel and
+// Dictionary shard records (public/lex/<shard>.json), written by corpora/edda/build.ts and read by the word panel and
 // the lemma pages. Each shard maps the pack's fold(lemma) to a DictHit. Entries are structured at build time by the
 // pack's parser for each dictionary, so src/lib/entry.ts renders every language the same way.
 

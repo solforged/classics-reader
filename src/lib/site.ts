@@ -1,7 +1,7 @@
 // Build-time access to the active site's works, lexicon and shards (generated/<site>/, scripts/core/outputs.ts).
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { LemmaStat, Work } from "../../scripts/lib/types";
+import type { LemmaStat, Work } from "../../scripts/core/types";
 import { lang, shardOf } from "../lang";
 import { site } from "../sites";
 import type { WorkInfo } from "../sites/types";

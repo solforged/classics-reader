@@ -9,7 +9,7 @@ import { cp, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { shardFile } from "../../src/lib/shard";
 import { parseMorph } from "../../src/lib/morph";
-import type { Analysis, LemmaStat, Row, SearchRow, Work } from "../lib/types";
+import type { Analysis, LemmaStat, Row, SearchRow, Work } from "./types";
 
 export const ROOT = join(import.meta.dir, "..", "..");
 
@@ -154,6 +154,7 @@ export class Concordance {
     return this.lemmas.size;
   }
 
+  /** Writes search.json and lexicon.json. `glossFor` gives a lemma's full gloss; the lexicon keeps 70 characters. */
   async write(
     outputs: Outputs,
     glossFor: (lemma: string, morph: string) => string,
@@ -185,7 +186,7 @@ export class Concordance {
           ...(groups.size > 1 ? { classes: [...group.classes], ...(!first ? { homograph: key } : {}) } : {}),
           count: group.count, works: group.works,
           occ: group.occ.sort((a, b) => a[4] - b[4]).slice(0, 400).map(([slug, row, line, probable]) => [slug, row, line, probable]),
-          gloss: glossFor(lemma, group.morph),
+          gloss: shortGloss(glossFor(lemma, group.morph)),
         });
         first = false;
       }
@@ -194,3 +195,5 @@ export class Concordance {
     await Bun.write(join(outputs.data, "lexicon.json"), JSON.stringify(lexicon));
   }
 }
+
+const shortGloss = (gloss: string): string => gloss.length <= 70 ? gloss : `${gloss.slice(0, 70).trimEnd()}…`;

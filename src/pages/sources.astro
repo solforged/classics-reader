@@ -1,11 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
-import Edda from "../components/sources/Edda.astro";
-import Gita from "../components/sources/Gita.astro";
+import Credits from "@reader/sources";
 import { site } from "../lib/site";
-
-const Credits = { edda: Edda, gita: Gita }[site.id];
-if (!Credits) throw new Error(`no sources page for ${site.id}`);
 ---
 
 <Base title={`Sources & licences · ${site.name}`} crumbs={[{ label: "Sources & licences" }]}>

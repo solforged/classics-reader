@@ -1,0 +1,17 @@
+import type { LanguagePack } from "../../src/lang/types";
+import { DICTIONARIES } from "./dictionaries";
+import { describeMorph } from "./morph";
+import { iastToDevanagari } from "./script";
+import { fold, searchContext, searchKey } from "./spelling";
+
+export const pack: LanguagePack = {
+  code: "sa-Latn",
+  name: "Sanskrit",
+  fold,
+  searchKey,
+  searchContext,
+  describeMorph,
+  dictionaries: DICTIONARIES,
+  scriptLabel: "IAST",
+  scripts: [{ id: "deva", label: "देवनागरी", tag: "sa-Deva", convert: iastToDevanagari }],
+};
