@@ -32,7 +32,8 @@ export type AnalysisSource = "e" | "a" | "w" | "n";
 /**
  * [lemma, UD morphology (src/lib/morph.ts) or "", source, word]. `word` is the word as the edition segments it, when
  * one written form joins several words (Norse enclitics, Sanskrit sandhi and compounds): the token's edition
- * analyses are then its words in order. An empty word marks an independent surface the edition does not supply.
+ * analyses are then its words in order. A single Sanskrit word also carries it when sandhi changes its written form
+ * (mano for manaḥ). An empty word marks an independent surface the edition does not supply.
  */
 export type Analysis = [lemma: string, morph: string, source: AnalysisSource, word?: string];
 
@@ -63,8 +64,9 @@ export interface Work {
   intro?: string[];
 }
 
-/** [slug, row id, source-language text, translation text] */
-export type SearchRow = [string, string, string, string];
+/** [slug, row id, source-language text, translation text, segments: [start, end, words] where a written form's
+ *  words differ from it (scripts/core/outputs.ts)] */
+export type SearchRow = [string, string, string, string, ([number, number, string][])?];
 
 /** A lexicon entry (data/lexicon.json). */
 export interface LemmaStat {

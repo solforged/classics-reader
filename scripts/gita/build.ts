@@ -45,8 +45,10 @@ function piecesFor(tokens: readonly DcsToken[], context: string, table: Analysis
         sanskrit.describeMorph(morph); // Throws on any word class, feature or value without an English label.
         labelledMorphs.add(morph);
       }
-      return table.add(multiword
-        ? [word.lemma, morph, "e", word.misc.Unsandhied || word.form]
+      // The word as DCS segments it, when sandhi changes the written form or the token joins several words.
+      const unsandhied = (word.misc.Unsandhied || word.form).normalize("NFC");
+      return table.add(multiword || unsandhied !== token.form.normalize("NFC")
+        ? [word.lemma, morph, "e", unsandhied]
         : [word.lemma, morph, "e"]);
     });
     if (!ids.length) {
@@ -144,7 +146,7 @@ function eachWord(work: Work, visit: (piece: [string, number[]], head: boolean) 
 for (const work of works) {
   eachWord(work, ([form, ids], head) => {
     const analysis = ids.length === 1 ? work.analyses[ids[0]!]! : undefined;
-    if (!analysis || analysis[2] !== "e" || analysis[3]) return;
+    if (!analysis || analysis[2] !== "e") return;
     const key = sanskrit.fold(form);
     for (const index of head ? [attested.head, attested.any] : [attested.any]) {
       const tally = index.get(key) ?? new Map();

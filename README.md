@@ -55,11 +55,15 @@ The Sanskrit of all 700 verses uses the lemma and morphology of the Digital Corp
 verse. Chapters 1 and 2 show Besant's sandhied Devanagari text, transliterated into IAST and aligned
 to the DCS analyses; chapters 3–18 retain the DCS surface text. A written form that joins words by
 sandhi or in a compound (*parayopetāste*) opens one card per word, each with its segmented form,
-grammar and entry from the DCS dictionary. Of the thirteen written forms DCS leaves unannotated (Besant's
+grammar and entry from the DCS dictionary; a single word whose written form sandhi changed (*mano*) shows
+its segmented form (*manaḥ*) too. Of the thirteen written forms DCS leaves unannotated (Besant's
 extra speaker captions, *vidhīyate* at 2.67, four words in chapter 13), all but *tajjyotis* show
 *candidate* analyses that DCS gives the same form elsewhere. Search ignores IAST diacritics (`sraddha` finds *śraddhā*)
 and accepts Devanagari (`श्रद्धा` finds *śraddhā* too), in the search page and the lexicon filter. It treats
-anusvāra and a class nasal before a stop as the same letter (`saṃjaya` finds *sañjaya*).
+anusvāra and a class nasal before a stop as the same letter (`saṃjaya` finds *sañjaya*). Queries also match
+the words as DCS segments them, so `"parayā upetāḥ"` finds *parayopetāste* and `manah` finds *mano*;
+`search.json` carries those segmentations per verse (`scripts/core/outputs.ts`). Old Norse forms the edition
+splits into a word and an enclitic (*vildu*, segmented *vild u*) match the same way.
 The top-bar toggle shows the Sanskrit in Devanagari on every page (`src/lang/san/script.ts`,
 `src/scripts/script.ts`); text is still stored, searched and linked in IAST. Credits are in
 `src/components/sources/Gita.astro`.

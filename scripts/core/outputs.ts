@@ -8,12 +8,34 @@
 import { cp, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { shardFile } from "../../src/lib/shard";
-import type { Analysis, LemmaStat, Piece, Row, SearchRow, Work } from "../lib/types";
+import type { Analysis, LemmaStat, Row, SearchRow, Work } from "../lib/types";
 
 export const ROOT = join(import.meta.dir, "..", "..");
 
-const plain = (lines: Piece[][]) =>
-  lines.map((l) => l.map((p) => (typeof p === "string" ? p : p[0])).join("")).join(" / ");
+/**
+ * A row's search entry. The source-language text joins units and lines with " / ". Written forms whose edition
+ * analyses give the words differently (sandhi, compounds: parayopetāste = parayā upetāḥ te) add a segment
+ * [start, end, words] over the text, so a query in the separate words finds the written form.
+ */
+function searchRow(slug: string, row: Row, analyses: readonly Analysis[]): SearchRow {
+  let on = "";
+  const segments: [number, number, string][] = [];
+  row.on.forEach((unit, u) => unit.lines.forEach((line, l) => {
+    if (u || l) on += " / ";
+    for (const piece of line) {
+      if (typeof piece === "string") {
+        on += piece;
+        continue;
+      }
+      const words = piece[1].map((id) => analyses[id]!).filter((a) => a[2] === "e" && a[3]).map((a) => a[3]!).join(" ");
+      const start = on.length;
+      on += piece[0];
+      if (words && words !== piece[0]) segments.push([start, on.length, words]);
+    }
+  }));
+  const en = row.en.map((u) => u.lines.join(" / ")).join(" / ");
+  return segments.length ? [slug, row.id, on, en, segments] : [slug, row.id, on, en];
+}
 
 export class Outputs {
   readonly data: string;
@@ -75,7 +97,7 @@ export class Concordance {
   addWork(slug: string, rows: readonly Row[], analyses: readonly Analysis[]): WorkCounts {
     const counts: WorkCounts = { words: 0, parsed: 0, annotated: 0 };
     for (const row of rows) {
-      this.search.push([slug, row.id, row.on.map((u) => plain(u.lines)).join(" / "), row.en.map((u) => u.lines.join(" / ")).join(" / ")]);
+      this.search.push(searchRow(slug, row, analyses));
       for (const u of row.on) {
         for (const line of u.lines) {
           const lineText = line.map((p) => (typeof p === "string" ? p : p[0])).join("");

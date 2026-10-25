@@ -43,11 +43,20 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
   import { lang } from "../lang";
   import { activeScript, applyScript } from "../scripts/script";
 
-  type Row = [slug: string, id: string, on: string, en: string];
+  /** [slug, row id, source-language text, translation text, segments] (scripts/core/outputs.ts). A segment
+   *  [start, end, words] gives the separate words of a written form joined by sandhi or compounding. */
+  type Row = [slug: string, id: string, on: string, en: string, segments?: [number, number, string][]];
+  /** A search key; key character i came from text characters start[i]..end[i]. */
+  interface Keyed {
+    key: string;
+    start: number[];
+    end: number[];
+  }
   interface Indexed {
     row: Row;
-    on: { key: string; map: number[] };
-    en: { key: string; map: number[] };
+    /** The source-language text, plus the same text with segmented forms in their separate words. */
+    on: Keyed[];
+    en: Keyed[];
   }
   const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
   const meta = JSON.parse(document.getElementById("meta")!.textContent!) as Record<
@@ -60,24 +69,46 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
   let side = "all";
   let coll = "all";
 
-  /** Search key plus, for each key character, the index of the source character it came from. */
-  function keyed(s: string) {
+  /** Keys characters [char, text start, text end] one at a time, then applies the pack's context rules. */
+  function keyed(chars: Iterable<readonly [string, number, number]>): Keyed {
     let key = "";
-    const map: number[] = [];
-    for (let i = 0; i < s.length; i++) {
-      const c = s[i]!;
+    const start: number[] = [];
+    const end: number[] = [];
+    for (const [c, a, b] of chars) {
       const k = /\s/.test(c) ? " " : lang.searchKey(c);
-      for (let j = 0; j < k.length; j++) map.push(i);
+      for (let j = 0; j < k.length; j++) {
+        start.push(a);
+        end.push(b);
+      }
       key += k;
     }
-    return { key: lang.searchContext ? lang.searchContext(key) : key, map };
+    return { key: lang.searchContext ? lang.searchContext(key) : key, start, end };
+  }
+
+  function* textChars(s: string, from = 0, to = s.length): Generator<[string, number, number]> {
+    for (let i = from; i < to; i++) yield [s[i]!, i, i + 1];
+  }
+
+  /** The text with each segment's written form replaced by its words; every word character maps to the form. */
+  function* segmentedChars(s: string, segments: readonly [number, number, string][]): Generator<[string, number, number]> {
+    let pos = 0;
+    for (const [a, b, words] of segments) {
+      yield* textChars(s, pos, a);
+      for (const c of words) yield [c, a, b];
+      pos = b;
+    }
+    yield* textChars(s, pos);
   }
 
   let index: Promise<Indexed[]> | undefined;
   const load = () =>
     (index ??= fetch(`${BASE}search.json`)
       .then((r) => r.json() as Promise<Row[]>)
-      .then((rows) => rows.map((row) => ({ row, on: keyed(row[2]), en: keyed(row[3]) }))));
+      .then((rows) => rows.map((row) => ({
+        row,
+        on: [keyed(textChars(row[2])), ...(row[4] ? [keyed(segmentedChars(row[2], row[4]))] : [])],
+        en: [keyed(textChars(row[3]))],
+      }))));
 
   function terms(q: string): string[] {
     const out: string[] = [];
@@ -90,26 +121,29 @@ const collections = [...new Set(WORKS.map((w) => w.collection))];
 
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  /** Snippet with the matches marked. `whole` widens marks to whole words, so text shown in another script
-   *  (src/scripts/script.ts) is converted word by word rather than split mid-word. */
-  function snippet(text: string, k: { key: string; map: number[] }, ts: string[], whole = false): string | undefined {
+  /** Snippet with the matches marked; every term must occur in one of the keys. `whole` widens marks to whole
+   *  words, so text shown in another script (src/scripts/script.ts) is converted word by word, not mid-word. */
+  function snippet(text: string, keys: readonly Keyed[], ts: string[], whole = false): string | undefined {
     const spans: [number, number][] = [];
     for (const t of ts) {
-      let from = 0;
       let found = false;
-      for (let at = k.key.indexOf(t, from); at >= 0; at = k.key.indexOf(t, from)) {
-        let [a, b] = [k.map[at]!, k.map[at + t.length - 1]! + 1];
-        if (whole) {
-          while (a > 0 && !/\s/.test(text[a - 1]!)) a--;
-          while (b < text.length && !/\s/.test(text[b]!)) b++;
+      for (const k of keys) {
+        let from = 0;
+        for (let at = k.key.indexOf(t, from); at >= 0; at = k.key.indexOf(t, from)) {
+          let [a, b] = [k.start[at]!, k.end[at + t.length - 1]!];
+          if (whole) {
+            while (a > 0 && !/\s/.test(text[a - 1]!)) a--;
+            while (b < text.length && !/\s/.test(text[b]!)) b++;
+          }
+          spans.push([a, b]);
+          found = true;
+          from = at + t.length;
         }
-        spans.push([a, b]);
-        found = true;
-        from = at + t.length;
       }
       if (!found) return undefined;
     }
-    spans.sort((a, b) => a[0] - b[0]);
+    // The longest span first among those starting together, so a word match does not cut a segment's mark short.
+    spans.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
     const first = spans[0]![0];
     const start = Math.max(0, text.lastIndexOf(" ", Math.max(0, first - 90)));
     let end = Math.min(text.length, first + 260);
