@@ -8,11 +8,21 @@ import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { WORKS, type WorkDef } from "./catalog";
 import { entryFits, fold, shardOf } from "../src/lib/norse";
+import type { DictHit } from "../src/lib/dict";
 import { AnalysisTable, FormIndex } from "./lib/analyses";
 import { parseBellows } from "./lib/bellows";
 import { parseBugge } from "./lib/bugge";
+import { NameIndex } from "./lib/names";
 import { eaeUnits, headText, parseEae } from "./lib/eae";
-import { indexDictionary, indexEae, indexWiktionary, sanitizeDef, type DictEntry } from "./lib/lexicon";
+import {
+  dictionaryHeadword,
+  indexDictionary,
+  indexEae,
+  indexWiktionary,
+  looseDictionaryKey,
+  sanitizeDef,
+  type DictEntry,
+} from "./lib/lexicon";
 import { parseBrodeur, parseSnorra } from "./lib/snorra";
 import type { EnUnit, OnUnit, Piece, RawWork, Row, Work } from "./lib/types";
 
@@ -30,6 +40,15 @@ console.log(`form index: ${index.size.toLocaleString()} spellings`);
 const bellows = parseBellows(await read("bellows/bellows.html"));
 const brodeur: Record<string, EnUnit[]> = {};
 for (const s of ["prologue", "gylfaginning", "skaldskaparmal"]) brodeur[s] = parseBrodeur(await read(`brodeur/${s}.html`));
+
+// Bellows's index of names glosses proper nouns and names unanalysed capitalized words in the prose.
+const names = new NameIndex(
+  await read("bellows/bellows.html"),
+  new Map(WORKS.flatMap((w) => (w.bellows ? [[w.bellows, w.slug] as const] : []))),
+);
+/** Proper-noun lemmas seen so far; WORKS lists the poems (edition-annotated) before the prose. */
+const knownNames = new Set<string>();
+const nameFor = (surface: string) => names.lemmaFor(surface, knownNames);
 
 // ---------------------------------------------------------------- raw works
 
@@ -84,7 +103,7 @@ function eaeSide(def: WorkDef, table: AnalysisTable): OnUnit[] {
 
 async function rawWork(def: WorkDef): Promise<RawWork> {
   const diplomatic = !def.eae && !!def.bugge;
-  const table = new AnalysisTable(index, diplomatic);
+  const table = new AnalysisTable(index, diplomatic, nameFor);
   let on: OnUnit[] = [];
   let en: EnUnit[] = [];
   let notes: Record<string, string> = {};
@@ -95,7 +114,7 @@ async function rawWork(def: WorkDef): Promise<RawWork> {
     const heads: Record<string, string> = { "svipdag1.html": "Grógaldr", "svipdag2.html": "Fjölsvinnsmál" };
     for (const [i, file] of def.bugge.entries()) {
       // Bugge supplies the end of Sigrdrífumál, lost in the Codex Regius lacuna.
-      const lacunaTable = def.eae ? new AnalysisTable(index, true) : table;
+      const lacunaTable = def.eae ? new AnalysisTable(index, true, nameFor) : table;
       const units = parseBugge(await read(`bugge/${file}`), lacunaTable, {
         keyPrefix: `b${i + 1}.`,
         fromStanza: def.eae ? 30 : undefined,
@@ -252,6 +271,7 @@ for (const def of WORKS) {
   for (const a of raw.analyses) {
     usedLemmas.add(a[0]);
     if (!lemmaMsa.has(a[0]) || a[2] === "e") lemmaMsa.set(a[0], a[1]);
+    if (a[1].startsWith("xNP") && a[2] !== "n") knownNames.add(a[0]);
   }
   for (const row of rows) {
     search.push([def.slug, row.id, row.on.map((u) => plain(u.lines)).join(" / "), row.en.map((u) => u.lines.join(" / ")).join(" / ")]);
@@ -300,32 +320,169 @@ function pct(a: number, b: number) {
 
 await Bun.write(join(ROOT, "public", "search.json"), JSON.stringify(search));
 
-// Dictionary shards: only lemmas that occur in the corpus.
-const zoega = indexDictionary(JSON.parse(await read("lex/zoega.json")) as DictEntry[]);
-const cv = indexDictionary(JSON.parse(await read("lex/cleasby-vigfusson.json")) as DictEntry[]);
-const shards = new Map<string, Record<string, unknown>>();
+// Dictionary shards: corpus lemmas, plus the headwords needed to explain compounds.
+const zoegaEntries = JSON.parse(await read("lex/zoega.json")) as DictEntry[];
+const cvEntries = JSON.parse(await read("lex/cleasby-vigfusson.json")) as DictEntry[];
+const zoega = indexDictionary(zoegaEntries);
+const cv = indexDictionary(cvEntries);
+const looseZoega = indexDictionary(zoegaEntries, looseDictionaryKey);
+const looseCv = indexDictionary(cvEntries, looseDictionaryKey);
+const shards = new Map<string, Record<string, DictHit>>();
 const shortGloss = new Map<string, string>();
-let withGloss = 0;
-for (const lemma of usedLemmas) {
+
+function dictionaryHit(lemma: string, msa = ""): DictHit {
   const k = fold(lemma);
-  if (!k) continue;
-  const msa = lemmaMsa.get(lemma) ?? "";
-  const z = zoega
-    .get(k)
-    ?.map((e) => ({ w: e.word, d: e.definitions.map(sanitizeDef) }))
-    .sort((a, b) => Number(entryFits(msa, b.d.join(" "))) - Number(entryFits(msa, a.d.join(" "))));
-  const c = cv.get(k)?.map((e) => ({ w: e.word, d: e.definitions.map((d) => (d.length > 2400 ? `${d.slice(0, 2400)}…` : d)) }));
+  const proper = /^\p{Lu}/u.test(lemma);
+  const accepts = (e: DictEntry) => !proper || /^\p{Lu}/u.test(dictionaryHeadword(e.word));
+  // CV's all-capital common headwords are typography, not evidence for a name spelling.
+  const acceptsLoose = (e: DictEntry) => {
+    if (!accepts(e) || (proper && !/\p{Ll}/u.test(dictionaryHeadword(e.word)))) return false;
+    const head = e.definitions.join(" ").replace(/<[^>]+>/g, "").replace(/\badj\./g, "a.").slice(0, 80);
+    const ranked = /\bx(?:NC|NP|VB|AJ|NO|AV|AQ|AP|CC|CS|CU|PD|NA|RP|IT|IM)\b/.test(msa);
+    const grammar = /(?:^|[\s,(;])(?:m|f|n|a|adv|prep|pron|v)\./.test(head);
+    return !ranked || !grammar || entryFits(msa, head);
+  };
+  let ze = zoega.get(k)?.filter(accepts);
+  let ce = cv.get(k)?.filter(accepts);
+  const loose = looseDictionaryKey(lemma);
+  if (!ze?.length) ze = looseZoega.get(loose)?.filter(acceptsLoose);
+  if (!ce?.length) ce = looseCv.get(loose)?.filter(acceptsLoose);
+  const z = ze?.length
+    ? ze.map((e) => ({ w: e.word, d: e.definitions.map(sanitizeDef) }))
+      .sort((a, b) => Number(entryFits(msa, b.d.join(" "))) - Number(entryFits(msa, a.d.join(" "))))
+    : undefined;
+  const c = ce?.length
+    ? ce.map((e) => ({ w: e.word, d: e.definitions.map((d) => (d.length > 2400 ? `${d.slice(0, 2400)}…` : d)) }))
+    : undefined;
   const w = wiktGlosses.get(k);
-  if (!z && !c && !w) continue;
-  withGloss++;
-  // Zoëga italicizes the English sense; its first italic span is a good one-line gloss.
-  const italic = z?.[0]?.d.join(" ").match(/<i>([^<]+)<\/i>/)?.[1];
-  const gloss = (italic ?? w?.[0]?.glosses[0] ?? "").replace(/[;,.:\s]+$/, "");
-  if (gloss) shortGloss.set(lemma, gloss.length > 70 ? `${gloss.slice(0, 70)}…` : gloss);
+  const printed = z?.[0]?.w ?? c?.[0]?.w;
+  const headword = printed ? dictionaryHeadword(printed) : undefined;
+  const via = headword && fold(headword) !== k ? headword : undefined;
+  return { z, c, w, via };
+}
+
+/** Zoëga italicizes its English senses; Wiktionary is the fallback for a brief gloss. */
+function dictionaryGloss(hit: DictHit): string {
+  const italic = hit.z?.[0]?.d.join(" ").match(/<i>([^<]+)<\/i>/)?.[1];
+  return (italic ?? hit.w?.[0]?.glosses[0] ?? "").replace(/[;,.:\s]+$/, "");
+}
+
+const NOUN_GRAMMAR = /(?:^|[\s,(;])[mfn]\./;
+const ADJECTIVE_GRAMMAR = /(?:^|[\s,(;])(?:a|adj)\./;
+const ADVERB_GRAMMAR = /(?:^|[\s,(;])adv\./;
+type PartRole = "noun" | "adjective" | "first";
+interface CompoundPart {
+  word: string;
+  hit: DictHit;
+  gloss: string;
+  ambiguous: boolean;
+}
+
+const headwords = new Map<string, string>();
+const prefixes = new Map<string, string>();
+for (const entries of [zoegaEntries, cvEntries]) {
+  for (const e of entries) {
+    let word = dictionaryHeadword(e.word);
+    // Lowercase compounds should not be decomposed into personal or place names.
+    if (/^\p{Lu}/u.test(word) && /\p{Ll}/u.test(word)) continue;
+    word = word.toLowerCase();
+    const k = fold(word);
+    if (entries === zoegaEntries && /[-‑]$/.test(e.word) && /\bprefix(?:ed)?\b|\bcompds?\b/.test(e.definitions.join(" "))) {
+      prefixes.set(k, `${word}-`);
+    }
+    if (k && !headwords.has(k)) headwords.set(k, word);
+  }
+}
+
+function compoundPart(word: string, role: PartRole): CompoundPart | undefined {
+  if (role === "first" && !zoega.has(fold(word))) return undefined;
+  const hit = dictionaryHit(word, role === "noun" ? "xNC" : role === "adjective" ? "xAJ" : "");
+  const prefix = word.endsWith("-");
+  // The first element needs Zoëga evidence; a second element may use CV when Zoëga lacks it.
+  const entries = (hit.z ?? (role === "first" ? undefined : hit.c)) ?? [];
+  for (const entry of entries) {
+    if (prefix && !/[-‑]$/.test(entry.w)) continue;
+    const sections = entry.d.join(" ").split(/<strong>[IVX]+\)<\/strong>/).filter((s) => s.trim());
+    const section = sections.find((s) => {
+      if (prefix) return true;
+      const lead = s.split("<i>", 1)[0]!.replace(/<[^>]+>/g, "");
+      if (role === "noun") return NOUN_GRAMMAR.test(lead);
+      if (role === "adjective") return ADJECTIVE_GRAMMAR.test(lead);
+      return NOUN_GRAMMAR.test(lead) || ADJECTIVE_GRAMMAR.test(lead) || ADVERB_GRAMMAR.test(lead);
+    });
+    if (!section) continue;
+    const italic = section.match(/<i>([^<]+)<\/i>/)?.[1];
+    const gloss = (italic ?? hit.w?.[0]?.glosses[0] ?? "").replace(/[;,.:\s]+$/, "");
+    if (!gloss) continue;
+    return { word, hit, gloss, ambiguous: sections.length > 1 || entries.length > 1 };
+  }
+  return undefined;
+}
+
+function compoundParts(lemma: string, msa: string): [CompoundPart, CompoundPart] | undefined {
+  if (!/^\p{Ll}/u.test(lemma)) return undefined;
+  const role = /\bxNC\b/.test(msa) ? "noun" : /\bxAJ\b/.test(msa) ? "adjective" : undefined;
+  if (!role) return undefined;
+  const k = fold(lemma);
+  if (/(?:andi|inn|aðr)$/.test(k)) return undefined;
+  // Earliest boundary gives the longest second headword with matching grammar.
+  for (let at = 1; at <= k.length - 3; at++) {
+    const secondWord = headwords.get(k.slice(at));
+    const second = secondWord ? compoundPart(secondWord, role) : undefined;
+    if (!second) continue;
+    const prefix = k.slice(0, at);
+    const firstKeys = [prefix];
+    for (const ending of ["s", "a", "ar", "u", "i"]) {
+      if (prefix.endsWith(ending)) firstKeys.push(prefix.slice(0, -ending.length));
+    }
+    for (const key of firstKeys) {
+      const firstWord = prefixes.get(key) ?? (key.length >= 2 ? headwords.get(key) : undefined);
+      const first = firstWord ? compoundPart(firstWord, "first") : undefined;
+      if (first) return [first, second];
+    }
+  }
+  return undefined;
+}
+
+function writeHit(lemma: string, hit: DictHit, overwrite = false) {
   const shard = shardOf(lemma);
   const rec = shards.get(shard) ?? {};
-  rec[k] = { z, c, w };
+  const k = fold(lemma);
+  const old = rec[k];
+  if (!old) rec[k] = hit;
+  else if (overwrite) {
+    // fold() lowercases, so a proper noun and a common noun (Askr, askr) share one record: merge, don't replace.
+    const merged: DictHit = { ...old };
+    for (const [key, value] of Object.entries(hit)) if (value !== undefined) Object.assign(merged, { [key]: value });
+    rec[k] = merged;
+  }
   shards.set(shard, rec);
+}
+
+let withGloss = 0;
+for (const lemma of usedLemmas) {
+  if (!fold(lemma)) continue;
+  const msa = lemmaMsa.get(lemma) ?? "";
+  const hit = dictionaryHit(lemma, msa);
+  let gloss = dictionaryGloss(hit);
+  const proper = msa.startsWith("xNP");
+  const n = proper ? names.glosses(lemma) : [];
+  if (n.length) {
+    hit.n = n;
+    // A proper noun's own identification beats a gloss of the common word it shares a spelling with.
+    gloss = [...new Set(n.map((e) => e.desc))].slice(0, 2).join("; ");
+  }
+  if (!hit.z && !hit.c && !hit.w && !hit.n) {
+    const parts = compoundParts(lemma, msa);
+    if (!parts) continue;
+    hit.parts = parts.map((part) => part.word);
+    // Do not turn an ambiguous homograph into an asserted compound translation.
+    gloss = parts.some((part) => part.ambiguous) ? "" : parts.map((part) => part.gloss).join(" + ");
+    for (const part of parts) writeHit(part.word, part.hit);
+  }
+  withGloss++;
+  if (gloss) shortGloss.set(lemma, gloss.length > 70 ? `${gloss.slice(0, 70)}…` : gloss);
+  writeHit(lemma, hit, true);
 }
 for (const [s, rec] of shards) await Bun.write(join(ROOT, "public", "lex", `${s}.json`), JSON.stringify(rec));
 

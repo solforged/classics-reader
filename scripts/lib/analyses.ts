@@ -1,6 +1,6 @@
 // Word analyses: per-work table of [lemma, msa, source] plus a form index for unannotated text.
 import { fold } from "../../src/lib/norse";
-import type { Analysis, AnalysisSource } from "./types";
+import type { Analysis } from "./types";
 
 /** Spelling differences between the Snorra Edda / Bugge texts and the Codex Regius edition's normalization. */
 const NORMAL_STEPS: [RegExp, string][] = [
@@ -47,8 +47,13 @@ export function spellingVariants(key: string, diplomatic: boolean): string[] {
 
 const deaccent = (k: string) => k.normalize("NFD").replace(/\p{M}/gu, "").normalize("NFC");
 
+interface IndexedAnalysis {
+  analysis: Analysis;
+  count: number;
+}
+
 export class FormIndex {
-  private forms = new Map<string, Map<string, Analysis>>();
+  private forms = new Map<string, Map<string, IndexedAnalysis>>();
   /** Accent-less keys, for diplomatic text that writes Óðinn as Oðinn. */
   private bare = new Map<string, Set<string>>();
 
@@ -61,8 +66,12 @@ export class FormIndex {
     if (!m) this.forms.set(k, (m = new Map()));
     const id = `${analysis[0]}\t${analysis[1]}`;
     const prev = m.get(id);
-    // Attested (edition) analyses outrank Wiktionary-derived ones.
-    if (!prev || (prev[2] === "w" && analysis[2] !== "w")) m.set(id, analysis);
+    // Each edition annotation contributes one attestation of this form and reading.
+    if (!prev) m.set(id, { analysis, count: analysis[2] === "e" ? 1 : 0 });
+    else {
+      if (analysis[2] === "e") prev.count++;
+      if (prev.analysis[2] === "w" && analysis[2] !== "w") prev.analysis = analysis;
+    }
     const b = deaccent(k);
     if (b !== k) {
       let s = this.bare.get(b);
@@ -71,13 +80,22 @@ export class FormIndex {
     }
   }
 
-  private hit(k: string, diplomatic: boolean): Map<string, Analysis> | undefined {
+  private hit(k: string, diplomatic: boolean): Map<string, IndexedAnalysis> | undefined {
     const h = this.forms.get(k);
     if (h || !diplomatic) return h;
     const keys = this.bare.get(deaccent(k));
     if (!keys) return undefined;
-    const merged = new Map<string, Analysis>();
-    for (const key of keys) for (const [id, a] of this.forms.get(key)!) merged.set(id, a);
+    const merged = new Map<string, IndexedAnalysis>();
+    for (const key of keys) {
+      for (const [id, a] of this.forms.get(key)!) {
+        const prev = merged.get(id);
+        if (!prev) merged.set(id, { ...a });
+        else {
+          prev.count += a.count;
+          if (prev.analysis[2] === "w" && a.analysis[2] !== "w") prev.analysis = a.analysis;
+        }
+      }
+    }
     return merged;
   }
 
@@ -95,10 +113,12 @@ export class FormIndex {
   }
 }
 
-/** Attested analyses only, if there are any; otherwise Wiktionary candidates. */
-function rank(list: Analysis[]): Analysis[] {
-  const attested = list.filter((a) => a[2] !== "w");
-  return (attested.length ? attested : list).slice(0, 8);
+/** Most frequent attested readings first; Wiktionary candidates only when none are attested. */
+function rank(list: IndexedAnalysis[]): Analysis[] {
+  const attested = list.filter((a) => a.analysis[2] !== "w");
+  return (attested.length ? attested.sort((a, b) => b.count - a.count) : list)
+    .slice(0, 8)
+    .map((a) => a.analysis);
 }
 
 /** Per-work analysis table; ids index into Work.analyses. */
@@ -109,6 +129,7 @@ export class AnalysisTable {
   constructor(
     private index: FormIndex,
     private diplomatic = false,
+    private names?: (surface: string) => string | undefined,
   ) {}
 
   add(a: Analysis): number {
@@ -124,8 +145,11 @@ export class AnalysisTable {
 
   /** Candidate analyses for an unannotated surface form. Attested-elsewhere entries are tagged "a". */
   lookup(surface: string): number[] {
-    return this.index
-      .get(surface, this.diplomatic)
-      .map((a) => this.add([a[0], a[1], a[2] === "e" ? "a" : a[2]]));
+    const analyses = this.index.get(surface, this.diplomatic);
+    if (!analyses.length && /^\p{Lu}/u.test(surface)) {
+      const lemma = this.names?.(surface);
+      if (lemma) return [this.add([lemma, "xNP", "n"])];
+    }
+    return analyses.map((a) => this.add([a[0], a[1], a[2] === "e" ? "a" : a[2]]));
   }
 }

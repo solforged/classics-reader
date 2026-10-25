@@ -1,12 +1,9 @@
 // Reader page behaviour: column view, word panel, translator's notes, go-to, citation links, reading position.
 import { decodeMsa, fold, shardOf } from "../lib/norse";
+import type { DictHit } from "../lib/dict";
+import { dictionaryHtml } from "../lib/entry";
 
-type ClientAnalysis = [lemma: string, msa: string, source: "e" | "a" | "w", slug: string, count: number];
-interface DictHit {
-  z?: { w: string; d: string[] }[];
-  c?: { w: string; d: string[] }[];
-  w?: { pos: string; glosses: string[] }[];
-}
+type ClientAnalysis = [lemma: string, msa: string, source: "e" | "a" | "w" | "n", slug: string, count: number];
 
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const json = <T,>(id: string): T => JSON.parse(document.getElementById(id)?.textContent ?? "null") as T;
@@ -128,22 +125,56 @@ const SOURCE_NOTE: Record<ClientAnalysis[2], string> = {
   e: "",
   a: `<span class="badge" title="Not annotated here; this spelling is annotated this way elsewhere in the Codex Regius edition">candidate</span>`,
   w: `<span class="badge" title="Not annotated here; candidate from Wiktionary inflection tables">candidate</span>`,
+  n: `<span class="badge" title="Not annotated here; read as a proper name from its spelling, with no grammatical analysis">name</span>`,
 };
 
-function dictHtml(hit: DictHit | undefined): string {
-  if (!hit) return `<div class="dict"><p class="wp-empty">No dictionary entry found.</p></div>`;
-  const parts: string[] = [];
-  if (hit.z?.length)
-    parts.push(
-      `<h4>Zoëga</h4>${hit.z.map((e) => `<p><b>${esc(e.w)}</b> ${e.d.join(" ")}</p>`).join("")}`,
-    );
-  if (hit.w?.length && !hit.z?.length)
-    parts.push(`<h4>Wiktionary</h4>${hit.w.map((e) => `<p><i>${esc(e.pos)}</i> ${esc(e.glosses.join("; "))}</p>`).join("")}`);
-  if (hit.c?.length)
-    parts.push(
-      `<details><summary>Cleasby–Vigfússon</summary>${hit.c.map((e) => `<p><b>${esc(e.w)}</b> ${esc(e.d.join(" "))}</p>`).join("")}</details>`,
-    );
-  return `<div class="dict">${parts.join("")}</div>`;
+function readingsHtml(readings: ClientAnalysis[]): string {
+  const seen = new Set<string>();
+  const unique = readings.map((reading) => ({
+    morph: decodeMsa(reading[1]),
+    features: new Map(reading[1].split(/\s+/).filter(Boolean).map((token) => [token[0]!, token.slice(1)])),
+  })).filter(({ morph }) => {
+    const key = `${morph.pos}:${morph.form}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  const groups: (typeof unique)[] = [];
+  for (const reading of unique) {
+    const group = groups.find((group) => {
+      if (group[0]!.morph.pos !== reading.morph.pos) return false;
+      const features = [...group.map((item) => item.features), reading.features];
+      const keys = new Set(features.flatMap((f) => [...f.keys()]));
+      return [...keys].filter((key) => new Set(features.map((f) => f.get(key))).size > 1).length === 1;
+    });
+    if (group) group.push(reading);
+    else groups.push([reading]);
+  }
+  const severalClasses = new Set(unique.map((reading) => reading.morph.pos)).size > 1;
+  const forms = groups.map((group) => {
+    const words = group.map((reading) => reading.morph.form.split(" "));
+    const first = words[0]!;
+    let prefix = 0;
+    let suffix = 0;
+    if (words.length > 1) {
+      while (prefix < first.length && words.every((w) => w[prefix] === first[prefix])) prefix++;
+      while (
+        suffix < first.length - prefix &&
+        words.every((w) => w[w.length - 1 - suffix] === first[first.length - 1 - suffix])
+      ) suffix++;
+    }
+    const alternatives = words.map((w) => w.slice(prefix, suffix ? -suffix : undefined).join(" "));
+    const joined = alternatives.length > 1
+      ? `${alternatives.slice(0, -1).join(", ")} or ${alternatives.at(-1)}`
+      : alternatives[0]!;
+    const form = [...first.slice(0, prefix), joined, ...first.slice(first.length - suffix)].filter(Boolean).join(" ");
+    return `${severalClasses ? `${group[0]!.morph.pos}: ` : ""}${form}`;
+  }).filter(Boolean);
+  const first = forms[0] ? `<p class="form">${esc(forms[0])}</p>` : "";
+  if (forms.length < 2) return first;
+  const others = groups.slice(1).reduce((count, group) => count + group.length, 0);
+  return `${first}<details class="other-readings"><summary>other readings (${others})</summary>` +
+    `${forms.slice(1).map((form) => `<p class="form">${esc(form)}</p>`).join("")}</details>`;
 }
 
 async function showWord(el: HTMLElement) {
@@ -160,36 +191,56 @@ async function showWord(el: HTMLElement) {
     return;
   }
   const items = ids.map((id) => analyses[id]!).filter(Boolean);
-  const blocks = items.map(([lemma, msa, source, lemmaSlug, count], i) => {
-    const m = decodeMsa(msa);
-    const lemmaHtml = lemmaSlug ? `<a href="${BASE}lexicon/${encodeURIComponent(lemmaSlug)}/">${esc(lemma)}</a>` : esc(lemma);
-    const occurs = lemmaSlug && count ? `<div class="meta">${count.toLocaleString("en")} occurrence${count === 1 ? "" : "s"} in the reader · <a href="${BASE}lexicon/${encodeURIComponent(lemmaSlug)}/">concordance</a></div>` : "";
+  // One card per lemma and word class: vit the noun and vit the pronoun are different words.
+  const grouped = new Map<string, ClientAnalysis[]>();
+  for (const item of items) {
+    const key = `${item[0]}\t${item[1].split(" ")[0]}`;
+    const readings = grouped.get(key);
+    if (readings) readings.push(item);
+    else grouped.set(key, [item]);
+  }
+  const groups = [...grouped.values()];
+  const lemmasShown = new Set(items.map((item) => item[0]));
+  const editionLemmas = new Set(items.filter((item) => item[2] === "e").map((item) => item[0]));
+  const enclitic = editionLemmas.size > 1;
+  const candidates = items.some((item) => item[2] === "a" || item[2] === "w");
+  const blocks = groups.map((readings, i) => {
+    const [lemma, , source, lemmaSlug, count] = readings[0]!;
+    const morphs = readings.map((reading) => decodeMsa(reading[1]));
+    const pos = [...new Set(morphs.map((m) => m.pos))].join(" / ");
+    const props = [...new Set(morphs.flatMap((m) => m.props))];
+    const href = lemmaSlug ? `${BASE}lexicon/${encodeURIComponent(lemmaSlug)}/` : "";
+    const lemmaHtml = href ? `<a href="${href}">${esc(lemma)}</a>` : esc(lemma);
+    const occurs = href && count
+      ? `<div class="meta">${count.toLocaleString("en")} occurrence${count === 1 ? "" : "s"} in the reader · ` +
+        `<a href="${href}">concordance</a></div>`
+      : "";
+    const slot = `<div class="dict-slot"><p class="wp-empty">Loading dictionary…</p></div>`;
+    const dictionaryBlock = i > 0 && candidates && !enclitic
+      ? `<details class="candidate-dictionary"><summary>Dictionary</summary>${slot}</details>`
+      : slot;
     return `<div class="an" data-i="${i}">
-      <div><span class="lemma">${lemmaHtml}</span> <span class="pos">${esc(m.pos)}</span>${SOURCE_NOTE[source]}</div>
-      ${m.form ? `<p class="form">${esc(m.form)}</p>` : ""}
-      ${m.props.length ? `<div class="props">${esc(m.props.join(" · "))}</div>` : ""}
+      <div><span class="lemma">${lemmaHtml}</span> <span class="pos">${esc(pos)}</span>${SOURCE_NOTE[source]}</div>
+      ${readingsHtml(readings)}
+      ${props.length ? `<div class="props">${esc(props.join(" · "))}</div>` : ""}
       ${occurs}
-      <div class="dict-slot"><p class="wp-empty">Loading dictionary…</p></div>
+      ${dictionaryBlock}
     </div>`;
   });
-  const note =
-    items.length > 1 && items.every((a) => a[2] === "e")
-      ? `<p class="props">This written form combines ${items.length} grammatical words.</p>`
-      : items.some((a) => a[2] !== "e")
-        ? `<p class="props">Possible analyses (the edition does not annotate this word):</p>`
-        : "";
+  const note = enclitic
+    ? `<p class="props">This written form combines ${editionLemmas.size} grammatical words.</p>`
+    : candidates
+      ? `<p class="props">Possible analyses (the edition does not annotate this word):</p>`
+      : "";
   body.innerHTML = note + blocks.join("");
-  // Several analyses can share a lemma; fetch each dictionary entry once.
-  const unique = [...new Set(items.map((a) => a[0]))];
-  const hits = new Map(await Promise.all(unique.map(async (l) => [l, await dictionary(l)] as const)));
+  const hits = new Map(await Promise.all([...lemmasShown].map(async (lemma) => [lemma, await dictionary(lemma)] as const)));
+  const partNames = new Set([...hits.values()].flatMap((hit) => hit?.parts ?? []));
+  const parts = new Map(await Promise.all([...partNames].map(async (part) => [part, await dictionary(part)] as const)));
   if (selected !== el) return;
-  const shown = new Set<string>();
   body.querySelectorAll<HTMLElement>(".an").forEach((block) => {
-    const lemma = items[Number(block.dataset.i)]![0];
-    const slot = block.querySelector(".dict-slot")!;
-    if (shown.has(lemma)) slot.remove();
-    else slot.outerHTML = dictHtml(hits.get(lemma));
-    shown.add(lemma);
+    const [lemma, msa, source] = groups[Number(block.dataset.i)]![0]!;
+    const content = dictionaryHtml(hits.get(lemma), { msa, work: slug, parts, properNoun: source === "n" });
+    block.querySelector(".dict-slot")!.outerHTML = `<div class="dict">${content}</div>`;
   });
 }
 

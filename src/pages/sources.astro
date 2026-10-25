@@ -66,7 +66,16 @@ import Base from "../layouts/Base.astro";
         Snorra Edda texts, and words the editors supplied), the panel lists possible analyses: spellings that the
         Codex Regius edition annotates the same way, and inflected forms from Wiktionary (via
         <a href="https://kaikki.org/dictionary/Old%20Norse/">kaikki.org</a>, CC BY-SA 4.0). These are marked
-        <i>candidate</i>: they are not chosen for context.
+        <i>candidate</i>: they are not chosen for context. The most frequent reading in the edition comes first.
+        Capitalized words in the prose that no analysis covers are matched against Bellows’s index of names and
+        marked <i>name</i>; they have no grammatical analysis.
+      </dd>
+      <dt>Dictionary lookup</dt>
+      <dd>
+        The edition’s lemmas use normalized spellings that the dictionaries do not always share (<i>loft</i>,
+        <i>heift</i>, <i>ǿði</i> against Zoëga’s <i>lopt</i>, <i>heipt</i>, <i>œði</i>). When the lemma is not a
+        headword, the panel shows the matching headword with a “Listed as” note. Compounds that no dictionary lists
+        are shown as their parts, each with its own entry.
       </dd>
       <dt>Geir T. Zoëga, <i>A Concise Dictionary of Old Icelandic</i> (Oxford, 1910)</dt>
       <dd>
@@ -78,6 +87,11 @@ import Base from "../layouts/Base.astro";
         Public domain. Digitization by Sampo Silvennoinen,
         <a href="https://github.com/stscoundrel/cleasby-vigfusson-dictionary">stscoundrel/cleasby-vigfusson-dictionary</a>
         (MIT), from the Germanic Lexicon Project.
+      </dd>
+      <dt>Henry Adams Bellows, “Pronouncing Index of Proper Names”, in <i>The Poetic Edda</i> (1923)</dt>
+      <dd>
+        Public domain. Identifies proper nouns, which Zoëga leaves out. Where Bellows lists several people of one
+        name, the panel shows the ones he cites in the pages of the poem being read.
       </dd>
       <dt>Wiktionary</dt>
       <dd>

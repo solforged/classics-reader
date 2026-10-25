@@ -119,6 +119,100 @@
     font-size: 0.75rem;
     color: var(--accent);
   }
+  .word-panel .other-readings summary,
+  .word-panel .candidate-dictionary > summary {
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    color: var(--accent);
+    margin-top: 0.4rem;
+  }
+  .word-panel .candidate-dictionary > summary {
+    border-top: 1px solid var(--border);
+    padding-top: 0.45rem;
+  }
+  .word-panel .candidate-dictionary .dict {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .word-panel .zoega-entry {
+    margin: 0.4rem 0 0.65rem;
+    overflow-wrap: anywhere;
+  }
+  .word-panel .entry-headword {
+    font-size: 1rem;
+  }
+  .word-panel .entry-section {
+    margin-top: 0.35rem;
+  }
+  .word-panel .entry-grammar {
+    color: var(--muted);
+    font-size: 0.85em;
+    line-height: 1.45;
+  }
+  .word-panel .entry-grammar strong {
+    color: var(--fg);
+    margin-right: 0.25rem;
+  }
+  .word-panel .entry-senses {
+    list-style: none;
+    padding: 0;
+    margin: 0.3rem 0;
+  }
+  .word-panel .entry-senses li {
+    position: relative;
+    padding-left: 1.6rem;
+    margin: 0.45rem 0;
+    line-height: 1.4;
+  }
+  .word-panel .sense-number {
+    position: absolute;
+    left: 0;
+    color: var(--faint);
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
+  }
+  .word-panel .sense-gloss i,
+  .word-panel .homograph-gloss i {
+    font-style: normal;
+  }
+  .word-panel .sense-examples {
+    display: block;
+    color: var(--muted);
+    font-size: 0.87em;
+    margin-top: 0.15rem;
+  }
+  .word-panel .headword-repeat {
+    color: color-mix(in srgb, var(--accent) 65%, var(--muted));
+  }
+  .word-panel abbr[title] {
+    text-decoration: underline dotted var(--faint);
+    text-underline-offset: 0.15em;
+    cursor: help;
+  }
+  .word-panel .other-homograph {
+    border-left: 2px solid var(--border);
+    padding-left: 0.5rem;
+  }
+  .word-panel .other-homograph > summary {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .word-panel .more-senses {
+    margin: 0.4rem 0 0.6rem 1.6rem;
+  }
+  .word-panel .more-senses .entry-senses {
+    margin-left: -1.6rem;
+  }
+  .word-panel .dict-via {
+    color: var(--muted);
+    font-size: 0.8em;
+  }
+  .word-panel .compound-part {
+    color: var(--muted);
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
   .wp-note {
     line-height: 1.5;
   }

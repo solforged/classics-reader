@@ -5,7 +5,7 @@ A static parallel-text reader for the Poetic and Prose Eddas, modelled on
 public-domain English translation, one aligned stanza (or chapter) per row.
 
 - Click any Old Norse word for its lemma, morphology and dictionary entries (Zoëga,
-  Cleasby–Vigfússon, Wiktionary).
+  Cleasby–Vigfússon, Wiktionary), or, for names, Bellows's index of proper names.
 - Bellows's notes open from the `n` markers beside his stanzas.
 - Every row has a stable anchor (`/voluspa/#45`); the margin number copies a link.
 - Full-text search covers both languages, and accents are optional (`thorr` finds *Þórr*).
@@ -22,8 +22,14 @@ public-domain English translation, one aligned stanza (or chapter) per row.
 See `src/pages/sources.astro` (served at `/sources/`) for full credits and licences.
 
 Codex Regius words use the edition's own annotation. Other texts get *candidate*
-analyses: spellings the edition annotates elsewhere, then Wiktionary inflection
-tables. About 80–92% of those words get a candidate.
+analyses: spellings the edition annotates elsewhere (most frequent first), then
+Wiktionary inflection tables, then Bellows's name index for capitalized words.
+About 80–93% of those words get a candidate.
+
+Dictionary lookup bridges the edition's spellings to the dictionaries' headwords
+(*loft*/*lopt*, *ǿði*/*œði*) and splits unlisted compounds into listed parts
+(`scripts/build-data.ts`). The panel renders Zoëga's entries as numbered senses and
+opens the homograph section that fits the reading (`src/lib/entry.ts`).
 
 ## Building
 
@@ -41,7 +47,8 @@ bun run preview
 
 - `scripts/catalog.ts`: the works, their groups and which source sections make up each side.
 - `scripts/lib/`: parsers (`eae.ts`, `bugge.ts`, `bellows.ts`, `snorra.ts`), the form index
-  (`analyses.ts`) and dictionary loading (`lexicon.ts`).
+  (`analyses.ts`), dictionary loading (`lexicon.ts`) and Bellows's name index (`names.ts`).
+- `src/lib/entry.ts`: renders dictionary entries for the word panel and the lemma pages.
 - `scripts/build-data.ts`: builds every output; fails if an alignment misses or repeats a unit.
 - `alignment/<slug>.json`: the curated row-by-row crosswalk between the two sides.
 - `src/lib/norse.ts`: spelling fold, search key and Menota morphology decoding, shared by the

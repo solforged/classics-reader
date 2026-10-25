@@ -26,8 +26,9 @@ export interface EnUnit {
 }
 
 /** Source of a word analysis. e = the edition's own annotation for this occurrence;
- * a = attested elsewhere in the annotated edition with this spelling; w = Wiktionary form table. */
-export type AnalysisSource = "e" | "a" | "w";
+ * a = attested elsewhere in the annotated edition with this spelling; w = Wiktionary form table;
+ * n = proper-name match from Bellows's index (msa "xNP", without inflection). */
+export type AnalysisSource = "e" | "a" | "w" | "n";
 /** [lemma, Menota msa tag string or "", source] */
 export type Analysis = [string, string, AnalysisSource];
 

@@ -15,6 +15,12 @@ export function indexEae(divs: Map<string, Element>, index: FormIndex) {
       const norm = w.getElementsByTagNameNS(ME, "norm")[0];
       const text = norm?.textContent?.replace(/\s+/g, " ").trim();
       if (!text) continue;
+      // A suffix inside an enclitic group is a fragment, not an independent-word candidate.
+      const parent = w.parentNode;
+      const fragment = parent?.nodeType === 1
+        && (parent as Element).localName === "seg"
+        && (parent as Element).getAttribute("type") === "enc";
+      if (lemma.startsWith("-") && (fragment || fold(text) === fold(lemma.slice(1)))) continue;
       index.add(text, [lemma.normalize("NFC"), w.getAttributeNS(ME, "msa") || "", "e"]);
     }
   }
@@ -100,7 +106,7 @@ export function indexWiktionary(jsonl: string, index: FormIndex): Map<string, Wi
   for (const line of jsonl.split("\n")) {
     if (!line) continue;
     const e = JSON.parse(line) as WiktEntry;
-    if (!e.word || e.word.includes(" ")) continue;
+    if (!e.word || e.word.includes(" ") || e.word.startsWith("-")) continue;
     const pos = e.pos;
     const own = (e.senses ?? []).filter((s) => !s.form_of?.length && s.glosses?.length);
     if (own.length) {
@@ -120,7 +126,7 @@ export function indexWiktionary(jsonl: string, index: FormIndex): Map<string, Wi
     }
     for (const s of e.senses ?? []) {
       for (const fo of s.form_of ?? []) {
-        if (fo.word) index.add(e.word, [fo.word, msaFrom(pos, s.tags), "w"]);
+        if (fo.word && !fo.word.startsWith("-")) index.add(e.word, [fo.word, msaFrom(pos, s.tags), "w"]);
       }
     }
   }
@@ -132,11 +138,36 @@ export interface DictEntry {
   definitions: string[];
 }
 
-/** fold(headword) → entries; CV headwords keep compound hyphens, which fold() drops. */
-export function indexDictionary(entries: DictEntry[]): Map<string, DictEntry[]> {
+/** A printed headword without homograph labels or compound separators. */
+export function dictionaryHeadword(word: string): string {
+  return word.replace(/\s*\(.*?\)\s*/g, "").replace(/\d+$/, "").replace(/[-‑·.]/g, "").trim();
+}
+
+/** Dictionary orthography only: keep long ø (ǿ/œ) distinct from o, and ö/ǫ distinct from both. */
+export function looseDictionaryKey(word: string): string {
+  return dictionaryHeadword(word)
+    .normalize("NFC")
+    .toLowerCase()
+    .replace(/[ǿœ]/g, "œ")
+    .replace(/[ǫøö]/g, "ø")
+    .replace(/[ǽę]/g, "æ")
+    .replace(/^ú/, "ó")
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .normalize("NFC")
+    .replace(/ft/g, "pt")
+    .replace(/endi$/, "indi")
+    .replace(/usta$/, "osta");
+}
+
+/** Headword → entries; the default key drops CV compound hyphens, as corpus lookups do. */
+export function indexDictionary(
+  entries: DictEntry[],
+  key: (word: string) => string = fold,
+): Map<string, DictEntry[]> {
   const map = new Map<string, DictEntry[]>();
   for (const e of entries) {
-    const k = fold(e.word.replace(/\s*\(.*?\)\s*/g, "").replace(/\d+$/, ""));
+    const k = key(dictionaryHeadword(e.word));
     if (!k) continue;
     const list = map.get(k) ?? [];
     list.push(e);

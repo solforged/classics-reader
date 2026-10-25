@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import { decodeMsa } from "../../lib/norse";
+import { dictionaryHtml } from "../../lib/entry";
 import { base, dictionaryEntry, LEXICON, lemmaSlugs, type LemmaStat, workBySlug, WORKS } from "../../lib/site";
 
 export function getStaticPaths() {
@@ -9,6 +10,7 @@ export function getStaticPaths() {
 
 const { stat } = Astro.props as { stat: LemmaStat };
 const dict = dictionaryEntry(stat.lemma);
+const parts = new Map(dict?.parts?.map((part) => [part, dictionaryEntry(part)]));
 const pos = decodeMsa(stat.pos).pos;
 const order = new Map(WORKS.map((w, i) => [w.slug, i]));
 const byWork = Object.entries(stat.works).sort((a, b) => order.get(a[0])! - order.get(b[0])!);
@@ -29,45 +31,9 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
       <i>{pos}</i>{stat.gloss && <> · {stat.gloss}</>} · {stat.count.toLocaleString("en")} occurrence{stat.count === 1 ? "" : "s"}
     </p>
 
-    <section class="dict">
-      {
-        dict?.z?.length ? (
-          <>
-            <h2>Zoëga, A Concise Dictionary of Old Icelandic (1910)</h2>
-            {dict.z.map((e) => (
-              <p>
-                <b>{e.w}</b> <span set:html={e.d.join(" ")} />
-              </p>
-            ))}
-          </>
-        ) : null
-      }
-      {
-        dict?.w?.length ? (
-          <>
-            <h2>Wiktionary</h2>
-            {dict.w.map((e) => (
-              <p>
-                <i>{e.pos}</i> {e.glosses.join("; ")}
-              </p>
-            ))}
-          </>
-        ) : null
-      }
-      {
-        dict?.c?.length ? (
-          <details>
-            <summary>Cleasby–Vigfússon, An Icelandic-English Dictionary (1874)</summary>
-            {dict.c.map((e) => (
-              <p>
-                <b>{e.w}</b> {e.d.join(" ")}
-              </p>
-            ))}
-          </details>
-        ) : null
-      }
-      {!dict && <p class="prose-note">No entry in Zoëga, Cleasby–Vigfússon or Wiktionary under this headword.</p>}
-    </section>
+    <section class="dict" set:html={dictionaryHtml(dict, {
+      parts, fullTitles: true, properNoun: stat.pos.startsWith("xNP"),
+    })} />
 
     <section>
       <h2>Frequency by work</h2>
@@ -112,7 +78,8 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
     color: var(--muted);
     margin-top: 0.2rem;
   }
-  h2 {
+  h2,
+  .dict :global(h2) {
     font-family: var(--sans);
     font-size: 0.75rem;
     letter-spacing: 0.1em;
@@ -121,16 +88,100 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
     margin: 2rem 0 0.5rem;
     font-weight: 600;
   }
-  .dict p {
+  .dict :global(p) {
     margin: 0.3rem 0;
     line-height: 1.45;
   }
-  .dict details summary {
+  .dict :global(details > summary) {
     cursor: pointer;
     font-family: var(--sans);
     font-size: 0.8rem;
     color: var(--accent);
     margin-top: 1rem;
+  }
+  .dict :global(.zoega-entry) {
+    margin: 0.6rem 0 1rem;
+    overflow-wrap: anywhere;
+  }
+  .dict :global(.entry-headword) {
+    font-size: 1.1rem;
+  }
+  .dict :global(.entry-section) {
+    margin-top: 0.5rem;
+  }
+  .dict :global(.entry-grammar) {
+    color: var(--muted);
+    font-size: 0.85em;
+    line-height: 1.45;
+  }
+  .dict :global(.entry-grammar strong) {
+    color: var(--fg);
+    margin-right: 0.25rem;
+  }
+  .dict :global(.entry-senses) {
+    list-style: none;
+    padding: 0;
+    margin: 0.4rem 0;
+  }
+  .dict :global(.entry-senses li) {
+    position: relative;
+    padding-left: 1.8rem;
+    margin: 0.6rem 0;
+    line-height: 1.45;
+  }
+  .dict :global(.sense-number) {
+    position: absolute;
+    left: 0;
+    color: var(--faint);
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
+  }
+  .dict :global(.sense-gloss i),
+  .dict :global(.homograph-gloss i) {
+    font-style: normal;
+  }
+  .dict :global(.sense-examples) {
+    display: block;
+    color: var(--muted);
+    font-size: 0.88em;
+    margin-top: 0.2rem;
+  }
+  .dict :global(.headword-repeat) {
+    color: color-mix(in srgb, var(--accent) 65%, var(--muted));
+  }
+  .dict :global(abbr[title]) {
+    text-decoration: underline dotted var(--faint);
+    text-underline-offset: 0.15em;
+    cursor: help;
+  }
+  .dict :global(.other-homograph) {
+    border-left: 2px solid var(--border);
+    padding-left: 0.7rem;
+  }
+  .dict :global(.other-homograph > summary) {
+    color: var(--muted);
+  }
+  .dict :global(.more-senses) {
+    margin: 0.5rem 0 0.8rem 1.8rem;
+  }
+  .dict :global(.more-senses > summary) {
+    margin-top: 0.4rem;
+  }
+  .dict :global(.more-senses .entry-senses) {
+    margin-left: -1.8rem;
+  }
+  .dict :global(.dict-via) {
+    color: var(--muted);
+    font-size: 0.8em;
+  }
+  .dict :global(.compound-part) {
+    color: var(--muted);
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
+  .dict :global(.wp-empty) {
+    color: var(--muted);
+    font-style: italic;
   }
   .freq {
     list-style: none;
