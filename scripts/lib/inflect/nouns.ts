@@ -1,10 +1,11 @@
 // Conservative Zoëga noun declensions, validated cell-by-cell against complete Wiktionary noun tables.
 // Enabled broad patterns clear 95% completely correct lemmas; smaller classes require explicit principal parts.
 // Unmarked masculine a-/i-stems, general feminine ō-/i-stems, unmarked weak-feminine genitive plurals,
-// ambiguous j-/v-stems and unspecified contraction are intentionally refused. Definite forms are not inferred.
+// ambiguous j-/v-stems and unspecified contraction are intentionally refused. Definite forms come from article.ts.
 import type { DictEntry } from "../../../src/lib/dict";
 import { fold } from "../../../src/lang/non/spelling";
 import type { Paradigm } from "../../../src/lib/paradigm";
+import { withArticle, type Gender } from "./article";
 import { grammarNotes, type Generated, type GrammarNote } from "./zoega";
 import { isVowel, syllables, syncopate, uUmlaut } from "./phonology";
 
@@ -237,12 +238,16 @@ export function inflectNoun(
   if (notes.length !== 1) return undefined;
   const generated = generate(headword, notes[0]!);
   if (!generated) return undefined;
-  for (const [key, forms] of Object.entries(attested ?? {})) {
-    const expected = generated.cells[key];
-    // Definite cells are deliberately not generated; their attestations cannot disprove an indefinite cell.
-    if (!expected) continue;
-    if (Object.keys(forms).some((form) => !expected.some((value) =>
-      fold(form.replace(/ǿ/g, "œ")) === fold(value.replace(/ǿ/g, "œ"))))) return undefined;
-  }
-  return generated;
+  const gender = notes[0]!.pos[0] as Gender;
+  const article = withArticle(generated.cells, gender);
+  const contradicts = (cells: Cells, key: string, forms: Record<string, number>) => {
+    const expected = cells[key];
+    return !!expected && Object.keys(forms).some((form) => !expected.some((value) =>
+      fold(form.replace(/ǿ/g, "œ")) === fold(value.replace(/ǿ/g, "œ"))));
+  };
+  const entries = Object.entries(attested ?? {});
+  if (entries.some(([key, forms]) => contradicts(generated.cells, key, forms))) return undefined;
+  // A contradicted article form drops the derived article forms, not the indefinite table they came from.
+  if (entries.some(([key, forms]) => contradicts(article, key, forms))) return generated;
+  return { ...generated, cells: { ...generated.cells, ...article } };
 }
