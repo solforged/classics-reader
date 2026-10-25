@@ -29,10 +29,10 @@ export interface Paradigm {
   attested: Record<string, Record<string, number>>;
   /**
    * "wiktionary": full table from Wiktionary; "zoega": generated from Zoëga's headword and grammar note;
-   * "edition": only the forms attested in the edition.
+   * "name": generated from a proper name's ending and gender; "edition": only forms attested in the edition.
    */
-  source: "wiktionary" | "zoega" | "edition";
-  /** For "zoega" tables, the grammar note the table was generated from, e.g. "(-s, -ar), m.". */
+  source: "wiktionary" | "zoega" | "name" | "edition";
+  /** For generated tables, the Zoëga grammar note or the proper-name inflection rule used. */
   note?: string;
 }
 

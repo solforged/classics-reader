@@ -105,10 +105,13 @@ export function shorten(stem: string): string {
   return SHORT[last] ? stem.slice(0, -1) + SHORT[last] : stem;
 }
 
-/** Syncope of the unstressed second-syllable vowel before a vowel ending (hamarr → hamri, mikill → miklir). */
-export function syncopate(stem: string): string {
-  const at = lastVowelGroup(stem);
-  if (at <= 0 || syllables(stem) < 2) return stem;
+/**
+ * Syncope of the unstressed second-syllable vowel before a vowel ending (hamarr → hamri, mikill → miklir).
+ * Pass true for a known unstressed final a/i/u before l/n, including hiatus (Dáin → Dán) and capitalized names.
+ */
+export function syncopate(stem: string, unstressedFinal = false): string {
+  const at = unstressedFinal ? stem.search(/[aiu][ln]$/) : lastVowelGroup(stem);
+  if (at <= 0 || !unstressedFinal && syllables(stem) < 2) return stem;
   return stem.slice(0, at) + stem.slice(at + 1);
 }
 

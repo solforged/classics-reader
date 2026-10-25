@@ -1,11 +1,13 @@
 // Extracts Wiktionary tables and joins the reader's edition-annotated forms without changing its analyses.
 import { fold } from "../../src/lang/non/spelling";
 import { morphCells, paradigmKind, type Paradigm, type ParadigmKind } from "../../src/lib/paradigm";
+import { parseMorph } from "../../src/lib/morph";
 import { looseDictionaryKey } from "./lexicon";
 import type { Analysis } from "./types";
 import type { DictEntry } from "../../src/lib/dict";
 import { inflectAdjective } from "./inflect/adjectives";
 import { inflectNoun } from "./inflect/nouns";
+import { inflectName } from "./inflect/names";
 import { inflectVerb } from "./inflect/verbs";
 import type { Generated } from "./inflect/zoega";
 
@@ -236,17 +238,42 @@ export function extract(entry: WiktEntry): Candidate | undefined {
   return { word: entry.word, kind, label: inflectionLabel(entry, kind, cells), cells };
 }
 
+interface NameUsage {
+  gender?: "m" | "f" | "n";
+  ambiguous: boolean;
+  singular: boolean;
+  plural: boolean;
+}
+
 /** Collects only lemmas used by the reader; attestation is counted once per reading and displayed word piece. */
 export class ParadigmBuilder {
   private readonly readings = new Map<string, Map<ParadigmKind, Paradigm["attested"]>>();
   private readonly personalAttested: Paradigm["attested"] = {};
+  private readonly names = new Map<string, NameUsage>();
 
-  use([lemma, morph]: Analysis): void {
+  use([lemma, morph, source]: Analysis): void {
     const kind = paradigmKind(morph, lemma);
     if (!kind || !fold(lemma)) return;
     let kinds = this.readings.get(lemma);
     if (!kinds) this.readings.set(lemma, kinds = new Map());
     if (!kinds.has(kind)) kinds.set(kind, {});
+    if (morph.startsWith("PROPN")) {
+      const { feats } = parseMorph(morph);
+      let name = this.names.get(lemma);
+      if (!name) this.names.set(lemma, name = { ambiguous: false, singular: false, plural: false });
+      const genders = feats.Gender ?? [];
+      for (const value of genders) {
+        const gender = value === "Masc" ? "m" : value === "Fem" ? "f" : value === "Neut" ? "n" : undefined;
+        if (!gender) continue;
+        if (name.gender && name.gender !== gender) name.ambiguous = true;
+        else name.gender = gender;
+      }
+      // Wiktionary candidates are not evidence that the edition uses a name in either number.
+      if (source === "e" || source === "a") {
+        if (feats.Number?.includes("Sing")) name.singular = true;
+        if (feats.Number?.includes("Plur")) name.plural = true;
+      }
+    }
   }
 
   attest(surface: string, analyses: Analysis[]): void {
@@ -329,9 +356,17 @@ export class ParadigmBuilder {
       const marks = kind === "personal" ? this.personalAttested : attested;
       if (best) out.push({ lemma, kind, label: best.label, cells: best.cells, attested: marks, source: "wiktionary" });
       else {
-        const generated = zoegaFor && !proper ? generate(lemma, kind, attested, zoegaFor) : undefined;
-        if (generated) out.push({ lemma, kind, ...generated, attested: marks, source: "zoega" });
-        else if (Object.keys(attested).length >= 2) out.push({ lemma, kind, cells: {}, attested: marks, source: "edition" });
+        const name = kind === "noun" ? this.names.get(lemma) : undefined;
+        const named = name?.gender && !name.ambiguous
+          ? inflectName(lemma, name.gender, name.plural && !name.singular, attested) : undefined;
+        if (named) out.push({ lemma, kind, ...named, attested: marks, source: "name" });
+        else {
+          const generated = zoegaFor && !proper ? generate(lemma, kind, attested, zoegaFor) : undefined;
+          if (generated) out.push({ lemma, kind, ...generated, attested: marks, source: "zoega" });
+          else if (Object.keys(attested).length >= 2) {
+            out.push({ lemma, kind, cells: {}, attested: marks, source: "edition" });
+          }
+        }
       }
     }
     return out;
