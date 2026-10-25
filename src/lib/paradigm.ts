@@ -25,8 +25,13 @@ export interface Paradigm {
   cells: Record<string, string[]>;
   /** Cell key → { form → count } for forms the Codex Regius edition annotates in this reader. */
   attested: Record<string, Record<string, number>>;
-  /** "wiktionary": full table from Wiktionary; "edition": only the forms attested in the edition. */
-  source: "wiktionary" | "edition";
+  /**
+   * "wiktionary": full table from Wiktionary; "zoega": generated from Zoëga's headword and grammar note;
+   * "edition": only the forms attested in the edition.
+   */
+  source: "wiktionary" | "zoega" | "edition";
+  /** For "zoega" tables, the grammar note the table was generated from, e.g. "(-s, -ar), m.". */
+  note?: string;
 }
 
 /** Reflexive pronoun lemmas; the edition tags them xPD without a person. */

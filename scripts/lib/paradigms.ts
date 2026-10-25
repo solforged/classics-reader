@@ -15,7 +15,7 @@ interface WiktTemplate {
   args: Record<string, string>;
 }
 
-interface WiktEntry {
+export interface WiktEntry {
   word: string;
   pos: string;
   forms?: WiktForm[];
@@ -23,7 +23,7 @@ interface WiktEntry {
   head_templates?: WiktTemplate[];
 }
 
-interface Candidate {
+export interface Candidate {
   word: string;
   kind: ParadigmKind;
   label?: string;
@@ -142,7 +142,8 @@ function inflectionLabel(entry: WiktEntry, kind: ParadigmKind, cells: Paradigm["
   return kind === "personal" ? "personal pronouns" : "pronominal declension";
 }
 
-function extract(entry: WiktEntry): Candidate | undefined {
+/** Wiktionary table of one entry, or undefined when it has none. */
+export function extract(entry: WiktEntry): Candidate | undefined {
   const kind: ParadigmKind | undefined = entry.pos === "noun" || entry.pos === "name" ? "noun"
     : entry.pos === "adj" ? "adj" : entry.pos === "verb" ? "verb"
     : entry.pos === "pron" || entry.pos === "det" || entry.pos === "article"
