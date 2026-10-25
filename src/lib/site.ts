@@ -5,6 +5,7 @@ import { GROUPS, WORKS, type WorkDef } from "../../scripts/catalog";
 import type { Work } from "../../scripts/lib/types";
 import lexicon from "../data/lexicon.json";
 import { fold, shardOf } from "./norse";
+import type { DictHit } from "./dict";
 
 export { GROUPS, WORKS, type WorkDef };
 
@@ -46,12 +47,6 @@ export const lemmaSlugs = (() => {
 export const lemmaCounts = new Map(LEXICON.map((l) => [l.lemma, l.count]));
 
 export const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
-
-export interface DictHit {
-  z?: { w: string; d: string[] }[];
-  c?: { w: string; d: string[] }[];
-  w?: { pos: string; glosses: string[] }[];
-}
 
 const shards = new Map<string, Record<string, DictHit>>();
 /** Dictionary entries for a lemma, read from the shards the word panel fetches. */
