@@ -27,7 +27,8 @@ export interface EnUnit {
 
 /** Source of a word analysis. e = the edition's own annotation for this occurrence;
  * a = attested elsewhere in the annotated edition with this spelling; w = Wiktionary form table;
- * n = proper-name match from Bellows's index (morph "PROPN", without inflection). */
+ * n = proper-name match from a names index (Bellows's for the Edda); its morph carries case and number only when
+ * the written form matches a cell of the name's table. */
 export type AnalysisSource = "e" | "a" | "w" | "n";
 /**
  * [lemma, UD morphology (src/lib/morph.ts) or "", source, word]. `word` is the word as the edition segments it, when

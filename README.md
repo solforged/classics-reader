@@ -35,7 +35,10 @@ Lookup bridges the prose's middle-voice *-st* to Wiktionary's *-sk*, and Bugge's
 unaccented manuscript spellings match accented and unaccented forms alike.
 About 80–93% of those words get a candidate. A Wiktionary headword that is only
 another spelling of a word the edition lemmatizes (*ec*, *enginn*, *sunr*) reads
-as that word (*ek*, *engi*, *sonr*).
+as that word (*ek*, *engi*, *sonr*). When the edition annotates a word only in its
+own spelling (*að* for the prose's *at*), those readings come before Wiktionary's,
+and Wiktionary-only readings are ordered by how often the edition uses the word.
+Name readings get case and number when the written form matches the name's table.
 
 Dictionary lookup bridges the edition's spellings to the dictionaries' headwords
 (*loft*/*lopt*, *ǿði*/*œði*) and splits unlisted compounds into listed parts
@@ -50,8 +53,11 @@ tables open the block holding the clicked form, decline past participles where
 Wiktionary gives the participle's table, and note the text's spelling when the
 table spells the form differently (*skoðask*, here *skoðast*). Comparatives the
 edition files under their own headword (*betri*, *meiri*) use the positive's
-table, so superlatives such as *beztr* land on a cell, and compound adjectives
-without a table are declined like their last part (*ósnjallr* like *snjallr*).
+table, so superlatives such as *beztr* land on a cell, and compound adjectives and
+nouns without a table are declined like their last part (*ósnjallr* like
+*snjallr*, *árdagr* like *dagr*). Where every attested form of a cell is spelled
+differently from the table (*álfa* against Wiktionary's *alfa*), the cell shows
+the edition's spelling and keeps the table's in its tooltip.
 
 The edition tags pronouns without their kind, so the build adds it from the lemma
 (personal, reflexive, demonstrative, article, possessive, interrogative,

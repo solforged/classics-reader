@@ -1,6 +1,9 @@
 import * as cheerio from "cheerio";
 import type { Article } from "../../../src/lib/dict";
 import { esc } from "../../../packs/non/build/articles";
+import { fold } from "../../../packs/non/spelling";
+import type { NorseParadigm } from "../../../packs/non/paradigm";
+import { formatMorph, parseMorph } from "../../../src/lib/morph";
 
 /** An entry in Bellows's "Pronouncing Index of Proper Names" (1923). */
 export interface NameGloss {
@@ -19,6 +22,32 @@ export function nameArticle(name: NameGloss): Article {
     sections: name.desc ? [{ senses: [{ gloss: esc(name.desc) }] }] : [],
     works: name.works,
   };
+}
+
+/** Capitalized noun lemmas denote names even when the edition uses its common-noun tag. */
+export function nameMorph(lemma: string, morph: string): string {
+  return /^\p{Lu}/u.test(lemma) ? morph.replace(/^NOUN\b/, "PROPN") : morph;
+}
+
+/** Recover only the inflection features supported by a candidate's written form in its name table. */
+export function inflectedNameMorph(
+  surface: string, morph: string, paradigm: NorseParadigm, genders?: ReadonlySet<string>,
+): string {
+  const parsed = parseMorph(morph);
+  if (parsed.upos !== "PROPN" || parsed.feats.Case || parsed.feats.Number) return morph;
+  const key = fold(surface.replace(/ǿ/g, "œ"));
+  const cells = Object.entries(paradigm.cells).filter(([cell, forms]) => /^\|[nadg][sp]i$/.test(cell)
+    && forms.some((form) => fold(form.replace(/ǿ/g, "œ")) === key)).map(([cell]) => cell);
+  if (!cells.length) return morph;
+  const cases: Record<string, string> = { n: "Nom", a: "Acc", d: "Dat", g: "Gen" };
+  parsed.feats.Case = cells.map((cell) => cases[cell[1]!]!);
+  parsed.feats.Number = cells.map((cell) => cell[2] === "p" ? "Plur" : "Sing");
+  if (!parsed.feats.Gender) {
+    const gender = /\b(masculine|feminine|neuter)\b/.exec(paradigm.label ?? "")?.[1];
+    if (gender) parsed.feats.Gender = [gender === "masculine" ? "Masc" : gender === "feminine" ? "Fem" : "Neut"];
+    else if (genders?.size === 1) parsed.feats.Gender = [...genders];
+  }
+  return formatMorph(parsed);
 }
 
 const clean = (text: string): string => text.replace(/\s+/g, " ").trim();
@@ -68,6 +97,7 @@ const spellings: Readonly<Record<string, string>> = {
   hatafjorthr: "hatafjord",
   varinsfjorthr: "varinsfjord",
   hindarfjall: "hindarfjoll",
+  sefafjoll: "sevafjoll",
 };
 
 function nominatives(surface: string): string[] {

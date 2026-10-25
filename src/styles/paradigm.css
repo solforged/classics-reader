@@ -68,6 +68,11 @@
 .para-cell.is-empty {
   color: var(--faint);
 }
+.para-cell.is-respelled > [lang="non"] {
+  text-decoration: underline dotted var(--faint);
+  text-underline-offset: 0.2em;
+  cursor: help;
+}
 .para-cell.is-current {
   color: var(--fg);
   background: color-mix(in srgb, var(--accent) 13%, transparent);

@@ -1,6 +1,6 @@
 // Conservative proper-name declensions in the edition's spelling. Only indefinite forms are generated, and only
 // in the number used for the headword. Final elements determine ambiguous strong stems; otherwise genitive and
-// dative attestations must identify the stem. Every generated cell is checked against the edition before use.
+// dative evidence must identify the stem. Every generated cell is checked against the edition before use.
 import { fold } from "../../spelling";
 import type { Paradigm } from "../../../../src/lib/paradigm";
 import { isVowel, syncopate, uUmlaut } from "./phonology";
@@ -38,11 +38,17 @@ function generate(
   gender: Gender,
   plural: boolean,
   attested?: Paradigm["attested"],
+  lexicalGenitives: string[] = [],
 ): Generated | undefined {
   // Multiword and hyphenated headwords need a lexical analysis of their components, not just a final ending.
   if (!/^\p{Lu}\p{L}*$/u.test(lemma)) return undefined;
   const lower = lemma.toLowerCase();
   if (plural) {
+    if (gender === "m" && /(?:ingr|ungr)$/.test(lower)) {
+      const stem = lemma.slice(0, -1);
+      return table(true, "masculine plural name in -ingr or -ungr",
+        `${stem}ar`, `${stem}a`, `${umlaut(stem)}um`, `${stem}a`);
+    }
     if (gender === "m" && lower.endsWith("ar")) {
       const stem = lemma.slice(0, -2);
       let genitive: string | string[] = `${stem}a`;
@@ -117,11 +123,14 @@ function generate(
         return table(false, "masculine name in -fjǫrðr",
           lemma, stem, `${stem.slice(0, -5)}firði`, `${stem.slice(0, -5)}fjarðar`);
       }
-      const genAr = /(?:mundr|røðr|varðr|urðr|lundr)$/.test(lower)
+      const genAr = /(?:mundr|røðr|varðr|urðr|lundr|fiðr)$/.test(lower)
         || lower.endsWith("viðr") && !lower.endsWith("sviðr");
       const genS = /(?:heimr|garðr|ormr|ingr|ungr|haugr|bakr|ráðr|sviðr)$/.test(lower);
-      const genitive = attestedChoice([`${stem}s`, `${stem}ar`], "|gsi", attested)
-        ?? (genAr ? `${stem}ar` : genS ? `${stem}s` : undefined);
+      const choices = [`${stem}s`, `${stem}ar`];
+      const lexical = choices.find((form) => lexicalGenitives.length
+        && lexicalGenitives.every((value) => same(value, form)));
+      const genitive = attestedChoice(choices, "|gsi", attested)
+        ?? lexical ?? (genAr ? `${stem}ar` : genS ? `${stem}s` : undefined);
       if (!genitive) return undefined;
       const observedDative = attestedChoice([`${stem}i`, stem], "|dsi", attested);
       if (!genAr && !genS && !observedDative) return undefined;
@@ -169,9 +178,12 @@ export function inflectName(
   gender: Gender,
   plural: boolean,
   attested?: Paradigm["attested"],
+  lexicalGenitives: string[] = [],
 ): Generated | undefined {
-  const generated = generate(lemma, gender, plural, attested);
+  const generated = generate(lemma, gender, plural, attested, lexicalGenitives);
   if (!generated) return undefined;
+  const genitive = generated.cells["|gsi"];
+  if (genitive && lexicalGenitives.some((form) => !genitive.some((value) => same(form, value)))) return undefined;
   for (const [key, forms] of Object.entries(attested ?? {})) {
     const expected = generated.cells[key];
     if (expected && Object.keys(forms).some((form) => !expected.some((value) => same(form, value)))) return undefined;

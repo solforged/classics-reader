@@ -4,7 +4,8 @@ import type { DictEntry } from "../../../../src/lib/dict";
 import type { NorseParadigm } from "../../paradigm";
 import { fold } from "../../spelling";
 import { inflectAdjective, inflectPastParticiple } from "./adjectives";
-import type { Generated } from "./zoega";
+import { inflectNoun } from "./nouns";
+import { grammarNotes, type Generated } from "./zoega";
 
 type Cells = NorseParadigm["cells"];
 interface Head {
@@ -15,6 +16,7 @@ interface Head {
 interface Table {
   word: string;
   kind: NorseParadigm["kind"];
+  label?: string;
   cells: Cells;
 }
 const spelling = (word: string) => fold(word.replace(/ǿ/g, "œ"));
@@ -100,6 +102,108 @@ export class CompoundAdjectives {
         return { cells, label: "strong and weak adjective", note: `declined like ${head.word}` };
       }
       return undefined;
+    }
+    return undefined;
+  }
+}
+
+type Gender = "m" | "f" | "n";
+interface NounHead {
+  word: string;
+  cells: Cells;
+  gender: Gender;
+  label: string;
+}
+
+/** Complete noun heads; a Wiktionary counterexample disables transfer of that head's table. */
+export class CompoundNouns {
+  private readonly heads = new Map<string, NounHead[]>();
+  private readonly refused = new Set<NounHead>();
+
+  constructor(tables: Iterable<Table>, private readonly zoegaFor: (word: string) => DictEntry[] | undefined) {
+    const nouns = [...tables].filter((table) => table.kind === "noun" && /^[a-záéíóúýæœöøǫǿðþ]+$/.test(table.word));
+    for (const table of nouns) {
+      const head = this.complete(table);
+      if (!head) continue;
+      const key = spelling(head.word);
+      this.heads.set(key, [...(this.heads.get(key) ?? []), head]);
+    }
+    // Optional variants, lexicalized compounds and accidental suffixes are not transferable paradigms.
+    for (const table of nouns) {
+      const compound = this.complete(table);
+      const split = compound && this.split(compound.word);
+      if (!compound || !split) continue;
+      for (const head of split.heads) {
+        if (head.gender !== compound.gender) continue;
+        const keys = new Set([...Object.keys(head.cells), ...Object.keys(compound.cells)]);
+        if ([...keys].some((key) => {
+          const expected = new Set(compound.cells[key]?.map(spelling));
+          const forms = new Set(head.cells[key]?.map((form) => spelling(split.prefix + form)));
+          return expected.size !== forms.size || [...expected].some((form) => !forms.has(form));
+        })) this.refused.add(head);
+      }
+    }
+  }
+
+  private complete(table: Table): NounHead | undefined {
+    const gender = table.label?.match(/\b(masculine|feminine|neuter)\b/)?.[1]?.[0] as Gender | undefined
+      ?? this.gender(table.word);
+    if (!gender) return undefined;
+    const cells = Object.fromEntries(Object.entries(table.cells).filter(([key]) => /^\|[nadg][sp][id]$/.test(key)));
+    const numbers = ["s", "p"].filter((number) => cells[`|n${number}i`]?.length);
+    if (!numbers.length || numbers.some((number) =>
+      [..."nadg"].some((c) => [..."id"].some((d) => !cells[`|${c}${number}${d}`]?.length)))) return undefined;
+    if (!numbers.some((number) => cells[`|n${number}i`]!.some((form) => spelling(form) === spelling(table.word)))) {
+      return undefined;
+    }
+    return { word: table.word, cells, gender, label: table.label ?? `${gender === "m" ? "masculine" : gender === "f" ? "feminine" : "neuter"} noun` };
+  }
+
+  private gender(word: string): Gender | undefined {
+    const genders = new Set((this.zoegaFor(word) ?? []).flatMap((entry) => grammarNotes(entry))
+      .flatMap((note) => /^[mfn]\./.test(note.pos) ? [note.pos[0] as Gender] : []));
+    return genders.size === 1 ? [...genders][0] : undefined;
+  }
+
+  private find(word: string): NounHead[] {
+    const key = spelling(word);
+    const known = this.heads.get(key);
+    if (known) return known;
+    const heads: NounHead[] = [];
+    for (const entry of this.zoegaFor(word) ?? []) {
+      if (spelling(entry.w) !== key) continue;
+      const generated = inflectNoun(entry.w, entry);
+      const head = generated && this.complete({ word: entry.w, kind: "noun", ...generated });
+      if (head) heads.push(head);
+    }
+    this.heads.set(key, heads);
+    return heads;
+  }
+
+  private split(lemma: string): { prefix: string; heads: NounHead[] } | undefined {
+    for (let at = 2; at < lemma.length - 2; at++) {
+      const prefix = lemma.slice(0, at);
+      if (!/[aeiouyáéíóúýæœöøǫǿ]/.test(prefix)) continue;
+      const heads = this.find(lemma.slice(at));
+      if (heads.length) return { prefix, heads };
+    }
+    return undefined;
+  }
+
+  inflect(lemma: string, attested: NorseParadigm["attested"] = {}, editionGender?: Gender): Generated | undefined {
+    if (!/^[a-záéíóúýæœöøǫǿðþ]+$/.test(lemma)) return undefined;
+    const dictionaryGender = this.gender(lemma);
+    if (dictionaryGender && editionGender && dictionaryGender !== editionGender) return undefined;
+    const gender = dictionaryGender ?? editionGender;
+    const split = gender && this.split(lemma);
+    if (!split) return undefined;
+    for (const head of split.heads) {
+      if (head.gender !== gender || this.refused.has(head)) continue;
+      const cells = Object.fromEntries(Object.entries(head.cells)
+        .map(([key, forms]) => [key, forms.map((form) => split.prefix + form)]));
+      if (Object.entries(attested).some(([key, forms]) => /^\|[nadg][sp][id]$/.test(key)
+        && Object.keys(forms).some((form) => !cells[key]?.some((value) => spelling(value) === spelling(form))))) continue;
+      return { cells, label: head.label, note: `declined like ${head.word}` };
     }
     return undefined;
   }

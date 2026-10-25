@@ -63,6 +63,7 @@ export function spellingVariants(key: string, diplomatic: boolean): string[] {
 }
 
 const deaccent = (k: string) => k.normalize("NFD").replace(/\p{M}/gu, "").normalize("NFC");
+const lemmaClass = (a: Analysis) => `${a[0]}\t${a[1].split(" ", 1)[0]}`;
 
 interface IndexedAnalysis {
   analysis: Analysis;
@@ -71,7 +72,7 @@ interface IndexedAnalysis {
   wiktionary?: boolean;
   /** Exceptional weak forms can be restricted to enclitic use. */
   clitic?: boolean;
-  /** Survived the exact key's attestation filter before a diplomatic merger. */
+  /** Dictionary candidate retained from the first matching spelling. */
   exact?: boolean;
 }
 
@@ -79,12 +80,18 @@ export class FormIndex {
   private forms = new Map<string, Map<string, IndexedAnalysis>>();
   /** Accent-less keys, for diplomatic text that writes Óðinn as Oðinn. */
   private bare = new Map<string, Set<string>>();
+  /** Edition frequency of a lemma and word class, independent of its inflected spelling. */
+  private lemmaCounts = new Map<string, number>();
 
   add(form: string, a: Analysis) {
     const k = fold(form.replace(/ǿ/g, "œ"));
     if (!k) return;
     // The clitic flag describes a particular occurrence, not the form.
     const analysis: Analysis = [a[0], withoutFeature(pronounMorph(a[0], a[1]), "Clitic"), a[2]];
+    if (analysis[2] === "e") {
+      const lexeme = lemmaClass(analysis);
+      this.lemmaCounts.set(lexeme, (this.lemmaCounts.get(lexeme) ?? 0) + 1);
+    }
     let m = this.forms.get(k);
     if (!m) this.forms.set(k, (m = new Map()));
     const id = `${analysis[0]}\t${analysis[1]}`;
@@ -134,15 +141,24 @@ export class FormIndex {
 
   get(surface: string, diplomatic = false): Analysis[] {
     const k = fold(surface.replace(/ǿ/g, "œ"));
+    const literal = this.forms.get(k);
+    const dictionaryOnly = literal && [...literal.values()].every((a) => a.analysis[2] === "w");
+    let candidates: IndexedAnalysis[] | undefined;
     for (const key of [k, ...spellingVariants(k, diplomatic)]) {
       const h = this.hit(key, diplomatic);
       if (!h) continue;
       // A middle spelling bridge must never create nominal readings for an unrelated -st word.
       const middle = /(?:st|zt|z)$/.test(k) && /(?:sk|zk)$/.test(key);
       const list = [...h.values()].filter((a) => !middle || /^VERB\b.*\bVoice=Mid\b/.test(a.analysis[1]));
-      if (list.length) return rank(list, diplomatic);
+      if (!list.length) continue;
+      if (candidates) {
+        candidates.push(...list.filter((a) => a.analysis[2] !== "w"));
+      } else if ((key === k && dictionaryOnly) || list.every((a) => a.analysis[2] === "w")) {
+        // Dictionary homographs must not hide readings attested under the edition's spelling.
+        candidates = list.map((a) => ({ ...a, exact: key === k && diplomatic ? a.exact ?? true : true }));
+      } else return rank(list, this.lemmaCounts);
     }
-    return [];
+    return candidates ? rank(candidates, this.lemmaCounts) : [];
   }
 
   get size() {
@@ -150,8 +166,8 @@ export class FormIndex {
   }
 }
 
-/** Attested readings lead; diplomatic mergers preserve exact candidates without flooding them with unattested ones. */
-function rank(list: IndexedAnalysis[], diplomatic: boolean): Analysis[] {
+/** Attested readings lead; retained dictionary candidates follow in edition lemma-and-class frequency order. */
+function rank(list: IndexedAnalysis[], lemmaCounts: ReadonlyMap<string, number>): Analysis[] {
   const counts = new Map<string, number>();
   const supported = new Set<string>();
   for (const a of list) {
@@ -164,8 +180,9 @@ function rank(list: IndexedAnalysis[], diplomatic: boolean): Analysis[] {
   const attested = list.filter((a) => a.analysis[2] !== "w"
     && !(dominant >= 200 && counts.get(a.analysis[0]) === 1 && !supported.has(a.analysis[0])))
     .sort((a, b) => b.count - a.count);
-  const candidates = attested.length
-    ? [...attested, ...(diplomatic ? list.filter((a) => a.analysis[2] === "w" && a.exact) : [])] : list;
+  const wiktionary = list.filter((a) => a.analysis[2] === "w" && (!attested.length || a.exact))
+    .sort((a, b) => (lemmaCounts.get(lemmaClass(b.analysis)) ?? 0) - (lemmaCounts.get(lemmaClass(a.analysis)) ?? 0));
+  const candidates = [...attested, ...wiktionary];
   const seen = new Set<string>();
   return candidates.filter(({ analysis }) => {
     const id = `${analysis[0]}\t${withoutFeature(analysis[1], "InflClass")}`;

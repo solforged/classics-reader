@@ -6,8 +6,8 @@ import { looseDictionaryKey } from "./lexicon";
 import type { Analysis } from "../../../scripts/core/types";
 import type { DictEntry } from "../../../src/lib/dict";
 import { inflectAdjective } from "./inflect/adjectives";
-import { CompoundAdjectives } from "./inflect/compounds";
-import { inflectNoun } from "./inflect/nouns";
+import { CompoundAdjectives, CompoundNouns } from "./inflect/compounds";
+import { inflectNoun, respellNoun } from "./inflect/nouns";
 import { inflectName } from "./inflect/names";
 import { inflectPronoun } from "./inflect/pronouns";
 import { inflectVerb } from "./inflect/verbs";
@@ -27,11 +27,14 @@ function generate(
   kind: ParadigmKind,
   attested: Paradigm["attested"],
   zoegaFor: (lemma: string) => DictEntry[] | undefined,
+  gender?: "m" | "f" | "n",
 ): Generated | undefined {
   const inflect = GENERATORS[kind];
   if (!inflect) return undefined;
   for (const entry of zoegaFor(lemma) ?? []) {
-    const generated = inflect(entry.w, entry, attested);
+    const spelling = kind === "noun" && /^[\p{Ll}]+$/u.test(entry.w)
+      && looseDictionaryKey(entry.w) === looseDictionaryKey(lemma) ? lemma : entry.w;
+    const generated = inflect(entry.w, entry, attested, kind === "noun" ? gender : undefined, spelling);
     if (generated) return generated;
   }
   return undefined;
@@ -52,7 +55,7 @@ export interface WiktEntry {
   word: string;
   pos: string;
   tags?: string[];
-  senses?: { tags?: string[] }[];
+  senses?: { tags?: string[]; alt_of?: { word: string }[]; form_of?: { word: string }[] }[];
   forms?: WiktForm[];
   inflection_templates?: WiktTemplate[];
   head_templates?: WiktTemplate[];
@@ -270,6 +273,18 @@ export function extract(entry: WiktEntry): Candidate | undefined {
   return { word: entry.word, kind, label: inflectionLabel(entry, kind, cells), cells };
 }
 
+/** Follow only noun entries whose every sense explicitly names the same alternative spelling. */
+function nounAlternative(entry: WiktEntry): string | undefined {
+  if (entry.pos !== "noun" || /^\p{Lu}/u.test(entry.word)) return undefined;
+  const targets = entry.senses?.map((sense) => {
+    const alternatives = sense.alt_of ?? (sense.tags?.some((tag) => tag === "alt-of" || tag === "alternative")
+      ? sense.form_of : undefined);
+    return alternatives?.length === 1 ? alternatives[0]!.word : undefined;
+  });
+  return targets?.length && targets.every((target) => target && target === targets[0]) ? targets[0] : undefined;
+}
+
+
 interface NameUsage {
   gender?: "m" | "f" | "n";
   ambiguous: boolean;
@@ -280,6 +295,7 @@ interface NameUsage {
 /** Collects only lemmas used by the reader; attestation counts each grammatical word, without attached clitics. */
 export class ParadigmBuilder {
   private readonly readings = new Map<string, Map<ParadigmKind, Paradigm["attested"]>>();
+  private readonly nounGenders = new Map<string, Set<"m" | "f" | "n">>();
   private readonly personalAttested: Paradigm["attested"] = {};
   private readonly names = new Map<string, NameUsage>();
 
@@ -289,6 +305,14 @@ export class ParadigmBuilder {
     let kinds = this.readings.get(lemma);
     if (!kinds) this.readings.set(lemma, kinds = new Map());
     if (!kinds.has(kind)) kinds.set(kind, {});
+    if (morph.startsWith("NOUN") && (source === "e" || source === "a")) {
+      let genders = this.nounGenders.get(lemma);
+      if (!genders) this.nounGenders.set(lemma, genders = new Set());
+      for (const value of parseMorph(morph).feats.Gender ?? []) {
+        const gender = value === "Masc" ? "m" : value === "Fem" ? "f" : value === "Neut" ? "n" : undefined;
+        if (gender) genders.add(gender);
+      }
+    }
     if (morph.startsWith("PROPN")) {
       const { feats } = parseMorph(morph);
       let name = this.names.get(lemma);
@@ -341,10 +365,21 @@ export class ParadigmBuilder {
   build(jsonl: string, zoegaFor?: (lemma: string) => DictEntry[] | undefined): Paradigm[] {
     const exact = new Map<string, Candidate[]>();
     const loose = new Map<string, Candidate[]>();
+    const nameEntries = new Map<string, WiktEntry[]>();
+    const nounAliases = new Map<string, string>();
+    const bridgedNouns = new Set<Candidate>();
     for (const line of jsonl.split("\n")) {
       if (!line) continue;
       const entry = JSON.parse(line) as WiktEntry;
       if (!entry.word || entry.word.includes(" ") || entry.word.startsWith("-")) continue;
+      const alternative = nounAlternative(entry);
+      if (alternative) nounAliases.set(entry.word, alternative);
+      if (/^\p{Lu}/u.test(entry.word) && (entry.pos === "name" || entry.pos === "noun")) {
+        const key = fold(entry.word);
+        const entries = nameEntries.get(key) ?? [];
+        entries.push(entry);
+        nameEntries.set(key, entries);
+      }
       const candidate = extract(entry);
       if (!candidate) continue;
       const aliases = new Set([entry.word]);
@@ -364,6 +399,26 @@ export class ParadigmBuilder {
         }
       }
     }
+    for (const [word, target] of nounAliases) {
+      let head = target;
+      const seen = new Set([word]);
+      while (nounAliases.has(head) && !seen.has(head)) {
+        seen.add(head);
+        head = nounAliases.get(head)!;
+      }
+      for (const candidate of [...exact.get(fold(head)) ?? []]) {
+        if (candidate.kind !== "noun" || /^\p{Lu}/u.test(candidate.word)) continue;
+        const cells = respellNoun(candidate.cells, candidate.word, word);
+        if (!cells) continue;
+        const bridged = { ...candidate, word, cells };
+        bridgedNouns.add(bridged);
+        for (const [index, key] of [[exact, fold(word)], [loose, looseDictionaryKey(word)]] as const) {
+          const entries = index.get(key) ?? [];
+          entries.push(bridged);
+          index.set(key, entries);
+        }
+      }
+    }
     // The dump keeps many participle declensions under their own headword (koma → kominn).
     for (const candidates of exact.values()) for (const candidate of candidates) {
       if (candidate.kind !== "verb") continue;
@@ -378,9 +433,18 @@ export class ParadigmBuilder {
       }
     }
     const compounds = new CompoundAdjectives(new Set([...exact.values()].flat()), (word) => zoegaFor?.(word));
+    const nounCompounds = new CompoundNouns(new Set([...exact.values()].flat()), (word) => zoegaFor?.(word));
     const comparisons = new Map<string, Candidate[]>();
     const formKey = (form: string) => fold(form.replace(/ǿ/g, "œ"));
+    const nounSpellings = new Map<string, Candidate[]>();
     for (const candidates of exact.values()) for (const candidate of candidates) {
+      if (candidate.kind === "noun" && !/^\p{Lu}/u.test(candidate.word)) {
+        // The edition's ð and long-ø spellings also occur as d and æ/œ in dictionary headwords.
+        const key = formKey(candidate.word).replace(/(?<=.)d/g, "ð");
+        const entries = nounSpellings.get(key) ?? [];
+        if (!entries.includes(candidate)) entries.push(candidate);
+        nounSpellings.set(key, entries);
+      }
       if (candidate.kind !== "adj" || !candidate.cells["str|nsm"]?.length
         || !candidate.cells["str_sup|nsm"]?.length) continue;
       for (const form of candidate.cells["comp|nsm"] ?? []) {
@@ -399,6 +463,15 @@ export class ParadigmBuilder {
       if (!candidates.length) {
         candidates = loose.get(looseDictionaryKey(lemma))
           ?.filter((c) => c.kind === kind && (!proper || /^\p{Lu}/u.test(c.word))) ?? [];
+      }
+      if (kind === "noun" && !proper && !candidates.length) {
+        for (const candidate of nounSpellings.get(formKey(lemma).replace(/(?<=.)d/g, "ð")) ?? []) {
+          const cells = respellNoun(candidate.cells, candidate.word, lemma);
+          if (!cells) continue;
+          const bridged = { ...candidate, word: lemma, cells };
+          candidates.push(bridged);
+          bridgedNouns.add(bridged);
+        }
       }
       if (kind === "pron" && !proper && !candidates.length) {
         // The edition uses pronominal readings of adjective/numeral lemmas such as einn and annarr.
@@ -436,6 +509,10 @@ export class ParadigmBuilder {
       let best: Candidate | undefined;
       let bestScore = -1;
       for (const candidate of candidates) {
+        if (bridgedNouns.has(candidate) && Object.entries(attested).some(([cell, forms]) =>
+          Object.keys(forms).some((form) => !candidate.cells[cell]?.some((value) => formKey(value) === formKey(form))))) {
+          continue;
+        }
         let score = 0;
         for (const [cell, forms] of Object.entries(attested)) {
           const expected = new Set(candidate.cells[cell]?.map(fold));
@@ -465,9 +542,29 @@ export class ParadigmBuilder {
           : best.cells;
         out.push({ lemma, kind, label: best.label, cells, attested: marks, source: "wiktionary" });
       } else {
-        const name = kind === "noun" ? this.names.get(lemma) : undefined;
-        const named = name?.gender && !name.ambiguous
-          ? inflectName(lemma, name.gender, name.plural && !name.singular, attested) : undefined;
+        const name = proper && kind === "noun" ? this.names.get(lemma) : undefined;
+        const entries = name ? nameEntries.get(fold(lemma)) ?? [] : [];
+        const genders = new Set<"m" | "f" | "n">();
+        for (const entry of entries) for (const template of entry.head_templates ?? []) {
+          for (const [key, value] of Object.entries(template.args)) {
+            if (!/^g\d*$/.test(key)) continue;
+            const gender = value[0];
+            if (gender === "m" || gender === "f" || gender === "n") genders.add(gender);
+          }
+        }
+        if (!genders.size && name) for (const note of zoegaFor?.(lemma)?.flatMap(grammarNotes) ?? []) {
+          const gender = note.pos[0];
+          if (gender === "m" || gender === "f" || gender === "n") genders.add(gender);
+        }
+        const gender = name?.gender ?? (genders.size === 1 ? [...genders][0] : undefined);
+        const genitives = entries.flatMap((entry) => [
+          ...(entry.forms ?? []).filter((form) => form.tags?.includes("genitive")
+            && !form.tags.some((tag) => tag === "plural" || tag === "definite")).map((form) => form.form),
+          ...(entry.head_templates ?? []).map((template) => template.args["3"] === "genitive"
+            ? template.args["4"] : /^(?:non-noun|non-proper noun)$/.test(template.name) ? template.args["2"] : ""),
+        ]).filter((form): form is string => !!form && /^\p{Lu}\p{L}*$/u.test(form));
+        const named = name && gender && !name.ambiguous
+          ? inflectName(lemma, gender, name.plural && !name.singular, attested, genitives) : undefined;
         if (named) out.push({ lemma, kind, ...named, attested: marks, source: "name" });
         else {
           const indeclinable = kind === "adj" && !proper ? zoegaFor?.(lemma)?.flatMap(grammarNotes)
@@ -477,14 +574,18 @@ export class ParadigmBuilder {
               source: "zoega", note: indeclinable.text });
             continue;
           }
-          const generated = zoegaFor && !proper ? generate(lemma, kind, attested, zoegaFor) : undefined;
-          const compound = !generated && kind === "adj" && !proper ? compounds.inflect(lemma, attested) : undefined;
+          const genders = this.nounGenders.get(lemma);
+          const gender = genders?.size === 1 ? genders.values().next().value : undefined;
+          const generated = zoegaFor && !proper ? generate(lemma, kind, attested, zoegaFor, gender) : undefined;
+          const compound = !generated && !proper ? kind === "adj" ? compounds.inflect(lemma, attested)
+            : kind === "noun" && (!genders || genders.size <= 1)
+              ? nounCompounds.inflect(lemma, attested, genders?.values().next().value) : undefined : undefined;
           // The citation-form marker duplicates a declined participle's nominal cell, not a second attestation.
           const cells = Object.keys(attested);
           const distinct = cells.filter((cell) => cell !== "act|past_part" || !cells.some((key) => key.startsWith("pp_")));
           if (generated) out.push({ lemma, kind, ...generated, attested: marks, source: "zoega" });
           else if (compound) out.push({ lemma, kind, ...compound, attested: marks,
-            source: zoegaFor?.(lemma)?.length ? "zoega" : "compound" });
+            source: kind === "noun" || !zoegaFor?.(lemma)?.length ? "compound" : "zoega" });
           else if (distinct.length >= 2) {
             out.push({ lemma, kind, cells: {}, attested: marks, source: "edition" });
           }

@@ -51,6 +51,8 @@ export function grammarNotes(entry: DictEntry): GrammarNote[] {
         rest = rest.slice(end + 1).replace(/^,?\s*/, "");
       }
     }
+    // A historical nominative can intervene between the principal parts and the gender.
+    rest = rest.replace(/^;\s*(?:old|older) nom\. [\p{L}]+,\s*/u, "");
     const pos = rest.match(POS)?.[0] ?? "";
     const indeclinable = rest.slice(pos.length).match(/^\s*indecl\./)?.[0].trim() ?? "";
     const printed = `${paren ? `(${paren})` : ""}${paren && pos ? ", " : ""}${pos}${indeclinable ? ` ${indeclinable}` : ""}`;

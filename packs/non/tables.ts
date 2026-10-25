@@ -21,9 +21,9 @@ export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string 
   const written = options.form?.trim();
   const writtenKey = written ? fold(written.replace(/ǿ/g, "œ")) : "";
   const spelled = (value: string) => fold(value.replace(/ǿ/g, "œ")) === writtenKey;
-  // The written form is noted once, on the first highlighted cell, and only when no highlighted cell displays it.
-  let noted = !written || [...highlighted].some((key) =>
-    (paradigm.cells[key]?.length ? paradigm.cells[key]! : Object.keys(paradigm.attested[key] ?? {})).some(spelled));
+  // Defer the written-form note until all highlighted cells have been rendered.
+  let noted = !written;
+  let firstCurrent = "";
   const keys = [...new Set([...Object.keys(paradigm.cells), ...Object.keys(paradigm.attested)])];
   const has = (key: string): boolean => Boolean(paradigm.cells[key]?.length)
     || Object.values(paradigm.attested[key] ?? {}).some((count) => count > 0);
@@ -39,20 +39,27 @@ export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string 
       }
     }
     const attestedForms = Object.keys(attested);
-    const shown = forms.length ? forms : attestedForms;
+    const respelled = forms.length > 0 && attestedForms.length > 0
+      && !attestedForms.some((form) => forms.some((tableForm) =>
+        fold(form.replace(/ǿ/g, "œ")) === fold(tableForm.replace(/ǿ/g, "œ"))));
+    const shown = respelled || !forms.length ? attestedForms : forms;
     const count = Object.values(attested).reduce((sum, value) => sum + value, 0);
     const note = count ? `attested ${count}× in the Eddas: ${attestedForms.join(", ")}` : "";
-    const title = [shown.join(" / "), note].filter(Boolean).join("\n");
+    const original = respelled ? `${paradigm.source === "wiktionary" ? "Wiktionary" : "Table"}: ${forms.join(" / ")}` : "";
+    const title = [shown.join(" / "), original, note].filter(Boolean).join("\n");
     const current = names.some((key) => highlighted.has(key));
-    const classes = ["para-cell", current ? "is-current" : "", !shown.length ? "is-empty" : ""]
-      .filter(Boolean).join(" ");
+    const classes = ["para-cell", current ? "is-current" : "", !shown.length ? "is-empty" : "",
+      respelled ? "is-respelled" : ""].filter(Boolean).join(" ");
     const marker = count ? `<span class="para-attested" aria-label="${esc(note)}">·</span>` : "";
     const form = shown.length ? shown.slice(0, 2).map(esc).join(" / ") : "—";
-    const here = current && !noted ? `<small class="para-here">here: <span lang="non">${esc(written!)}</span></small>` : "";
-    if (here) noted = true;
-    return `<${tag} class="${classes}" data-cell="${esc(names.join(" "))}" title="${esc(title)}"${attributes}>`
+    const content = `<${tag} class="${classes}" data-cell="${esc(names.join(" "))}" title="${esc(title)}"${attributes}>`
       + `${current ? '<span class="para-sr">Clicked reading: </span>' : ""}`
-      + `<span lang="non">${form}</span>${marker}${here}</${tag}>`;
+      + `<span lang="non">${form}</span>${marker}`;
+    if (current) {
+      noted ||= shown.slice(0, 2).some(spelled);
+      firstCurrent ||= content;
+    }
+    return `${content}</${tag}>`;
   }
 
   /** A table; inside a disclosure whose summary names it, the caption is left out. */
@@ -192,6 +199,10 @@ export function paradigmHtml(paradigm: Paradigm, options: TableOptions): string 
       (person) => [...highlighted].some((key) => key.startsWith(`|${person}`)));
   } else {
     html = genderTables("");
+  }
+  if (!noted && firstCurrent) {
+    const here = `<small class="para-here">here: <span lang="non">${esc(written!)}</span></small>`;
+    html = html.replace(firstCurrent, firstCurrent + here);
   }
   const label = paradigm.label ? `<p class="para-label">${esc(paradigm.label)}</p>` : "";
   const unattested = "Forms without a dot are not attested in the annotated poems; check them against a grammar.";

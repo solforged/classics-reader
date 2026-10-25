@@ -1,7 +1,7 @@
 // Conservative Zoëga noun declensions, validated cell-by-cell against complete Wiktionary noun tables.
 // Enabled broad patterns clear 95% completely correct lemmas; smaller classes require explicit principal parts.
-// Unmarked masculine a-/i-stems, general feminine ō-/i-stems, unmarked weak-feminine genitive plurals,
-// ambiguous j-/v-stems and unspecified contraction are intentionally refused. Definite forms come from article.ts.
+// Unmarked masculine a-/i-stems, general feminine ō-/i-stems, ambiguous weak-feminine genitive plurals,
+// j-/v-stems and unspecified contraction are refused. Definite forms come from article.ts.
 import type { DictEntry } from "../../../../src/lib/dict";
 import { fold } from "../../spelling";
 import type { Paradigm } from "../../../../src/lib/paradigm";
@@ -117,7 +117,7 @@ function generate(word: string, note: GrammarNote): Generated | undefined {
       label = "neuter ja-stem -i";
     } else if (!isVowel(word.at(-1))) {
       // These endings also belong to contracted, consonant, v- and ja-stems; a bare gender cannot decide.
-      if (!note.paren && /(?:arn|al|in|að|ak|höfuð|högg|kyn|mið|nef|gg|[st]|ráð|rán)$/.test(word)) {
+      if (!note.paren && /(?:arn|al|in|að|ak|höfuð|högg|kyn|mið|nef|gg|s|ráð|rán)$/.test(word)) {
         return undefined;
       }
       const oblique = explicit.dsi?.[0]?.endsWith("i") ? explicit.dsi[0].slice(0, -1) : word;
@@ -207,7 +207,7 @@ function generate(word: string, note: GrammarNote): Generated | undefined {
     const oblique = explicit.gsi?.[0] ?? uUmlaut(stem, /ast$/.test(stem)) + "u";
     const plural = explicit.npi ?? [oblique.slice(0, -1) + "ur"];
     const jStem = stem.endsWith("j") && !/[gk]j$/.test(stem);
-    if (!explicit.gpi && !jStem) return undefined;
+    if (!explicit.gpi && !jStem && !/(?:ða|ma|ga|ska)$/.test(word)) return undefined;
     cells = nominalCells([word, oblique, oblique, oblique, plural, plural, oblique.slice(0, -1) + "um",
       jStem ? word : stem.replace(/j$/, "") + "na"]);
     label = "weak feminine -a, explicit/regular genitive plural";
@@ -227,27 +227,58 @@ function generate(word: string, note: GrammarNote): Generated | undefined {
   return { cells, label, note: note.text };
 }
 
-/** Decline a single unambiguous Zoëga noun section, refusing notes/classes that cannot be inferred safely. */
+/** Project an explicit spelling bridge without changing the source stem's inflection or vowel quantity. */
+export function respellNoun(cells: Cells, headword: string, spelling: string): Cells | undefined {
+  const head = headword.normalize("NFC");
+  const alias = spelling.normalize("NFC");
+  if (head === alias) return cells;
+  if (head.length !== alias.length) return undefined;
+  let last = head.length - 1;
+  while (last >= 0 && head[last] === alias[last]) last--;
+  const prefix = head.slice(0, last + 1);
+  const replacement = alias.slice(0, last + 1);
+  const out: Cells = {};
+  for (const [cell, forms] of Object.entries(cells)) {
+    const values: string[] = [];
+    for (const form of forms) {
+      const normalized = form.normalize("NFC");
+      if (!normalized.startsWith(prefix)) return undefined;
+      values.push(replacement + normalized.slice(prefix.length));
+    }
+    out[cell] = values;
+  }
+  return out;
+}
+
+/** Decline noun sections only when their surviving tables agree with each other and the edition. */
 export function inflectNoun(
   headword: string,
   entry: DictEntry,
   attested?: Paradigm["attested"],
+  gender?: Gender,
+  spelling = headword,
 ): Generated | undefined {
   if (!/^[\p{L}]+$/u.test(headword) || /^[A-ZÁÉÍÓÚÝÞÆÖ]/.test(headword)) return undefined;
-  const notes = grammarNotes(entry).filter((note) => /^[mfn]\./.test(note.pos));
-  if (notes.length !== 1) return undefined;
-  const generated = generate(headword, notes[0]!);
-  if (!generated) return undefined;
-  const gender = notes[0]!.pos[0] as Gender;
-  const article = withArticle(generated.cells, gender);
+  const notes = grammarNotes(entry).filter((note) => /^[mfn]\./.test(note.pos) && (!gender || note.pos[0] === gender));
+  if (!gender && new Set(notes.map((note) => note.pos[0])).size > 1) return undefined;
+  let chosen: Generated | undefined;
   const contradicts = (cells: Cells, key: string, forms: Record<string, number>) => {
     const expected = cells[key];
     return !!expected && Object.keys(forms).some((form) => !expected.some((value) =>
       fold(form.replace(/ǿ/g, "œ")) === fold(value.replace(/ǿ/g, "œ"))));
   };
   const entries = Object.entries(attested ?? {});
-  if (entries.some(([key, forms]) => contradicts(generated.cells, key, forms))) return undefined;
-  // A contradicted article form drops the derived article forms, not the indefinite table they came from.
-  if (entries.some(([key, forms]) => contradicts(article, key, forms))) return generated;
-  return { ...generated, cells: { ...generated.cells, ...article } };
+  for (const note of notes) {
+    const generated = generate(headword, note);
+    if (!generated) return undefined;
+    const plain = respellNoun(generated.cells, headword, spelling);
+    const article = respellNoun(withArticle(generated.cells, note.pos[0] as Gender), headword, spelling);
+    if (!plain || !article || entries.some(([key, forms]) => contradicts(plain, key, forms))) continue;
+    // A contradicted article form drops the derived article forms, not the indefinite table they came from.
+    const candidate = { ...generated, cells: entries.some(([key, forms]) => contradicts(article, key, forms))
+      ? plain : { ...plain, ...article } };
+    if (chosen && JSON.stringify(chosen.cells) !== JSON.stringify(candidate.cells)) return undefined;
+    chosen = candidate;
+  }
+  return chosen;
 }

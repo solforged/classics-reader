@@ -8,14 +8,14 @@ import { suffixEntry, zoegaFits, zoegaGrammarPattern } from "../../packs/non/dic
 import { fold } from "../../packs/non/spelling";
 import type { ArticleSection, DictEntry as PrintedEntry, DictHit } from "../../src/lib/dict";
 import { parseMorph } from "../../src/lib/morph";
-import type { Paradigm } from "../../src/lib/paradigm";
+import type { NorseParadigm as Paradigm } from "../../packs/non/paradigm";
 import { glossArticle, plainArticle, zoegaArticle } from "../../packs/non/build/articles";
 import { FormIndex } from "../../packs/non/build/forms";
 import { pronounMorph } from "../../packs/non/build/menota";
 import { AnalysisTable } from "../../scripts/core/analyses";
 import { parseBellows } from "./lib/bellows";
 import { parseBugge } from "./lib/bugge";
-import { NameIndex, nameArticle, type NameGloss } from "./lib/names";
+import { NameIndex, inflectedNameMorph, nameArticle, nameMorph, type NameGloss } from "./lib/names";
 import { eaeUnits, headText, parseEae } from "./lib/eae";
 import { ParadigmBuilder } from "../../packs/non/build/paradigms";
 import {
@@ -108,7 +108,10 @@ function eaeSide(def: WorkDef, table: AnalysisTable): OnUnit[] {
 
 /** An analysis table drawing candidates from the form index; Bugge's diplomatic texts match more loosely. */
 const analysisTable = (diplomatic: boolean) =>
-  new AnalysisTable({ lookup: (surface) => index.get(surface, diplomatic), names: nameFor, morph: pronounMorph });
+  new AnalysisTable({
+    lookup: (surface) => index.get(surface, diplomatic), names: nameFor,
+    morph: (lemma, morph) => pronounMorph(lemma, nameMorph(lemma, morph)),
+  });
 
 async function rawWork(def: WorkDef): Promise<RawWork> {
   const diplomatic = !def.eae && !!def.bugge;
@@ -253,21 +256,28 @@ const usedLemmas = new Set<string>();
 const lemmaMorph = new Map<string, string>(); // a representative analysis, to rank dictionary homographs
 const classMorphs = new Map<string, Map<string, string>>();
 const editionClasses = new Map<string, Set<string>>();
+const nameGenders = new Map<string, Set<string>>();
 const stats: string[] = [];
 const paradigms = new ParadigmBuilder();
+const works: Work[] = [];
 
 for (const def of WORKS) {
   const raw = await rawWork(def);
   await Bun.write(join(ROOT, ".cache", "raw", `${def.slug}.json`), JSON.stringify(raw, null, 1));
   const rows = await align(def, raw);
   const work: Work = { slug: def.slug, rows, analyses: raw.analyses, notes: raw.notes, intro: raw.intro };
-  await outputs.writeWork(work);
+  works.push(work);
 
   for (const a of raw.analyses) {
     usedLemmas.add(a[0]);
     paradigms.use(a);
     if (!lemmaMorph.has(a[0]) || a[2] === "e") lemmaMorph.set(a[0], a[1]);
-    const upos = parseMorph(a[1]).upos;
+    const { upos, feats } = parseMorph(a[1]);
+    if (upos === "PROPN" && feats.Gender) {
+      const genders = nameGenders.get(a[0]) ?? new Set<string>();
+      for (const gender of feats.Gender) genders.add(gender);
+      nameGenders.set(a[0], genders);
+    }
     let morphs = classMorphs.get(a[0]);
     if (!morphs) classMorphs.set(a[0], morphs = new Map());
     if (!morphs.has(upos) || a[2] === "e") morphs.set(upos, a[1]);
@@ -285,7 +295,6 @@ for (const def of WORKS) {
       }
     }
   }
-  stats.push(statsLine(def.slug, rows.length, concordance.addWork(def.slug, rows, raw.analyses)));
 }
 
 // Dictionary shards: corpus lemmas, plus the headwords needed to explain compounds.
@@ -548,6 +557,27 @@ for (const paradigm of paradigms.build(wiktionary, (lemma) => dictionaryHit(lemm
   tables.set(k, [...(tables.get(k) ?? []), paradigm]);
 }
 await outputs.writeShards("para", tables);
+
+// Name candidates need the completed tables; infer each written form before deduplicating its reading.
+for (const work of works) {
+  const readings = new AnalysisTable();
+  for (const row of work.rows) for (const unit of row.on) for (const line of unit.lines) for (const piece of line) {
+    if (typeof piece === "string") continue;
+    piece[1] = piece[1].map((id) => {
+      const analysis = work.analyses[id]!;
+      if (analysis[2] !== "n" && analysis[2] !== "w") return readings.add(analysis);
+      const paradigm = tables.get(fold(analysis[0]))?.find((table) => table.kind === "noun" && table.lemma === analysis[0]);
+      if (!paradigm) return readings.add(analysis);
+      const morph = inflectedNameMorph(analysis[3] ?? piece[0], analysis[1], paradigm, nameGenders.get(analysis[0]));
+      if (morph === analysis[1]) return readings.add(analysis);
+      return readings.add(analysis[3] === undefined
+        ? [analysis[0], morph, analysis[2]] : [analysis[0], morph, analysis[2], analysis[3]]);
+    });
+  }
+  work.analyses = readings.list;
+  await outputs.writeWork(work);
+  stats.push(statsLine(work.slug, work.rows.length, concordance.addWork(work.slug, work.rows, work.analyses)));
+}
 
 await concordance.write(
   outputs,
