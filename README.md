@@ -57,7 +57,8 @@ to the DCS analyses; chapters 3–18 retain the DCS surface text. A written form
 sandhi or in a compound (*parayopetāste*) opens one card per word, each with its segmented form,
 grammar and entry from the DCS dictionary. Of the thirteen written forms DCS leaves unannotated (Besant's
 extra speaker captions, *vidhīyate* at 2.67, four words in chapter 13), all but *tajjyotis* show
-*candidate* analyses that DCS gives the same form elsewhere. Search ignores IAST diacritics (`sraddha` finds *śraddhā*).
+*candidate* analyses that DCS gives the same form elsewhere. Search ignores IAST diacritics (`sraddha` finds *śraddhā*)
+and accepts Devanagari (`श्रद्धा` finds *śraddhā* too), in the search page and the lexicon filter.
 The top-bar toggle shows the Sanskrit in Devanagari on every page (`src/lang/san/script.ts`,
 `src/scripts/script.ts`); text is still stored, searched and linked in IAST. Credits are in
 `src/components/sources/Gita.astro`.

@@ -58,8 +58,9 @@ export const gita: ReaderSite = {
     "English and chapters 1–2 Sanskrit: Annie Besant, The Bhagavad-Gita, fourth edition (1922), public domain, via Wikisource. " +
     "The English wording is retained; translator’s footnotes are omitted.",
   corpus: "the Gītā",
-  searchHint: "IAST diacritics are optional: <i>sraddha</i> finds <i>śraddhā</i>, <i>samnyasya</i> finds <i>saṃnyasya</i>.",
-  searchPlaceholder: "e.g. arjuna, dharma, devotion",
+  searchHint: "IAST diacritics are optional: <i>sraddha</i> finds <i>śraddhā</i>, <i>samnyasya</i> finds " +
+    "<i>saṃnyasya</i>. Devanagari works too: <i lang=\"sa-Deva\">श्रद्धा</i> finds <i>śraddhā</i>.",
+  searchPlaceholder: "e.g. arjuna, धर्म, devotion",
   countNote: "Counts use DCS annotation. Each written token counts once for each lemma it contains, including " +
     "words joined by sandhi or in compounds. Forms DCS leaves unannotated count as probable when all their candidate " +
     "analyses agree on one lemma. Glosses come from the DCS dictionary (Oliver Hellwig, CC BY 4.0).",
