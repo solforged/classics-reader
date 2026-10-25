@@ -353,9 +353,22 @@ export class ParadigmBuilder {
           bestScore = score;
         }
       }
+      if (proper && kind === "noun") {
+        // Names don't take the article; the edition's two definite tags on names (Hrímfaxi, Ving-Þórr) are plain forms.
+        for (const key of Object.keys(attested).filter((k) => /^\|[nadg][sp]d$/.test(k))) {
+          const plain = attested[`${key.slice(0, -1)}i`] ??= {};
+          for (const [form, count] of Object.entries(attested[key]!)) plain[form] = (plain[form] ?? 0) + count;
+          delete attested[key];
+        }
+      }
       const marks = kind === "personal" ? this.personalAttested : attested;
-      if (best) out.push({ lemma, kind, label: best.label, cells: best.cells, attested: marks, source: "wiktionary" });
-      else {
+      if (best) {
+        // Wiktionary's noun template fills article forms for names too (Svíþjóðin, Mjǫllnirinn); names don't take them.
+        const cells = proper && kind === "noun"
+          ? Object.fromEntries(Object.entries(best.cells).filter(([key]) => !/^\|[nadg][sp]d$/.test(key)))
+          : best.cells;
+        out.push({ lemma, kind, label: best.label, cells, attested: marks, source: "wiktionary" });
+      } else {
         const name = kind === "noun" ? this.names.get(lemma) : undefined;
         const named = name?.gender && !name.ambiguous
           ? inflectName(lemma, name.gender, name.plural && !name.singular, attested) : undefined;
