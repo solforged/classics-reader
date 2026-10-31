@@ -17,13 +17,13 @@ flowchart LR
   p5 --> p7
 ```
 
-## Decisions needed
+## Decisions
 
-| Decision | Needed before | Notes |
+| Decision | State | Notes |
 |---|---|---|
-| Name of the whole site | Phase 4 | Shown on the library page and as the first breadcrumb. |
-| Domain and host | Deploying Phase 4 | `astro.config.mjs` still has the placeholder `site: "https://eddas.example.org"`. Phase 4 builds and previews locally without one. |
-| Licence wording | Phase 4 | The Aeneid's LASLA data is CC BY-NC-SA. Hosting it with the other readers is allowed, but the library page and the footer should say which reader carries the non-commercial term. |
+| Name of the whole site | Working name | "Classics Reader" (`classics-reader`) on the library page and as the first breadcrumb until a final name is chosen. Keep it in one place (the library layout) so a rename touches one file. |
+| Domain | Settled | `classics-reader.solforged.io`, set as `site` in `astro.config.mjs`. Readers live under `/edda/`, `/gita/`, `/aeneid/`. The host is chosen when Phase 4 is first deployed. |
+| Licence wording | Deferred | The Aeneid's LASLA data is CC BY-NC-SA. Each reader's sources page already states its licences; site-wide wording waits until the site is published. |
 
 ## Phase 1: Citations and breadcrumbs
 

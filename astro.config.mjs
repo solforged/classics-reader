@@ -7,7 +7,7 @@ const reader = readerId(process.env.READER);
 const file = (path) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
-  site: "https://eddas.example.org",
+  site: "https://classics-reader.solforged.io",
   trailingSlash: "always",
   publicDir: `generated/${reader}/public`,
   outDir: `dist/${reader}`,
