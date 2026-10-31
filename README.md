@@ -1,11 +1,12 @@
-# The Edda Reader and the Gītā Reader
+# The Edda Reader, the Gītā Reader and the Aeneid Reader
 
 Static parallel-text readers modelled on [The Aristotle Reader](https://aristotle.johnhboyer.com).
 Each reader is one site built from the same pages: the original language sits beside a
-public-domain English translation, one aligned stanza, verse or chapter per row.
+public-domain English translation, one aligned stanza, verse, chapter or paragraph per row.
 
 - **The Edda Reader**: the Poetic and Prose Eddas in Old Norse.
 - **The Gītā Reader**: the Bhagavadgītā, all 18 chapters, in Sanskrit (IAST or Devanagari).
+- **The Aeneid Reader**: Vergil's Aeneid, book 1, in Latin.
 
 ## The Edda Reader
 
@@ -86,6 +87,24 @@ The top-bar toggle shows the Sanskrit in Devanagari on every page (`packs/san/sc
 `src/scripts/script.ts`); text is still stored, searched and linked in IAST. Credits are in
 `corpora/gita/Sources.astro`.
 
+## The Aeneid Reader
+
+The Latin is Greenough's text (1881) from Perseus, one row per paragraph of his, beside Theodore C.
+Williams's blank-verse English (1910), whose paragraphs Perseus numbers by the same Latin lines. Every
+fifth line is numbered; the go-to box and links accept a line inside a paragraph (`/aeneid-1/#1.23`), and
+the concordance cites lines. Lemma and morphology come from the LASLA corpus (Université de Liège, via
+CIRCSE), **CC BY-NC-SA 4.0**: the Aeneid Reader's Latin data is for non-commercial use only. LASLA
+follows another edition, so `corpora/aeneid/alignment.ts` pairs each printed word with LASLA's word on
+the same line: other spellings (*ruunt*, LASLA *ruont*) keep LASLA's annotation, and the fourteen words
+where Greenough prints another reading (`READINGS`) get candidate analyses LASLA gives the same form
+elsewhere in the Aeneid; five of them have none. Words joined by *-que*, *-ne* or *-ve* open one card
+per word. The dictionary is Frieze's Aeneid vocabulary as revised by Dickinson College Commentaries (CC
+BY-SA 4.0), which DCC keyed to LASLA's lemmas; lemmas show its headword form (*canō*, *vir*), and
+where a lemma has several entries (*ut*), each LASLA homograph takes the entry with its Aeneid count and
+the panel opens the entries for the word's class. Search ignores macrons, case, and v/u and j/i
+(`uirum` finds *virum*). There are no inflection tables yet. Credits are in
+`corpora/aeneid/Sources.astro`.
+
 ## Building
 
 ```sh
@@ -98,6 +117,10 @@ bun run preview
 READER=gita bun run fetch   # DCS chapters, DCS dictionary, Besant pages → .cache/sources/gita
 READER=gita bun run data    # → generated/gita/
 bun run build:gita          # → dist/gita/ (READER=gita astro build)
+
+READER=aeneid bun run fetch # LASLA's 12 Aeneid books, Perseus Latin and English, Frieze → .cache/sources/aeneid
+READER=aeneid bun run data  # → generated/aeneid/
+bun run build:aeneid        # → dist/aeneid/
 ```
 
 `READER` picks the reader for every step and defaults to `edda`; `bun run all` runs all three.
@@ -120,13 +143,17 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   side id, and the reader's column toggle, the search filter and `search.json` follow the list.
   Each work names its citation `levels`, outermost first (`["Stanza"]`, or `["Book", "Line"]` with
   row ids like `1.23`); a listed level (a prose work's chapters) gets a strip of links above the
-  text, and the go-to box accepts `1.23`, `1 23` or `1:23`.
+  text, and the go-to box accepts `1.23`, `1 23` or `1:23`. A source unit with `firstLine` is
+  numbered stichic verse (an epic paragraph): its lines carry their numbers, every fifth shows one,
+  and the go-to box, `#1.23` links and concordance citations reach a line inside its row. A
+  translation unit marked `stichic` is continuous verse too, without the alternate indent.
 - `src/lang/types.ts` is the pack contract the shared code uses (spelling fold, search key,
   morphology labels, dictionary list, optional inflection tables and scripts); `src/lang/index.ts`
   exposes the reader's pack as `lang`.
 - `src/lib/morph.ts`: the analysis format. Word analyses carry Universal Dependencies morphology,
   e.g. `NOUN Case=Acc|Definite=Ind|Gender=Masc|Number=Sing`.
-- `src/lib/entry.ts`: renders dictionary articles for the word panel and the lemma pages.
+- `src/lib/entry.ts`: renders dictionary articles for the word panel and the lemma pages. A section
+  that lists `classes` (word classes from the build) opens only for readings of those classes.
   `src/lib/paradigm.ts` is the inflection table record; packs with tables draw them
   (`packs/non/tables.ts`).
 - `scripts/core/outputs.ts`: what every reader's build writes under `generated/<reader>/`: works,
@@ -139,6 +166,9 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   (`articles.ts`).
 - `packs/san/`: Sanskrit. The build helpers read DCS CoNLL-U (`conllu.ts`) and the DCS dictionary
   (`dictionary.ts`), convert DCS tags to UD (`morph.ts`) and repair damaged characters (`repair.ts`).
+- `packs/lat/`: Latin. Lookup folds macrons, case, v/u and j/i. The build helpers read LASLA
+  CoNLL-UP (`lasla.ts`), adjust its UD features (`morph.ts`: noun gender dropped, deponents marked)
+  and read Frieze's vocabulary from DCC (`frieze.ts`).
 - `corpora/edda/`: the Edda build (`build.ts`, `catalog.ts`) and its parsers (`lib/`: `eae.ts`,
   `bugge.ts`, `bellows.ts`, `snorra.ts`, Bellows's name index `names.ts`). It fails if an
   alignment misses or repeats a unit. `alignment/<slug>.json` is the curated row-by-row crosswalk
@@ -148,6 +178,10 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   Besant's extra verse 13.1 (`english-alignment.ts`) and his Devanagari against DCS
   (`surface-alignment.ts`). It fails if a verse is missing or repeated on either side, or on a
   morphology value with no English label.
+- `corpora/aeneid/`: the Aeneid build: pinned and hash-checked sources (`sources.ts`), Perseus TEI
+  for Greenough and Williams (`lib/perseus.ts`), and the word-by-word pairing with LASLA
+  (`alignment.ts`). It fails if a line's word count differs from LASLA's, if Greenough's and
+  Williams's paragraphs differ, or if a listed reading is no longer in the text.
 - `src/pages/`: home, reader (`[slug]`), search, lexicon, sources.
 
 ## Edda alignment

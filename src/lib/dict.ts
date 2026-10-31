@@ -18,6 +18,12 @@ export interface ArticleSection {
   senses?: Sense[];
   /** Section text that the parser could not split into senses (HTML); rendered as is. */
   text?: string;
+  /**
+   * UPOS classes of the readings this section describes, when the build knows them (Latin: LASLA files each reading
+   * under one Frieze entry). The panel then opens the sections whose classes include the reading's, in place of the
+   * dictionary's `fits` test.
+   */
+  classes?: string[];
 }
 
 /** A structured dictionary entry. */

@@ -13,6 +13,11 @@ export interface SourceUnit {
   kind: UnitKind;
   /** Edition label shown in the margin (stanza number, chapter number). */
   label?: string;
+  /**
+   * Citation number of the first line, when each line is a numbered verse of continuous (stichic) verse, as in an
+   * epic: the reader numbers every fifth line and does not indent alternate lines.
+   */
+  firstLine?: number;
   lines: Piece[][];
 }
 
@@ -23,6 +28,8 @@ export interface TextUnit {
   label?: string;
   /** Plain text lines (stanza) or paragraphs (prose). */
   lines: string[];
+  /** Continuous (stichic) verse, as a verse translation of an epic: alternate lines are not indented. */
+  stichic?: true;
   /** Translator's note keys attached to this unit. */
   notes?: string[];
 }
@@ -81,7 +88,10 @@ export interface LemmaStat {
   homograph?: string;
   count: number;
   works: Record<string, number>;
-  /** Concordance lines: slug, row id, line with the word marked ⟦…⟧, 1 = probable (not edition-annotated). */
+  /**
+   * Concordance lines: slug, citation (the row id, or the line's own number in numbered verse: "1.742"), line with
+   * the word marked ⟦…⟧, 1 = probable (not edition-annotated).
+   */
   occ: [string, string, string, number][];
   /** Short gloss for the lexicon list. */
   gloss: string;

@@ -67,19 +67,28 @@ function sectionContent(dict: Dictionary, section: ArticleSection, headword: str
 /** An "article" entry: homograph sections, numbered senses; sections that do not fit the reading are collapsed. */
 function articleHtml(dict: Dictionary, article: Article, morph?: string): string {
   const headword = repeatedHead(article);
+  const upos = morph ? parseMorph(morph).upos : "";
+  const byClass = article.sections.some((section) => section.classes);
   const fits = article.sections.map((section) => {
+    if (section.classes) return section.classes.includes(upos);
     const grammar = (section.grammar || section.text || "").replace(/\([^)]*\)/g, "");
     return morph && dict.fits ? dict.fits(morph, grammar) : false;
   });
-  const selected = fits.filter(Boolean).length === 1 ? fits.indexOf(true) : -1;
+  // A dictionary's `fits` test collapses the other sections only when one section alone fits; build-time classes
+  // collapse every section that does not list the reading's class.
+  const fitting = fits.filter(Boolean).length;
+  const collapse = (i: number) => fitting > 0 && !fits[i] && (byClass || fitting === 1);
   const blocks = article.sections.map((section, i) => {
     const label = `${section.label ?? ""}${enrich(dict, section.grammar ?? "", headword, true)}`;
     const source = `${label ? `<div class="entry-grammar">${label}</div>` : ""}${sectionContent(dict, section, headword)}`;
-    if (selected >= 0 && selected !== i) {
+    if (collapse(i)) {
       const firstGloss = /<i>[^]*?<\/i>/.exec(section.senses?.[0]?.gloss ?? section.text ?? "")?.[0] ?? "";
       const textLabel = section.text?.split("<i>")[0]?.replace(/<[^>]+>/g, "").slice(0, 120) ?? "";
+      // Sections with build-time classes (Frieze) have plain glosses, not italic ones: show the start of the first.
+      const plainLabel = byClass && !firstGloss ? (section.senses?.[0]?.gloss ?? "").replace(/<[^>]+>/g, "") : "";
       const summary = label + (section.grammar ? "" : esc(textLabel)) +
-        (firstGloss ? ` <span class="homograph-gloss">${enrich(dict, firstGloss, headword)}</span>` : "");
+        (firstGloss ? ` <span class="homograph-gloss">${enrich(dict, firstGloss, headword)}</span>` : "") +
+        (plainLabel ? ` <span class="homograph-gloss">${plainLabel.length > 80 ? `${plainLabel.slice(0, 80).trimEnd()}…` : plainLabel}</span>` : "");
       return `<details class="entry-section other-homograph">` +
         `<summary data-entry-ui>${summary}</summary>${source}</details>`;
     }

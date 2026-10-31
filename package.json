@@ -13,7 +13,10 @@
     "align": "bun corpora/edda/check-alignment.ts",
     "dev:gita": "READER=gita astro dev",
     "build:gita": "READER=gita astro build",
-    "preview:gita": "READER=gita astro preview"
+    "preview:gita": "READER=gita astro preview",
+    "dev:aeneid": "READER=aeneid astro dev",
+    "build:aeneid": "READER=aeneid astro build",
+    "preview:aeneid": "READER=aeneid astro preview"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4",

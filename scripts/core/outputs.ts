@@ -124,7 +124,9 @@ export class Concordance {
     for (const row of rows) {
       this.search.push(searchRow(slug, row, this.sides, analyses));
       for (const u of this.sources.flatMap((side) => sourceUnits(row, side))) {
-        for (const line of u.lines) {
+        for (const [l, line] of u.lines.entries()) {
+          // Numbered verse cites its line (1.742), which the reader finds inside the row; other units cite the row.
+          const cite = u.firstLine === undefined ? row.id : [...row.id.split(".").slice(0, -1), u.firstLine + l].join(".");
           const lineText = line.map((p) => (typeof p === "string" ? p : p[0])).join("");
           for (const p of line) {
             if (typeof p === "string") continue;
@@ -154,7 +156,7 @@ export class Concordance {
               }
               st.count++;
               st.works[slug] = (st.works[slug] ?? 0) + 1;
-              if (st.occ.length < 400) st.occ.push([slug, row.id, lineText.replace(p[0], `⟦${p[0]}⟧`), probable, this.occurrence]);
+              if (st.occ.length < 400) st.occ.push([slug, cite, lineText.replace(p[0], `⟦${p[0]}⟧`), probable, this.occurrence]);
               this.occurrence++;
             }
           }

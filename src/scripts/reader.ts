@@ -55,13 +55,33 @@ function jump(id: string) {
   return true;
 }
 
+/**
+ * A numbered verse inside a passage (an epic's "1.23" when its rows cite their first lines, 1.12 and 1.34): the
+ * last level is the line (data-n), the levels before it must start the row id.
+ */
+function verseLine(cite: string): HTMLElement | undefined {
+  const parts = cite.split(".");
+  const line = parts.pop()!;
+  const prefix = parts.length ? `${parts.join(".")}.` : "";
+  return [...text.querySelectorAll<HTMLElement>(`.l[data-n="${CSS.escape(line)}"]`)]
+    .find((el) => el.closest<HTMLElement>(".row")?.id.startsWith(prefix));
+}
+
+/** Scrolls to a numbered line and flashes it; the address cites the line ("#1.23"). */
+function jumpToLine(el: HTMLElement, cite: string) {
+  history.replaceState(null, "", `#${cite}`);
+  el.scrollIntoView({ block: "center" });
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 1600);
+}
+
 document.getElementById("goto")?.addEventListener("submit", (e) => {
   e.preventDefault();
   const input = document.getElementById("goto-input") as HTMLInputElement;
   // "1 23", "1,23" and "1:23" cite like "1.23".
   const want = input.value.trim().replace(/\s*[\s,:]\s*/g, ".");
   if (!want) return;
-  // Exact row id, else the row containing a stanza with that label.
+  // Exact row id, else the row containing a stanza with that label, else a numbered line inside a row.
   if (rowIds.has(want) && jump(want)) return;
   for (const lab of text.querySelectorAll<HTMLElement>(".col.source .slabel, .col.source .chap, .col.translation .slabel")) {
     if (lab.textContent === want) {
@@ -69,10 +89,19 @@ document.getElementById("goto")?.addEventListener("submit", (e) => {
       if (row && jump(row.id)) return;
     }
   }
+  const line = verseLine(want);
+  if (line) return jumpToLine(line, want);
   input.setCustomValidity(`No passage ${want}`);
   input.reportValidity();
   setTimeout(() => input.setCustomValidity(""), 1500);
 });
+
+// A link to a line inside a passage (#1.23) opens at that line.
+const hashCite = decodeURIComponent(location.hash.slice(1));
+if (hashCite && !rowIds.has(hashCite)) {
+  const line = verseLine(hashCite);
+  if (line) jumpToLine(line, hashCite);
+}
 
 // Citation links copy a stable URL.
 text.addEventListener("click", (e) => {
@@ -316,10 +345,11 @@ text.addEventListener("click", (e) => {
   if (n) showNote(n.dataset.note!);
 });
 
-// Highlight a word passed from the lexicon (?w=form#row).
+// Highlight a word passed from the lexicon (?w=form#row, or #1.742 for a numbered line).
 const want = new URLSearchParams(location.search).get("w");
 if (want && location.hash) {
-  const row = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  const cite = decodeURIComponent(location.hash.slice(1));
+  const row = document.getElementById(cite) ?? verseLine(cite);
   const hit = [...(row?.querySelectorAll<HTMLElement>(".w") ?? [])].find((w) => sourceText(w) === want);
   if (hit) {
     hit.classList.add("sel");

@@ -4,6 +4,7 @@
 export const READERS = {
   edda: { pack: "non" },
   gita: { pack: "san" },
+  aeneid: { pack: "lat" },
 } as const satisfies Readonly<Record<string, { pack: string }>>;
 
 export type ReaderId = keyof typeof READERS;

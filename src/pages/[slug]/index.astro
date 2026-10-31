@@ -48,6 +48,14 @@ function sourceUnit(u: SourceUnit): string {
   }
   if (u.kind === "prose") return `<p class="prose">${u.lines.map(pieces).join(" ")}</p>`;
   const label = u.label ? `<span class="slabel">${esc(u.label)}</span>` : "";
+  // Numbered stichic verse (an epic): every line carries its number for the go-to box, and every fifth shows it.
+  const first = u.firstLine;
+  if (first !== undefined) {
+    return `<div class="stanza stichic">${label}${u.lines.map((l, i) => {
+      const n = first + i;
+      return `<div class="l" data-n="${n}">${n % 5 ? "" : `<span class="lnum" aria-hidden="true">${n}</span>`}${pieces(l)}</div>`;
+    }).join("")}</div>`;
+  }
   return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${pieces(l)}</div>`).join("")}</div>`;
 }
 
@@ -66,7 +74,7 @@ function textUnit(u: TextUnit): string {
   }
   if (u.kind === "prose") return `<p class="prose">${u.lines.map(plainText).join(" ")}${notes}</p>`;
   const label = u.label ? `<span class="slabel">${esc(u.label)}</span>` : "";
-  return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${plainText(l)}</div>`).join("")}${notes}</div>`;
+  return `<div class="${u.stichic ? "stanza stichic" : "stanza"}">${label}${u.lines.map((l) => `<div class="l">${plainText(l)}</div>`).join("")}${notes}</div>`;
 }
 
 // [lemma, morph, source, lemma page slug, corpus count, segmented word]; src/scripts/reader.ts reads these.
@@ -350,6 +358,33 @@ const ids = new Set(work.rows.map((r) => r.id));
   }
   .stanza .l:nth-child(even of .l) {
     padding-left: 2.2em;
+  }
+  /* Stichic verse (an epic): no alternate indent; numbered lines carry their number in the margin, and the citation
+     link replaces the first one on hover. */
+  .stanza.stichic .l {
+    position: relative;
+  }
+  .stanza.stichic .l:nth-child(even of .l) {
+    padding-left: 1.2em;
+  }
+  .lnum {
+    position: absolute;
+    left: -1.9rem;
+    width: 1.5rem;
+    text-align: right;
+    text-indent: 0;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    line-height: 2.2;
+    color: var(--faint);
+  }
+  .row:hover .l:first-of-type > .lnum,
+  .row:target .l:first-of-type > .lnum {
+    visibility: hidden;
+  }
+  .l.flash {
+    background: color-mix(in srgb, var(--hit) 45%, transparent);
+    border-radius: 4px;
   }
   .slabel {
     position: absolute;

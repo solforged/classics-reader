@@ -1,0 +1,80 @@
+---
+// Sources and licences of the Aeneid Reader (src/pages/sources.astro).
+import { READINGS } from "./alignment";
+import { LASLA_COMMIT, PERSEUS_COMMIT } from "./sources";
+
+const readings = Object.entries(READINGS).map(([key, lasla]) => {
+  const [line, word] = key.split(" ");
+  return { line, word, lasla };
+});
+---
+<h2>Latin</h2>
+<dl>
+  <dt>J. B. Greenough (ed.), <i>The Bucolics, Aeneid, and Georgics of Virgil</i> (Boston: Ginn, 1881)</dt>
+  <dd>
+    Public domain. The text, line numbers and paragraphs come from the Perseus Digital Library’s
+    <a href="https://github.com/PerseusDL/canonical-latinLit">canonical-latinLit</a> edition
+    <code>phi0690.phi003.perseus-lat2</code>, pinned to commit <code>{PERSEUS_COMMIT}</code>. Perseus’s encoding
+    is licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; this reader uses only
+    Greenough’s words, punctuation, line numbers and paragraph divisions. Lines 426 and 711, which Greenough
+    brackets as spurious, are shown in square brackets. Greenough’s speech marks are not printed.
+  </dd>
+  <dt>LASLA, Université de Liège: lemmatized and tagged Aeneid</dt>
+  <dd>
+    Every word’s lemma and morphology come from the LASLA corpus as converted to CoNLL-U by CIRCSE
+    (<a href="https://github.com/CIRCSE/LASLA">CIRCSE/LASLA</a>, release v1.0.1, commit
+    <code>{LASLA_COMMIT}</code>; <a href="https://doi.org/10.5281/zenodo.8370759">Zenodo</a>). LASLA’s data is
+    licensed <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>, so this reader’s Latin
+    annotation, and the word data built from it, may be reused only for non-commercial purposes, with attribution and
+    under the same licence.
+  </dd>
+  <dt>Morphology</dt>
+  <dd>
+    LASLA’s Universal Dependencies features are kept, including its declension and conjugation classes. Two
+    changes: nouns take their gender from the dictionary, because LASLA files first-declension masculines
+    (<i>Aeneas</i>, <i>agricola</i>) as feminine; and verbs whose lemma ends in <i>-or</i> are labelled deponent
+    rather than passive. LASLA’s lemmas are lowercase and spell consonantal u and i as <i>u</i> and <i>i</i>; the
+    reader shows the matching form of Frieze’s headword instead (<i>uir</i> as <i>vir</i>, <i>cano</i> as
+    <i>canō</i>).
+  </dd>
+  <dt>Aligning Greenough’s text with LASLA’s</dt>
+  <dd>
+    LASLA follows another edition. Each printed word takes the annotation of the LASLA word in the same position of
+    the same line. LASLA’s four spurious opening lines (<i>Ille ego qui quondam…</i>) are left out. Where the
+    editions spell a word differently (<i>ruunt</i> and <i>ruont</i>, <i>omnes</i> and <i>omnis</i>), the word keeps
+    LASLA’s annotation. Lines 610 and 701 order two words differently and are matched by spelling. Where Greenough
+    prints another word, the reader offers <i>candidate</i> analyses: those LASLA gives the same written form
+    elsewhere in the Aeneid, or for an unknown form with an enclitic, its stem and the enclitic. Words with no
+    candidate show no analysis.
+    <details>
+      <summary>Greenough’s other readings</summary>
+      <ul>
+        {readings.map(({ line, word, lasla }) => <li>1.{line} <i lang="la">{word}</i> (LASLA <i lang="la">{lasla}</i>)</li>)}
+      </ul>
+    </details>
+  </dd>
+</dl>
+
+<h2>English</h2>
+<dl>
+  <dt>Theodore C. Williams, <i>The Aeneid of Virgil</i> (Boston: Houghton Mifflin, 1910)</dt>
+  <dd>
+    Public domain. The text is Perseus’s <code>phi0690.phi003.perseus-eng2</code> from the same pinned commit.
+    Williams’s blank verse follows Greenough’s paragraphs, which Perseus numbers by their first Latin line; the
+    paragraph at line 132 starts inside his line “he voiced this word: | ‘What pride of birth or power”, and is split
+    there.
+  </dd>
+</dl>
+
+<h2>Dictionary</h2>
+<dl>
+  <dt>Henry S. Frieze, <i>Vergil’s Aeneid</i>, vocabulary revised by Walter Dennison (1902)</dt>
+  <dd>
+    As edited by Dickinson College Commentaries, <a href="https://dcc.dickinson.edu/vergil-aeneid-vocabulary">Vergil
+    Aeneid vocabulary</a>, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+    DCC built the list from LASLA’s lemmas, so each LASLA lemma has its entries. Where a lemma has several
+    (<i>ut</i>: result, manner, question), each LASLA homograph is matched to the entry with the same number of
+    occurrences in the Aeneid, and the word panel opens the entries for the clicked word’s class. The export is not
+    versioned; the build checks it against the snapshot it was made with.
+  </dd>
+</dl>

@@ -105,6 +105,11 @@ button { font: inherit; color: inherit; }
   font-family: "Noto Serif Devanagari", "Devanagari Sangam MN", "Kohinoor Devanagari", "Mangal", var(--serif);
 }
 
+/* EB Garamond's Latin localized forms print every u as V-shaped (virvmqve); editions here spell u and v as given. */
+:lang(la) {
+  font-feature-settings: "locl" 0;
+}
+
 .page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
 .page.wide { max-width: 72rem; }
 
