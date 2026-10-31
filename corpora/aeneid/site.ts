@@ -29,6 +29,7 @@ export const site: ReaderSite = {
     "candidate analyses agree on one lemma. Glosses come from Frieze’s Aeneid vocabulary (Dickinson College " +
     "Commentaries, CC BY-SA 4.0).",
   sides: [{ id: "la", role: "source", label: "Latin" }, { id: "en", role: "translation", label: "English", lang: "en" }],
+  collections: [{ id: "aeneid", title: "Vergil, Aeneid" }],
   groups: GROUPS,
   works: [{
     slug: "aeneid-1",
@@ -37,7 +38,7 @@ export const site: ReaderSite = {
     english: "Storm and arrival at Carthage",
     summary: "Juno’s anger drives the Trojan fleet onto the coast of Libya. Venus guides Aeneas to Carthage, " +
       "where Dido receives the Trojans and, through Cupid, begins to love Aeneas.",
-    collection: "Vergil, Aeneid",
+    collection: "aeneid",
     group: "Books",
     levels: [{ name: "Book" }, { name: "Line" }],
     sources: {

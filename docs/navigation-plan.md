@@ -27,6 +27,9 @@ flowchart LR
 
 ## Phase 1: Citations and breadcrumbs
 
+Status: done (2026-11-01). The go-to box also accepts the abbreviation's own notation inside the
+open work (`Aen. 1.305`).
+
 These shared pieces are needed by every later phase, and they work within a single reader.
 
 1. **Citation formatting.** Add `src/lib/cite.ts` with `formatCite(work, cite)`. When a work has
@@ -60,6 +63,8 @@ the toolbar and citation text.
 
 ## Phase 2: Reading view
 
+Status: done (2026-11-01). The outline lives in `src/components/WorkPage.astro`.
+
 1. **Outline rail.** Build a per-work outline in `src/pages/[slug]/index.astro`:
    - Listed levels (Prose Edda chapters): one entry per division. This replaces the `.chapters` strip.
    - Numbered stichic verse (Aeneid paragraphs): the first line number and the first three words of
@@ -67,12 +72,13 @@ the toolbar and citation text.
    - Stanzaic poems: no entries for individual stanzas; the go-to box serves that purpose.
    - Below the outline: the other works of the same collection.
 
-   On wide screens the rail is a sticky left column. Below 640 px it opens as a sheet from an
-   "Outline" button in the toolbar. The current entry is highlighted by the `IntersectionObserver`
-   that already records the reading position.
+   The rail stands beside the text from 1280 px wide while the word panel is closed, and from
+   1680 px with it open; otherwise it opens as a sheet from an "Outline" button in the toolbar. The
+   current entry is highlighted by the `IntersectionObserver` that already records the reading
+   position.
 2. **Position bar.** Replace `.work-nav` with a bar that holds the previous and next outline entry,
-   a progress bar (rows read / rows in the work), and the next work. Works without an outline
-   show only the progress bar and the previous and next work.
+   a progress bar (how far the reader has scrolled through the text), and the previous and next
+   work. Works without an outline show only the progress bar and the previous and next work.
 3. **Word-panel history.** Keep a back stack of shown words in `reader.ts` (`showWord`). The
    panel header shows the previous word as a back link. The stack resets when the panel closes.
 
@@ -81,6 +87,8 @@ scroll position; a Prose Edda work's chapters appear in the rail and the strip i
 and pressing back in the panel restores the first. Browser check at 1280 and 390 px wide.
 
 ## Phase 3: Collections
+
+Status: done (2026-11-01).
 
 1. **Site contract.** Add `collections: { id, title, subtitle, intro }[]` to `ReaderSite`
    (`src/sites/types.ts`) and change `WorkInfo.collection` from a display string to a collection
@@ -91,7 +99,8 @@ and pressing back in the panel restores the first. Browser check at 1280 and 390
    `src/pages/[slug]/index.astro` route: `getStaticPaths` returns works and collections with a
    `kind` prop, and the route renders `WorkPage.astro` or `CollectionPage.astro`. A second dynamic
    route at the same segment would make Astro choose between them by priority, so one route is the
-   safer arrangement. The data build fails if a collection id equals a work slug.
+   safer arrangement. The site build (`src/lib/site.ts`) fails if a collection id equals a work
+   slug or a work names an unknown collection.
 3. **Reader home.** `src/pages/index.astro` lists collections (when there are several), each with
    its groups, instead of groups alone. Readers with one collection look as they do now.
 4. **Breadcrumbs.** Reader › collection › work when there are several collections; reader ›

@@ -1,10 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
 import { lang } from "../lang";
-import { site, WORKS } from "../lib/site";
+import { COLLECTIONS, site, WORKS } from "../lib/site";
 
 const meta = Object.fromEntries(WORKS.map((w) => [w.slug, { title: w.title, abbr: w.abbr, c: w.collection }]));
-const collections = [...new Set(WORKS.map((w) => w.collection))];
 // Side order matches each search row's texts (scripts/core/outputs.ts).
 const sides = site.sides.map((side) => ({ id: side.id, role: side.role, lang: side.role === "source" ? lang.code : side.lang ?? "" }));
 const searched = new Intl.ListFormat("en", { type: "conjunction" }).format(site.sides.map((side) => `the ${side.label}`));
@@ -26,10 +25,10 @@ const searched = new Intl.ListFormat("en", { type: "conjunction" }).format(site.
           {site.sides.map((side) => <button type="button" data-side={side.id} aria-pressed="false">{side.label}</button>)}
         </div>
         {
-          collections.length > 1 && (
+          COLLECTIONS.length > 1 && (
             <div class="segmented" role="group" aria-label="Collection">
               <button type="button" data-coll="all" aria-pressed="true">All works</button>
-              {collections.map((c) => <button type="button" data-coll={c} aria-pressed="false">{c}</button>)}
+              {COLLECTIONS.map((c) => <button type="button" data-coll={c.id} aria-pressed="false">{c.title}</button>)}
             </div>
           )
         }

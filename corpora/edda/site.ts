@@ -38,6 +38,24 @@ export const site: ReaderSite = {
     "analyses all agree on one lemma. Glosses from Zoëga’s <i>Concise Dictionary of Old Icelandic</i> (1910) or " +
     "Wiktionary.",
   sides: [{ id: "non", role: "source", label: "Old Norse" }, { id: "en", role: "translation", label: "English", lang: "en" }],
+  collections: [
+    {
+      id: "poetic-edda",
+      title: "Poetic Edda",
+      subtitle: "Eddukvæði",
+      intro: "The anonymous mythological and heroic poems of medieval Iceland, most of them preserved in the " +
+        "thirteenth-century Codex Regius (GKS 2365 4to). Poems from other manuscripts follow Sophus Bugge’s edition " +
+        "of 1867. Most of the English is Henry Adams Bellows’s translation of 1923.",
+    },
+    {
+      id: "prose-edda",
+      title: "Prose Edda",
+      subtitle: "Snorra Edda",
+      intro: "Snorri Sturluson’s handbook of myth and poetic diction, written about 1220: the Prologue, " +
+        "Gylfaginning, Skáldskaparmál and Háttatal. The Old Norse is Guðni Jónsson’s edition; the English is Arthur " +
+        "Gilchrist Brodeur’s translation of 1916, which leaves out Háttatal.",
+    },
+  ],
   groups: GROUPS,
   works: WORKS.map((def) => {
     const prose = def.collection === "prose" && def.slug !== "hattatal";
@@ -47,7 +65,7 @@ export const site: ReaderSite = {
       title: def.title,
       english: def.english,
       summary: def.summary,
-      collection: def.collection === "poetic" ? "Poetic Edda" : "Prose Edda",
+      collection: def.collection === "poetic" ? "poetic-edda" : "prose-edda",
       group: def.group,
       levels: [prose ? { name: "Chapter", list: true } : { name: "Stanza" }],
       sources: sources(def),

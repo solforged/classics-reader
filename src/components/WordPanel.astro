@@ -4,6 +4,7 @@ import "../styles/paradigm.css";
 
 <aside class="word-panel" id="word-panel" hidden aria-live="polite">
   <header>
+    <button class="wp-back" type="button" id="wp-back" hidden title="Back to the previous word">‹ <span></span></button>
     <h2 id="wp-title"></h2>
     <button class="icon-btn" type="button" id="wp-close" aria-label="Close panel">×</button>
   </header>
@@ -39,6 +40,26 @@ import "../styles/paradigm.css";
     font-weight: 500;
     font-size: 1.4rem;
     flex: 1;
+    min-width: 0;
+  }
+  .wp-back {
+    max-width: 9rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    padding: 0.15rem 0.5rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+  .wp-back[hidden] {
+    display: none;
+  }
+  .wp-back:hover {
+    border-color: var(--accent);
   }
   #wp-body {
     overflow-y: auto;

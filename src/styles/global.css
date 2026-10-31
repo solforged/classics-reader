@@ -70,11 +70,43 @@ button { font: inherit; color: inherit; }
 }
 .topbar .crumbs { display: flex; gap: 0.45rem; align-items: center; min-width: 0; }
 .topbar .crumbs a { text-decoration: none; font-weight: 600; white-space: nowrap; }
-.topbar .crumbs span { color: var(--faint); }
+.topbar .crumbs .sep { color: var(--faint); }
+.topbar .crumb { display: inline-flex; align-items: center; gap: 0.1rem; min-width: 0; }
 .topbar .crumbs .here { color: var(--fg); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.topbar nav { margin-left: auto; display: flex; gap: 1rem; align-items: center; }
-.topbar nav a { color: var(--fg); text-decoration: none; }
-.topbar nav a:hover { color: var(--accent); }
+.crumb-more {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  padding: 0 0.2rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+.crumb-more:hover { color: var(--accent); }
+/* The menu hangs below its crumb where anchor positioning works, and sits near the top-left corner elsewhere. */
+.crumb-menu {
+  margin: 0;
+  inset: 3rem auto auto 1rem;
+  max-height: min(28rem, 70vh);
+  overflow-y: auto;
+  min-width: 12rem;
+  padding: 0.35rem 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+@supports (position-area: bottom) {
+  .crumb-menu { inset: auto; position-area: bottom span-right; position-try-fallbacks: flip-inline; margin-top: 0.3rem; }
+}
+.topbar .crumb-menu a { display: block; padding: 0.3rem 0.9rem; color: var(--fg); font-weight: 400; text-decoration: none; white-space: nowrap; }
+.topbar .crumb-menu a:hover { background: var(--accent-soft); }
+.topbar .crumb-menu a[aria-current] { color: var(--accent); font-weight: 600; }
+.topbar > nav { margin-left: auto; display: flex; gap: 1rem; align-items: center; }
+.topbar > nav a { color: var(--fg); text-decoration: none; }
+.topbar > nav a:hover { color: var(--accent); }
 
 .icon-btn {
   display: inline-grid;
@@ -169,11 +201,11 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
 
 @media (max-width: 640px) {
   .topbar { gap: 0.6rem; padding: 0.5rem 0.75rem; }
-  .topbar nav { gap: 0.7rem; }
-  .topbar nav .wide-only { display: none; }
+  .topbar > nav { gap: 0.7rem; }
+  .topbar > nav .wide-only { display: none; }
   .topbar .crumbs .here { max-width: 9rem; }
-  /* Keep only the home link and the current page on phones. */
-  .topbar .crumbs > :not(.home-link):not(.here):not(:nth-last-child(2)) { display: none; }
+  /* Keep only the home link and the last crumb (with its separator) on phones. */
+  .topbar .crumbs > :not(.home-link):not(:nth-last-child(-n + 2)) { display: none; }
 }
 
 .toast {

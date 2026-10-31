@@ -1,5 +1,6 @@
 // Reader page behaviour: column view, word panel, translator's notes, go-to, citation links, reading position.
 import { lang, shardOf } from "../lang";
+import { formatCite, resolveCite, type CiteWork } from "../lib/cite";
 import type { DictHit } from "../lib/dict";
 import { dictionaryHtml } from "../lib/entry";
 import { expandMorph, formatMorph, parseMorph } from "../lib/morph";
@@ -16,11 +17,12 @@ const json = <T,>(id: string): T => JSON.parse(document.getElementById(id)?.text
 const analyses = json<ClientAnalysis[]>("analyses");
 const notes = json<Record<string, string>>("notes");
 const rowIds = new Set(json<string[]>("row-ids"));
+const works = json<CiteWork[]>("works");
 const site = json<{ sourceNotes: Record<string, string>; noteCredit: string }>("site");
 const READER = import.meta.env.PUBLIC_READER;
 const text = document.querySelector<HTMLElement>(".text")!;
 const slug = text.dataset.slug!;
-const abbr = text.dataset.abbr!;
+const work = works.find((w) => w.slug === slug)!;
 
 // ------------------------------------------------------------ view toggle
 // "all" shows every side; a side id shows only that column (the page's inline style hides the others).
@@ -41,9 +43,6 @@ if (views.length) {
 for (const b of viewButtons) b.addEventListener("click", () => setView(b.dataset.view!));
 
 // ------------------------------------------------------------ navigation
-document.getElementById("work-select")?.addEventListener("change", (e) => {
-  location.href = `${BASE}${(e.target as HTMLSelectElement).value}/`;
-});
 
 function jump(id: string) {
   const row = document.getElementById(id);
@@ -75,33 +74,47 @@ function jumpToLine(el: HTMLElement, cite: string) {
   setTimeout(() => el.classList.remove("flash"), 1600);
 }
 
-document.getElementById("goto")?.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const input = document.getElementById("goto-input") as HTMLInputElement;
-  // "1 23", "1,23" and "1:23" cite like "1.23".
-  const want = input.value.trim().replace(/\s*[\s,:]\s*/g, ".");
-  if (!want) return;
-  // Exact row id, else the row containing a stanza with that label, else a numbered line inside a row.
-  if (rowIds.has(want) && jump(want)) return;
+/** Goes to a row, a stanza label or a numbered line of this work ("12", "1.23"); false when there is none. */
+function goLocal(want: string): boolean {
+  if (rowIds.has(want) && jump(want)) return true;
   for (const lab of text.querySelectorAll<HTMLElement>(".col.source .slabel, .col.source .chap, .col.translation .slabel")) {
     if (lab.textContent === want) {
       const row = lab.closest<HTMLElement>(".row");
-      if (row && jump(row.id)) return;
+      if (row && jump(row.id)) return true;
     }
   }
   const line = verseLine(want);
-  if (line) return jumpToLine(line, want);
-  input.setCustomValidity(`No passage ${want}`);
+  if (!line) return false;
+  jumpToLine(line, want);
+  return true;
+}
+
+// The go-to box takes a place in this work ("12", "1 23", "1:23") or a citation of any work ("Háv 77"); other words
+// open search.
+document.getElementById("goto")?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = document.getElementById("goto-input") as HTMLInputElement;
+  const typed = input.value.trim();
+  if (!typed) return;
+  if (goLocal(typed.replace(/\s*[\s,:]\s*/g, "."))) return;
+  const found = resolveCite(typed, works);
+  if (found && found.slug !== slug) {
+    location.href = `${BASE}${found.slug}/${found.cite ? `#${found.cite}` : ""}`;
+    return;
+  }
+  if (found && (!found.cite || goLocal(found.cite))) return;
+  if (!found && /\p{L}{2,}/u.test(typed)) {
+    location.href = `${BASE}search/?q=${encodeURIComponent(typed)}`;
+    return;
+  }
+  input.setCustomValidity(`No passage ${typed}`);
   input.reportValidity();
   setTimeout(() => input.setCustomValidity(""), 1500);
 });
 
-// A link to a line inside a passage (#1.23) opens at that line.
+// A link to a line inside a passage (#1.23) or to a stanza by its label opens there.
 const hashCite = decodeURIComponent(location.hash.slice(1));
-if (hashCite && !rowIds.has(hashCite)) {
-  const line = verseLine(hashCite);
-  if (line) jumpToLine(line, hashCite);
-}
+if (hashCite && !rowIds.has(hashCite)) goLocal(hashCite);
 
 // Citation links copy a stable URL.
 text.addEventListener("click", (e) => {
@@ -112,7 +125,7 @@ text.addEventListener("click", (e) => {
   jump(id);
   const url = `${location.origin}${location.pathname}#${id}`;
   navigator.clipboard?.writeText(url).then(
-    () => toast(`Copied link to ${abbr} ${id}`),
+    () => toast(`Copied link to ${formatCite(work, id)}`),
     () => undefined,
   );
 });
@@ -125,11 +138,73 @@ function toast(msg: string) {
   setTimeout(() => t.remove(), 1800);
 }
 
+// ------------------------------------------------------------ outline and position bar
+const outline = document.getElementById("outline");
+const outlineLinks = [...document.querySelectorAll<HTMLAnchorElement>(".outline-entries a[data-row]")];
+const rowOrder = new Map([...text.querySelectorAll<HTMLElement>(".row")].map((row, i) => [row.id, i]));
+const outlineRows = outlineLinks.map((a) => rowOrder.get(a.dataset.row!) ?? 0);
+const prevStep = document.querySelector<HTMLAnchorElement>(".pb-prev");
+const nextStep = document.querySelector<HTMLAnchorElement>(".pb-next");
+
+function setStep(link: HTMLAnchorElement | null, entry: HTMLAnchorElement | undefined) {
+  if (!link) return;
+  link.hidden = !entry;
+  if (!entry) return;
+  link.href = entry.getAttribute("href")!;
+  const num = entry.querySelector(".onum")?.textContent ?? "";
+  const words = entry.querySelector(".otext")?.textContent ?? "";
+  link.querySelector("span")!.textContent = words ? `${num} ${words}` : num;
+}
+
+/** Marks the outline entry containing a row and points the position bar's steps at its neighbours. */
+function showPosition(rowId: string) {
+  const at = rowOrder.get(rowId) ?? 0;
+  let current = -1;
+  outlineRows.forEach((row, i) => {
+    if (row <= at) current = i;
+  });
+  outlineLinks.forEach((a, i) => (i === current ? a.setAttribute("aria-current", "location") : a.removeAttribute("aria-current")));
+  setStep(prevStep, outlineLinks[current - 1]);
+  setStep(nextStep, outlineLinks[current + 1]);
+  // Keep the current entry in view inside the outline, without scrolling the page.
+  const link = outlineLinks[current];
+  if (outline && link && (link.offsetTop < outline.scrollTop || link.offsetTop > outline.scrollTop + outline.clientHeight - 40)) {
+    outline.scrollTop = link.offsetTop - outline.clientHeight / 3;
+  }
+}
+const firstRow = text.querySelector<HTMLElement>(".row");
+if (firstRow) showPosition(firstRow.id);
+
+// Following a link in the outline sheet closes the sheet.
+outline?.addEventListener("click", (e) => {
+  if ((e.target as HTMLElement).closest("a") && outline.matches(":popover-open")) outline.hidePopover();
+});
+
+const fill = document.querySelector<HTMLElement>(".pb-fill");
+const track = document.querySelector<HTMLElement>(".pb-track");
+let progressFrame = 0;
+function showProgress() {
+  progressFrame = 0;
+  if (!fill || !track) return;
+  const top = text.getBoundingClientRect().top + scrollY;
+  const atEnd = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
+  const share = atEnd ? 1 : Math.min(1, Math.max(0, (scrollY + innerHeight * 0.3 - top) / text.offsetHeight));
+  fill.style.width = `${(share * 100).toFixed(1)}%`;
+  track.setAttribute("aria-valuenow", String(Math.round(share * 100)));
+}
+addEventListener("scroll", () => {
+  progressFrame ||= requestAnimationFrame(showProgress);
+}, { passive: true });
+showProgress();
+
 // Remember the reading position for "Continue reading".
 const seen = new IntersectionObserver(
   (entries) => {
     const top = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-    if (top) localStorage.setItem(`${READER}-last`, JSON.stringify({ slug, row: (top.target as HTMLElement).id }));
+    if (!top) return;
+    const row = (top.target as HTMLElement).id;
+    localStorage.setItem(`${READER}-last`, JSON.stringify({ slug, row }));
+    showPosition(row);
   },
   { rootMargin: "-20% 0px -70% 0px" },
 );
@@ -139,13 +214,37 @@ for (const row of text.querySelectorAll(".row")) seen.observe(row);
 const panel = document.getElementById("word-panel")!;
 const title = document.getElementById("wp-title")!;
 const body = document.getElementById("wp-body")!;
+const back = document.getElementById("wp-back") as HTMLButtonElement;
 let selected: HTMLElement | null = null;
+// Words shown before the current one, most recent last; the panel's back button returns to them.
+const shown: HTMLElement[] = [];
+
+function remember(el: HTMLElement | null) {
+  if (el && shown.at(-1) !== el) shown.push(el);
+  if (shown.length > 30) shown.shift();
+}
+
+function showBack() {
+  const previous = shown.at(-1);
+  back.hidden = !previous;
+  if (!previous) return;
+  const label = back.querySelector("span")!;
+  label.textContent = sourceText(previous);
+  label.setAttribute("lang", lang.code);
+  applyScript(back);
+}
+back.addEventListener("click", () => {
+  const previous = shown.pop();
+  if (previous) void showWord(previous, true);
+});
 
 function closePanel() {
   panel.hidden = true;
   document.body.classList.remove("panel-open");
   selected?.classList.remove("sel");
   selected = null;
+  shown.length = 0;
+  showBack();
 }
 document.getElementById("wp-close")!.addEventListener("click", closePanel);
 document.addEventListener("keydown", (e) => {
@@ -218,7 +317,10 @@ function readingsHtml(readings: ClientAnalysis[]): string {
     `${forms.slice(1).map((form) => `<p class="form">${esc(form)}</p>`).join("")}</details>`;
 }
 
-async function showWord(el: HTMLElement) {
+/** Shows a word's analyses; `fromHistory` is set when the back button returns to it, so it is not remembered again. */
+async function showWord(el: HTMLElement, fromHistory = false) {
+  if (!fromHistory && !panel.hidden && selected !== el) remember(selected);
+  showBack();
   selected?.classList.remove("sel");
   selected = el;
   el.classList.add("sel");
@@ -328,6 +430,8 @@ async function showWord(el: HTMLElement) {
 }
 
 function showNote(key: string) {
+  if (!panel.hidden) remember(selected);
+  showBack();
   selected?.classList.remove("sel");
   selected = null;
   title.textContent = "Translator’s note";

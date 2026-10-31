@@ -8,6 +8,21 @@ public-domain English translation, one aligned stanza, verse, chapter or paragra
 - **The Gītā Reader**: the Bhagavadgītā, all 18 chapters, in Sanskrit (IAST or Devanagari).
 - **The Aeneid Reader**: Vergil's Aeneid, book 1, in Latin.
 
+## Navigation
+
+- **Breadcrumbs.** Reader › collection › work. Each crumb's ▾ lists the other items at its level.
+  The collection level appears only in a reader with several collections: the Edda has pages
+  for the Poetic Edda (`/poetic-edda/`) and the Prose Edda (`/prose-edda/`).
+- **Go-to.** The box in a work's toolbar takes a place in the open work (`45`, `1 23`, `1:23`) or a
+  citation of any work in the reader (`Háv 77`, `BhG 2.47`, `Aen. 1.157`; accents and case are
+  optional). Anything else with words opens search.
+- **Outline.** The rail beside the text (or the Outline sheet on narrower screens) lists a prose
+  work's chapters with their headings, or an epic's paragraphs by first line and opening words, and
+  then the other works of the collection. It marks where the reader is.
+- **Position bar.** It holds the previous and next outline entry, progress through the work, and the
+  previous and next work.
+- **Word panel.** Its back button returns to the word shown before.
+
 ## The Edda Reader
 
 - Click any Old Norse word for its lemma, morphology and dictionary entries (Zoëga,
@@ -124,6 +139,7 @@ bun run build:aeneid        # → dist/aeneid/
 ```
 
 `READER` picks the reader for every step and defaults to `edda`; `bun run all` runs all three.
+`bun test` runs the unit tests (`src/lib/cite.test.ts`: citation formatting and parsing).
 
 ## Layout
 
@@ -142,11 +158,16 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   text (words with analyses, in the pack's language) or a translation; rows store their units per
   side id, and the reader's column toggle, the search filter and `search.json` follow the list.
   Each work names its citation `levels`, outermost first (`["Stanza"]`, or `["Book", "Line"]` with
-  row ids like `1.23`); a listed level (a prose work's chapters) gets a strip of links above the
-  text, and the go-to box accepts `1.23`, `1 23` or `1:23`. A source unit with `firstLine` is
+  row ids like `1.23`); a listed level (a prose work's chapters) is the work's outline, and the
+  go-to box accepts `1.23`, `1 23` or `1:23`. A source unit with `firstLine` is
   numbered stichic verse (an epic paragraph): its lines carry their numbers, every fifth shows one,
-  and the go-to box, `#1.23` links and concordance citations reach a line inside its row. A
-  translation unit marked `stichic` is continuous verse too, without the alternate indent.
+  the outline lists its paragraphs, and the go-to box, `#1.23` links and concordance citations reach
+  a line inside its row. A translation unit marked `stichic` is continuous verse too, without the
+  alternate indent. Works belong to one of the site's `collections` by id; with more than one, each
+  collection gets a page at `/<id>/`, and `src/lib/site.ts` fails the build if an id is also a
+  work slug.
+- `src/lib/cite.ts`: citations as printed (`formatCite`: `Vsp 45`, `BhG 12.47`, `Aen. 1.742`) and
+  as typed (`resolveCite`, for the go-to box).
 - `src/lang/types.ts` is the pack contract the shared code uses (spelling fold, search key,
   morphology labels, dictionary list, optional inflection tables and scripts); `src/lang/index.ts`
   exposes the reader's pack as `lang`.
@@ -182,7 +203,8 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   for Greenough and Williams (`lib/perseus.ts`), and the word-by-word pairing with LASLA
   (`alignment.ts`). It fails if a line's word count differs from LASLA's, if Greenough's and
   Williams's paragraphs differ, or if a listed reading is no longer in the text.
-- `src/pages/`: home, reader (`[slug]`), search, lexicon, sources.
+- `src/pages/`: home, works and collection pages (`[slug]`, rendering `src/components/WorkPage.astro`
+  or `CollectionPage.astro`), search, lexicon, sources.
 
 ## Edda alignment
 

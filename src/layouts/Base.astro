@@ -3,10 +3,17 @@ import { lang } from "../lang";
 import { site } from "../sites";
 import "../styles/global.css";
 
+/** A breadcrumb; `siblings` (the other items at its level, the crumb's own marked current) open as a menu. */
+export interface Crumb {
+  href?: string;
+  label: string;
+  siblings?: { href: string; label: string; current?: boolean }[];
+}
+
 interface Props {
   title: string;
   description?: string;
-  crumbs?: { href?: string; label: string }[];
+  crumbs?: Crumb[];
   bodyClass?: string;
 }
 
@@ -17,7 +24,8 @@ const {
   bodyClass = "",
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
-const themeKey = `${site.id}-theme`;
+// The theme is shared by every reader on the site; a choice stored under the reader's old key carries over.
+const oldThemeKey = `${site.id}-theme`;
 // Script toggle (src/scripts/script.ts): the stored spelling first, then the pack's other scripts.
 const scripts = lang.scripts?.length
   ? [{ id: "", label: lang.scriptLabel ?? lang.code }, ...lang.scripts.map((s) => ({ id: s.id, label: s.label }))]
@@ -35,9 +43,13 @@ const hideUnconverted = `html[data-script]:not([data-script=""]) [lang="${lang.c
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
-    <script is:inline define:vars={{ themeKey }}>
+    <script is:inline define:vars={{ oldThemeKey }}>
       (function () {
-        var t = localStorage.getItem(themeKey);
+        var t = localStorage.getItem("theme");
+        if (!t) {
+          t = localStorage.getItem(oldThemeKey);
+          if (t) localStorage.setItem("theme", t);
+        }
         if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         document.documentElement.dataset.theme = t;
       })();
@@ -59,10 +71,26 @@ const hideUnconverted = `html[data-script]:not([data-script=""]) [lang="${lang.c
       <div class="crumbs">
         <a class="home-link" href={base}>{site.shortName}</a>
         {
-          crumbs.map((c) => (
+          crumbs.map((c, i) => (
             <>
-              <span>›</span>
-              {c.href ? <a href={c.href}>{c.label}</a> : <span class="here">{c.label}</span>}
+              <span class="sep">›</span>
+              <span class="crumb">
+                {c.href ? <a href={c.href}>{c.label}</a> : <span class="here">{c.label}</span>}
+                {
+                  c.siblings && c.siblings.length > 1 && (
+                    <>
+                      <button class="crumb-more" type="button" popovertarget={`crumb-menu-${i}`}
+                        style={`anchor-name: --crumb-${i}`} aria-label={`Other choices for ${c.label}`}>▾</button>
+                      <nav class="crumb-menu" id={`crumb-menu-${i}`} popover style={`position-anchor: --crumb-${i}`}
+                        aria-label={`Other choices for ${c.label}`}>
+                        {c.siblings.map((s) => (
+                          <a href={s.href} aria-current={s.current ? "page" : undefined}>{s.label}</a>
+                        ))}
+                      </nav>
+                    </>
+                  )
+                }
+              </span>
             </>
           ))
         }
@@ -88,7 +116,7 @@ const hideUnconverted = `html[data-script]:not([data-script=""]) [lang="${lang.c
       document.querySelector(".theme-toggle")?.addEventListener("click", () => {
         const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
         document.documentElement.dataset.theme = next;
-        localStorage.setItem(`${import.meta.env.PUBLIC_READER}-theme`, next);
+        localStorage.setItem("theme", next);
       });
 
       // The button names the script it switches to; it cycles through the stored spelling and the pack's scripts.

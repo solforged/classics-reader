@@ -1,0 +1,49 @@
+---
+// A collection's table of contents (only on sites with several collections; see src/lib/site.ts).
+import Base from "../layouts/Base.astro";
+import WorkGroups from "./WorkGroups.astro";
+import { base, COLLECTIONS, collectionById, groupsBefore, site, worksIn } from "../lib/site";
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+const collection = collectionById.get(id)!;
+const works = worksIn(id);
+---
+
+<Base
+  title={`${collection.title} · ${site.name}`}
+  description={`${collection.title}: ${works.map((w) => w.title).join(", ")}.`}
+  crumbs={[{
+    label: collection.title,
+    siblings: COLLECTIONS.map((c) => ({ href: `${base}${c.id}/`, label: c.title, current: c.id === id })),
+  }]}
+>
+  <main class="page wide">
+    <header class="collection-head">
+      {collection.subtitle && <p class="eyebrow">{collection.subtitle}</p>}
+      <h1>{collection.title}</h1>
+      {collection.intro && <p class="lede" set:html={collection.intro} />}
+    </header>
+    <WorkGroups works={works} start={groupsBefore(id)} />
+  </main>
+</Base>
+
+<style>
+  .collection-head {
+    text-align: center;
+    padding: 2rem 0 0.5rem;
+  }
+  .collection-head h1 {
+    font-weight: 400;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    margin: 0.4rem 0 0.8rem;
+  }
+  .lede {
+    max-width: 36rem;
+    margin: 0 auto;
+    color: var(--muted);
+  }
+</style>

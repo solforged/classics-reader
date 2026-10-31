@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
+    "test": "bun test",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

@@ -1,10 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
-import { lang } from "../lang";
-import { base, GROUPS, LEXICON, site, WORKS } from "../lib/site";
+import WorkGroups from "../components/WorkGroups.astro";
+import { base, COLLECTION_PAGES, COLLECTIONS, groupsBefore, LEXICON, site, WORKS, worksIn } from "../lib/site";
 
 const workTitles = Object.fromEntries(WORKS.map((w) => [w.slug, w.title]));
-const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 ---
 
 <Base title={site.homeTitle} bodyClass="home">
@@ -34,24 +33,22 @@ const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
     </div>
 
     <section id="works">
-      <p class="eyebrow section-label">Open a work</p>
       {
-        GROUPS.map((group, gi) => (
-          <section class="group">
-            <h2>
-              <span class="num">{roman[gi]}.</span> {group}
-            </h2>
-            <div class="grid">
-              {WORKS.filter((w) => w.group === group).map((w) => (
-                <a class="card work" href={`${base}${w.slug}/`}>
-                  <h3>{w.title}</h3>
-                  <span class="on">{w.english}</span>
-                  <p>{w.summary}</p>
-                </a>
-              ))}
-            </div>
-          </section>
-        ))
+        COLLECTION_PAGES
+          ? COLLECTIONS.map((c) => (
+            <>
+              <p class="eyebrow section-label">
+                <a href={`${base}${c.id}/`}>{c.title}</a>{c.subtitle && <> · {c.subtitle}</>}
+              </p>
+              <WorkGroups works={worksIn(c.id)} start={groupsBefore(c.id)} />
+            </>
+          ))
+          : (
+            <>
+              <p class="eyebrow section-label">Open a work</p>
+              <WorkGroups works={WORKS} />
+            </>
+          )
       }
     </section>
 
@@ -131,21 +128,12 @@ const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
     padding-top: 1.2rem;
     color: var(--muted);
   }
-  .group h2 {
-    font-weight: 400;
-    font-size: 1.7rem;
-    margin: 1.5rem 0 0.8rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 1px solid var(--border);
+  .section-label:not(:first-child) {
+    margin-top: 2.5rem;
   }
-  .group .num {
+  .section-label a {
     color: var(--accent);
-    font-size: 1rem;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-    gap: 0.7rem;
+    text-decoration: none;
   }
   .site-foot {
     margin-top: 4rem;

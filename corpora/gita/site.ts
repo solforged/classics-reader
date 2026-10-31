@@ -67,6 +67,7 @@ export const site: ReaderSite = {
     "words joined by sandhi or in compounds. Forms DCS leaves unannotated count as probable when all their candidate " +
     "analyses agree on one lemma. Glosses come from the DCS dictionary (Oliver Hellwig, CC BY 4.0).",
   sides: [{ id: "sa", role: "source", label: "Sanskrit" }, { id: "en", role: "translation", label: "English", lang: "en" }],
+  collections: [{ id: "bhagavadgita", title: "Mahābhārata, Bhīṣmaparvan" }],
   groups: GROUPS,
   works: DISCOURSES.map(([english, summary], index) => ({
     slug: `bhagavad-gita-${index + 1}`,
@@ -74,7 +75,7 @@ export const site: ReaderSite = {
     title: `Bhagavadgītā, chapter ${index + 1}`,
     english,
     summary,
-    collection: "Mahābhārata, Bhīṣmaparvan",
+    collection: "bhagavadgita",
     group: GROUPS[Math.floor(index / 6)]!,
     levels: [{ name: "Verse" }],
     sources: {

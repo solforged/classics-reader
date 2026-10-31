@@ -12,6 +12,24 @@ import type { Paradigm } from "./paradigm";
 export { site, type LemmaStat, type WorkInfo };
 export const WORKS = site.works;
 export const GROUPS = site.groups;
+export const COLLECTIONS = site.collections;
+export const collectionById = new Map(COLLECTIONS.map((c) => [c.id, c]));
+/** Collections get pages of their own only when a site has several; otherwise the home page lists the works. */
+export const COLLECTION_PAGES = COLLECTIONS.length > 1;
+
+for (const w of WORKS) {
+  if (!collectionById.has(w.collection)) throw new Error(`${w.slug}: unknown collection ${w.collection}`);
+  if (collectionById.has(w.slug)) throw new Error(`collection id ${w.slug} is also a work slug`);
+}
+
+/** Works in a collection, in site order. */
+export const worksIn = (collection: string): WorkInfo[] => WORKS.filter((w) => w.collection === collection);
+
+/** Home-page groups in the collections before this one: group numbering runs on from one collection to the next. */
+export function groupsBefore(collection: string): number {
+  const earlier = COLLECTIONS.slice(0, COLLECTIONS.findIndex((c) => c.id === collection));
+  return earlier.reduce((n, c) => n + GROUPS.filter((g) => worksIn(c.id).some((w) => w.group === g)).length, 0);
+}
 
 const DATA = join(process.cwd(), "generated", site.id, "data");
 const PUBLIC = join(process.cwd(), "generated", site.id, "public");

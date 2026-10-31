@@ -2,6 +2,7 @@
 import Base from "../../layouts/Base.astro";
 import { lang } from "../../lang";
 import { parseMorph } from "../../lib/morph";
+import { formatCite } from "../../lib/cite";
 import { dictionaryHtml } from "../../lib/entry";
 import {
   base, dictionaryEntry, LEXICON, lemmaSlugs, paradigms, site, type LemmaStat, workBySlug, WORKS,
@@ -74,7 +75,7 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
           stat.occ.map(([slug, row, line, probable]) => (
             <li class={probable ? "probable" : ""}>
               <a class="ref" href={`${base}${slug}/?w=${encodeURIComponent(form(line))}#${row}`}>
-                {workBySlug.get(slug)?.abbr} {row}
+                {formatCite(workBySlug.get(slug)!, row)}
               </a>
               <span lang={lang.code} set:html={mark(line)} />
               {probable ? <span class="tag" title="Not annotated by the edition; all possible analyses agree on this lexicon entry">probable</span> : null}

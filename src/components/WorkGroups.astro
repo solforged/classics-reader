@@ -1,0 +1,52 @@
+---
+// The works of some collections as numbered groups of cards (home and collection pages).
+import { base, GROUPS, type WorkInfo } from "../lib/site";
+
+interface Props {
+  works: readonly WorkInfo[];
+  /** Number of groups already shown above, so numbering continues across collections. */
+  start?: number;
+}
+
+const { works, start = 0 } = Astro.props;
+const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+const groups = GROUPS.map((name) => ({ name, works: works.filter((w) => w.group === name) })).filter((g) => g.works.length);
+---
+
+{
+  groups.map((group, gi) => (
+    <section class="group">
+      <h2>
+        <span class="num">{roman[start + gi]}.</span> {group.name}
+      </h2>
+      <div class="grid">
+        {group.works.map((w) => (
+          <a class="card work" href={`${base}${w.slug}/`}>
+            <h3>{w.title}</h3>
+            <span class="on">{w.english}</span>
+            <p>{w.summary}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))
+}
+
+<style>
+  .group h2 {
+    font-weight: 400;
+    font-size: 1.7rem;
+    margin: 1.5rem 0 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .group .num {
+    color: var(--accent);
+    font-size: 1rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 0.7rem;
+  }
+</style>

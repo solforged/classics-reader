@@ -1,0 +1,694 @@
+---
+// One work's reading view: facing text, outline rail, position bar and word panel (src/scripts/reader.ts).
+import { sourceUnits, textUnits, type TextUnit, type SourceUnit, type Piece } from "../../scripts/core/types";
+import Base, { type Crumb } from "../layouts/Base.astro";
+import WordPanel from "./WordPanel.astro";
+import { lang } from "../lang";
+import { formatCite } from "../lib/cite";
+import {
+  base, COLLECTION_PAGES, COLLECTIONS, collectionById, lemmaPage, loadWork, site, WORKS, worksIn,
+} from "../lib/site";
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+const index = WORKS.findIndex((w) => w.slug === slug);
+const def = WORKS[index]!;
+const prev = WORKS[index - 1];
+const next = WORKS[index + 1];
+const work = loadWork(def.slug);
+const levels = def.levels;
+const collection = collectionById.get(def.collection)!;
+const siblings = worksIn(def.collection);
+const crumbs: Crumb[] = [
+  ...(COLLECTION_PAGES
+    ? [{
+      href: `${base}${collection.id}/`,
+      label: collection.title,
+      siblings: COLLECTIONS.map((c) => ({ href: `${base}${c.id}/`, label: c.title, current: c.id === collection.id })),
+    }]
+    : []),
+  {
+    label: def.title,
+    siblings: siblings.map((w) => ({ href: `${base}${w.slug}/`, label: w.title, current: w.slug === def.slug })),
+  },
+];
+// A listed outermost level (chapters) numbers its heads and lists its divisions in the outline.
+const listed = levels[0]?.list ?? false;
+// Columns: the site's sides that have text in this work.
+const sides = site.sides.filter((side) => work.rows.some((r) => r.sides[side.id]?.length));
+const views = sides.length > 1
+  ? [{ id: sides[0]!.id, label: sides[0]!.label }, { id: "all", label: sides.length === 2 ? "Both" : "All" },
+    ...sides.slice(1).map((side) => ({ id: side.id, label: side.label }))]
+  : [];
+// Showing one side hides the others; side ids are plain tokens, so they are safe in selectors.
+const viewCss = sides.map((side) => `.view-${side.id} .col:not([data-side="${side.id}"]){display:none}`).join("");
+const labels = (role: string) => site.sides.filter((side) => side.role === role).map((side) => side.label).join(" and ");
+const translations = labels("translation");
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+function pieces(line: Piece[]): string {
+  return line
+    .map((p) => {
+      if (typeof p === "string") return esc(p);
+      const cls = p[2] ? "w sup" : "w";
+      return `<span class="${cls}" data-a="${p[1].join(" ")}">${esc(p[0])}</span>`;
+    })
+    .join("");
+}
+
+function sourceUnit(u: SourceUnit): string {
+  if (u.kind === "head") {
+    const label = u.label && listed ? `<span class="chap">${esc(u.label)}</span> ` : "";
+    return `<h3 class="rubric">${label}${u.lines.map(pieces).join(" ")}</h3>`;
+  }
+  if (u.kind === "prose") return `<p class="prose">${u.lines.map(pieces).join(" ")}</p>`;
+  const label = u.label ? `<span class="slabel">${esc(u.label)}</span>` : "";
+  // Numbered stichic verse (an epic): every line carries its number for the go-to box, and every fifth shows it.
+  const first = u.firstLine;
+  if (first !== undefined) {
+    return `<div class="stanza stichic">${label}${u.lines.map((l, i) => {
+      const n = first + i;
+      return `<div class="l" data-n="${n}">${n % 5 ? "" : `<span class="lnum" aria-hidden="true">${n}</span>`}${pieces(l)}</div>`;
+    }).join("")}</div>`;
+  }
+  return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${pieces(l)}</div>`).join("")}</div>`;
+}
+
+function plainText(s: string): string {
+  return esc(s).replace(/ \| /g, '<span class="cz" aria-hidden="true"></span>');
+}
+
+function textUnit(u: TextUnit): string {
+  const notes = (u.notes ?? [])
+    .map((k) => `<button class="note-btn" type="button" data-note="${esc(k)}" title="Translator’s note">n</button>`)
+    .join("");
+  if (u.kind === "head") {
+    const label = u.label ? `<span class="chap">${esc(u.label)}</span>` : "";
+    const text = u.lines.map(plainText).join(" ");
+    return `<h3 class="rubric">${label}${label && text ? " " : ""}${text}${notes}</h3>`;
+  }
+  if (u.kind === "prose") return `<p class="prose">${u.lines.map(plainText).join(" ")}${notes}</p>`;
+  const label = u.label ? `<span class="slabel">${esc(u.label)}</span>` : "";
+  return `<div class="${u.stichic ? "stanza stichic" : "stanza"}">${label}${u.lines.map((l) => `<div class="l">${plainText(l)}</div>`).join("")}${notes}</div>`;
+}
+
+// [lemma, morph, source, lemma page slug, corpus count, segmented word]; src/scripts/reader.ts reads these.
+const analyses = work.analyses.map(([lemma, morph, s, word]) => {
+  const page = lemmaPage(lemma, morph);
+  const a = [lemma, morph, s, page?.slug ?? "", page?.count ?? 0];
+  return word ? [...a, word] : a;
+});
+// The outline: a listed level's divisions (a prose work's chapters, with their headings), or the paragraphs of
+// numbered verse (an epic's, by first line and opening words). Stanzaic poems have none; go-to reaches a stanza.
+const plain = (line: Piece[]) => line.map((p) => (typeof p === "string" ? p : p[0])).join("");
+const opening = (line: string) => line.split(/\s+/).slice(0, 3).join(" ").replace(/[\s,.;:!?"“”‘’—–-]+$/u, "");
+const sourceSide = sides.find((side) => side.role === "source")?.id;
+const citation = new RegExp(`^${levels.map(() => "\\d+[a-z]?").join("\\.")}$`);
+const outline: { id: string; num: string; text: string }[] = [];
+if (listed) {
+  const seen = new Set<string>();
+  for (const r of work.rows) {
+    const top = r.id.split(".")[0]!;
+    if (!citation.test(r.id) || seen.has(top)) continue;
+    seen.add(top);
+    const head = sourceSide ? sourceUnits(r, sourceSide).find((u) => u.kind === "head") : undefined;
+    outline.push({ id: r.id, num: top, text: head ? head.lines.map(plain).join(" ") : "" });
+  }
+} else if (sourceSide) {
+  for (const r of work.rows) {
+    const unit = sourceUnits(r, sourceSide).find((u) => u.firstLine !== undefined);
+    if (unit) outline.push({ id: r.id, num: String(unit.firstLine), text: opening(plain(unit.lines[0] ?? [])) });
+  }
+}
+const ids = new Set(work.rows.map((r) => r.id));
+---
+
+<Base
+  title={`${def.title}: ${def.english} · ${site.name}`}
+  description={`${def.title} (${def.english}) in ${labels("source")}${translations ? ` with a facing ${translations} translation` : ""}. ${def.summary}`}
+  crumbs={crumbs}
+  bodyClass="reader view-all"
+>
+  <main class="work">
+    <nav class="outline no-print" id="outline" popover aria-label="Outline">
+      {
+        outline.length > 0 && (
+          <>
+            <p class="outline-label">{def.title}</p>
+            <ol class="outline-entries">
+              {outline.map((entry) => (
+                <li>
+                  <a href={`#${entry.id}`} data-row={entry.id}>
+                    <span class="onum">{entry.num}</span>
+                    <span class="otext" lang={lang.code}>{entry.text}</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </>
+        )
+      }
+      <p class="outline-label">{collection.title}</p>
+      <ol class="outline-works">
+        {siblings.map((w) => (
+          <li><a href={`${base}${w.slug}/`} aria-current={w.slug === def.slug ? "page" : undefined}>{w.title}</a></li>
+        ))}
+      </ol>
+    </nav>
+    <header class="work-head page">
+      <p class="eyebrow">{collection.title} · {def.abbr}</p>
+      <h1>{def.title}</h1>
+      <p class="english">{def.english}</p>
+      <p class="summary">{def.summary}</p>
+      <dl class="sources">
+        {site.sides.map((side) => <><dt>{side.label}</dt><dd>{def.sources[side.id]}</dd></>)}
+      </dl>
+      {
+        site.notes && work.intro && work.intro.length > 0 && (
+          <details class="intro">
+            <summary>{site.notes.introLabel}</summary>
+            {work.intro.map((p) => <p set:html={p} />)}
+          </details>
+        )
+      }
+    </header>
+
+    <div class="toolbar no-print">
+      <div class="toolbar-inner">
+        <button class="btn outline-btn" type="button" popovertarget="outline">Outline</button>
+        <form id="goto" class="goto">
+          <label for="goto-input">{levels.map((level) => level.name).join(".")}</label>
+          <input id="goto-input" name="row" autocomplete="off" spellcheck="false"
+            title={`A ${levels.at(-1)!.name.toLowerCase()} in this work, or a citation such as ${formatCite(def, "1")}`}
+            placeholder={levels.map((level) => (level.list ? "12" : "1")).join(".")} />
+        </form>
+        {
+          views.length > 0 && (
+            <div class="segmented" role="group" aria-label="Columns">
+              {views.map((view) => (
+                <button type="button" data-view={view.id} aria-pressed={String(view.id === "all")}>{view.label}</button>
+              ))}
+            </div>
+          )
+        }
+        <button class="btn print" type="button" onclick="window.print()">Print</button>
+      </div>
+    </div>
+
+    <div class={`text ${sides.length > 1 ? "" : "single"}`} style={`--cols: ${sides.length}`} data-slug={def.slug}
+      data-abbr={def.abbr} data-title={def.title}>
+      {
+        work.rows.map((r) => (
+          <section class="row" id={r.id}>
+            <a class="cite no-print" href={`#${r.id}`} title="Link to this passage">
+              {r.id}
+            </a>
+            {sides.map((side) => side.role === "source"
+              ? <div class="col source" data-side={side.id} lang={lang.code}
+                  set:html={sourceUnits(r, side.id).map(sourceUnit).join("")} />
+              : <div class="col translation" data-side={side.id} lang={side.lang}
+                  set:html={textUnits(r, side.id).map(textUnit).join("")} />)}
+          </section>
+        ))
+      }
+    </div>
+
+    <nav class="position-bar no-print" aria-label="Position">
+      {prev ? <a class="pb-work" href={`${base}${prev.slug}/`}>‹ {prev.title}</a> : <span class="pb-work" />}
+      <a class="pb-step pb-prev" href="#" hidden>‹ <span></span></a>
+      <div class="pb-track" role="progressbar" aria-label="Position in the work" aria-valuemin="0" aria-valuemax="100">
+        <span class="pb-fill"></span>
+      </div>
+      <a class="pb-step pb-next" href="#" hidden><span></span> ›</a>
+      {next ? <a class="pb-work" href={`${base}${next.slug}/`}>{next.title} ›</a> : <span class="pb-work" />}
+    </nav>
+  </main>
+
+  <style is:inline set:html={viewCss} />
+  <WordPanel />
+  <script type="application/json" id="analyses" set:html={JSON.stringify(analyses).replace(/</g, "\\u003c")} />
+  <script type="application/json" id="notes" set:html={JSON.stringify(work.notes).replace(/</g, "\\u003c")} />
+  <script type="application/json" id="row-ids" set:html={JSON.stringify([...ids])} />
+  <script type="application/json" id="works" set:html={JSON.stringify(
+    WORKS.map((w) => ({ slug: w.slug, abbr: w.abbr, levels: w.levels })),
+  ).replace(/</g, "\\u003c")} />
+  <script type="application/json" id="site" set:html={JSON.stringify({
+    sourceNotes: site.sourceNotes, noteCredit: site.notes?.credit ?? "",
+  }).replace(/</g, "\\u003c")} />
+</Base>
+
+<script>
+  import "../scripts/reader";
+</script>
+
+<style is:global>
+  .work-head {
+    padding-bottom: 1rem;
+  }
+  .work-head h1 {
+    font-size: 2.4rem;
+    font-weight: 500;
+    margin: 0.3rem 0 0;
+  }
+  .work-head .english {
+    margin: 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1.15rem;
+  }
+  .work-head .summary {
+    font-size: 1.05rem;
+  }
+  .sources {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.15rem 0.8rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0 0 0.6rem;
+  }
+  .sources dt {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-top: 0.2rem;
+  }
+  .sources dd {
+    margin: 0;
+  }
+  details.intro {
+    font-size: 0.95rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 0.5rem 1rem;
+  }
+  details.intro summary {
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+
+  .toolbar {
+    position: sticky;
+    top: 2.85rem;
+    z-index: 15;
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--sans);
+    font-size: 0.8rem;
+  }
+  .toolbar-inner {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0.5rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    align-items: center;
+  }
+  .toolbar select,
+  .toolbar input {
+    font: inherit;
+    color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+  }
+  .goto {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .goto input {
+    width: 6.5rem;
+  }
+  .toolbar .print {
+    margin-left: auto;
+    padding: 0.3rem 0.7rem;
+  }
+  .outline-btn {
+    padding: 0.3rem 0.7rem;
+  }
+  /* The outline opens as a sheet from the toolbar button, and stands beside the text on wide screens. */
+  .outline {
+    margin: 0;
+    inset: 0 auto 0 0;
+    width: min(18rem, 85vw);
+    height: 100%;
+    max-height: none;
+    overflow-y: auto;
+    padding: 0.8rem 0.6rem 2rem;
+    border: 0;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--fg);
+    box-shadow: 8px 0 24px rgb(0 0 0 / 0.12);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+  }
+  .outline::backdrop {
+    background: rgb(0 0 0 / 0.15);
+  }
+  .outline-label {
+    margin: 0.4rem 0.4rem 0.3rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .outline ol {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+  }
+  .outline a {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .outline a:hover {
+    background: var(--accent-soft);
+  }
+  .outline a[aria-current] {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .outline .onum {
+    flex: 0 0 2.2em;
+    text-align: right;
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .outline .otext {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media (min-width: 1280px) {
+    body:not(.panel-open) .outline {
+      display: block;
+      position: fixed;
+      inset: 2.85rem auto 0 0;
+      width: 15rem;
+      height: auto;
+      box-shadow: none;
+      z-index: 10;
+    }
+    body:not(.panel-open) main.work {
+      padding-left: 15rem;
+    }
+    body:not(.panel-open) .outline-btn {
+      display: none;
+    }
+  }
+  @media (min-width: 1680px) {
+    body.panel-open .outline {
+      display: block;
+      position: fixed;
+      inset: 2.85rem auto 0 0;
+      width: 15rem;
+      height: auto;
+      box-shadow: none;
+      z-index: 10;
+    }
+    body.panel-open main.work {
+      padding-left: 15rem;
+    }
+    body.panel-open .outline-btn {
+      display: none;
+    }
+  }
+
+  .text {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 4rem 3.2rem;
+  }
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+    gap: 2.5rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid transparent;
+    scroll-margin-top: 7rem;
+  }
+  .text.single .row,
+  .view-single .row {
+    grid-template-columns: minmax(0, 40rem);
+    justify-content: center;
+  }
+  .row:target,
+  .row.flash {
+    background: color-mix(in srgb, var(--hit) 45%, transparent);
+    border-radius: 6px;
+  }
+  .cite {
+    position: absolute;
+    left: -2.6rem;
+    top: 0.85rem;
+    width: 2.2rem;
+    text-align: right;
+    font-family: var(--sans);
+    font-size: 0.65rem;
+    color: var(--faint);
+    text-decoration: none;
+    opacity: 0;
+  }
+  .row:hover .cite,
+  .row:target .cite {
+    opacity: 1;
+  }
+  .cite:hover {
+    color: var(--accent);
+  }
+  .col {
+    min-width: 0;
+  }
+  .stanza {
+    position: relative;
+    margin: 0.25rem 0 0.75rem;
+  }
+  .stanza .l {
+    padding-left: 1.2em;
+    text-indent: -1.2em;
+  }
+  .stanza .l:nth-child(even of .l) {
+    padding-left: 2.2em;
+  }
+  /* Stichic verse (an epic): no alternate indent; numbered lines carry their number in the margin, and the citation
+     link replaces the first one on hover. */
+  .stanza.stichic .l {
+    position: relative;
+  }
+  .stanza.stichic .l:nth-child(even of .l) {
+    padding-left: 1.2em;
+  }
+  .lnum {
+    position: absolute;
+    left: -1.9rem;
+    width: 1.5rem;
+    text-align: right;
+    text-indent: 0;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    line-height: 2.2;
+    color: var(--faint);
+  }
+  .row:hover .l:first-of-type > .lnum,
+  .row:target .l:first-of-type > .lnum {
+    visibility: hidden;
+  }
+  .l.flash {
+    background: color-mix(in srgb, var(--hit) 45%, transparent);
+    border-radius: 4px;
+  }
+  .slabel {
+    position: absolute;
+    left: -1.9rem;
+    width: 1.5rem;
+    text-align: right;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    line-height: 2.2;
+    color: var(--faint);
+  }
+  .col.translation .slabel {
+    color: var(--faint);
+  }
+  .col.translation {
+    color: color-mix(in srgb, var(--fg) 88%, var(--muted));
+  }
+  .prose {
+    margin: 0.25rem 0 0.75rem;
+    text-align: justify;
+    hyphens: auto;
+  }
+  .rubric {
+    font-weight: 500;
+    font-size: 1.05rem;
+    font-variant: small-caps;
+    letter-spacing: 0.03em;
+    color: var(--accent);
+    margin: 0.6rem 0 0.4rem;
+  }
+  .chap {
+    font-family: var(--sans);
+    font-variant: normal;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0 0.35rem;
+    color: var(--muted);
+  }
+  .cz {
+    display: inline-block;
+    width: 1.6em;
+  }
+  .w {
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .w:hover {
+    background: var(--accent-soft);
+  }
+  .w.sel {
+    background: var(--hit);
+  }
+  .w.sup {
+    font-style: italic;
+    color: var(--muted);
+  }
+  .note-btn {
+    font-family: var(--sans);
+    font-size: 0.6rem;
+    vertical-align: super;
+    margin-left: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--accent);
+    padding: 0 0.25rem;
+    line-height: 1.3;
+    cursor: pointer;
+  }
+  .stanza > .note-btn {
+    position: absolute;
+    right: -1.4rem;
+    top: 0.35rem;
+    margin: 0;
+    vertical-align: baseline;
+  }
+  @media (min-width: 1100px) {
+    body.panel-open .text,
+    body.panel-open .toolbar-inner,
+    body.panel-open .position-bar {
+      margin-right: 26rem;
+    }
+  }
+  .position-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 15;
+    max-width: 72rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.45rem 1.25rem;
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(6px);
+    border-top: 1px solid var(--border);
+    font-family: var(--sans);
+    font-size: 0.8rem;
+  }
+  .position-bar a {
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pb-work {
+    flex: 0 1 12rem;
+    min-width: 0;
+  }
+  .pb-work:last-child {
+    text-align: right;
+  }
+  .pb-step {
+    flex: 0 1 10rem;
+    min-width: 0;
+  }
+  .pb-next {
+    text-align: right;
+  }
+  .pb-track {
+    flex: 1 1 6rem;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .pb-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+  }
+  @media (max-width: 640px) {
+    .pb-work {
+      display: none;
+    }
+  }
+  @media (max-width: 760px) {
+    .text {
+      padding-left: 2.2rem;
+      padding-right: 0.9rem;
+    }
+    .view-all .row {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+    .view-all .col.translation {
+      border-left: 2px solid var(--border);
+      padding-left: 0.7rem;
+      font-size: 0.92em;
+    }
+    .toolbar {
+      top: 2.7rem;
+    }
+    .cite {
+      display: none;
+    }
+  }
+  @media print {
+    .toolbar,
+    .cite {
+      display: none;
+    }
+    .text {
+      padding: 0;
+    }
+    .row {
+      break-inside: avoid;
+    }
+    details.intro {
+      display: none;
+    }
+  }
+</style>

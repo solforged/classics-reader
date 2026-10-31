@@ -31,7 +31,7 @@ export interface WorkInfo {
   /** English rendering of the title. */
   english: string;
   summary: string;
-  /** Collection shown above the title, e.g. "Poetic Edda". */
+  /** Id of the work's collection, one of the site's `collections`. */
   collection: string;
   /** Home-page group, one of the site's `groups`. */
   group: string;
@@ -39,6 +39,21 @@ export interface WorkInfo {
   levels: readonly CitationLevel[];
   /** Edition of each side (by side id), shown above the text. */
   sources: Readonly<Record<string, string>>;
+}
+
+/**
+ * A body of works with its own title, e.g. the Poetic Edda. A site with several collections gives each a page at
+ * `<id>/`, so an id must not be a work slug; a site with one collection uses its home page instead.
+ */
+export interface CollectionInfo {
+  /** URL slug, e.g. "poetic-edda". */
+  id: string;
+  /** Title as the reader shows it, e.g. "Poetic Edda"; also the eyebrow above each work's title. */
+  title: string;
+  /** Line under the title on the collection page, e.g. "Eddukvæði". */
+  subtitle?: string;
+  /** Collection-page introduction (HTML). */
+  intro?: string;
 }
 
 export interface ReaderSite {
@@ -68,7 +83,9 @@ export interface ReaderSite {
   countNote: string;
   /** The reader's columns in display order; at least one source side. */
   sides: readonly SideSpec[];
-  /** Home-page groups in order. */
+  /** Collections in order; works name theirs by id. */
+  collections: readonly CollectionInfo[];
+  /** Home-page groups in order; each group's works belong to one collection. */
   groups: readonly string[];
   works: readonly WorkInfo[];
   /** Badge (HTML) after the lemma of an analysis from each non-edition source (src/scripts/reader.ts). */
