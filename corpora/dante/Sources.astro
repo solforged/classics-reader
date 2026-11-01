@@ -1,0 +1,108 @@
+---
+// Sources and licences of the Dante Reader (src/pages/sources.astro).
+import { LEMMA_FIXES, MARKS, PLACEMENTS, VERSE_FIXES } from "./alignment";
+import { NO_TOYNBEE, TOYNBEE_HEADS } from "./names";
+import { FILES, KAIKKI, UD_COMMIT } from "./sources";
+
+const fixes = Object.entries(LEMMA_FIXES);
+const placements = Object.keys(PLACEMENTS).length + Object.keys(VERSE_FIXES).length;
+const marks = Object.keys(MARKS).length;
+const respelt = Object.keys(TOYNBEE_HEADS).length;
+const unlisted = Object.keys(NO_TOYNBEE).length;
+---
+<h2>Italian</h2>
+<dl>
+  <dt>Dante Alighieri, <i>La Commedia secondo l’antica vulgata</i>, ed. Giorgio Petrocchi (Milan: Mondadori, 1966–67; 2nd ed. Florence: Le Lettere, 1994)</dt>
+  <dd>
+    Petrocchi’s critical text, the standard edition of the Commedia, as the DanteSearch corpus of the University of
+    Pisa gives it and UD_Italian-Old carries it. Its spelling is Petrocchi’s (<i>ogne</i>, <i>sanza</i>,
+    <i>vegna</i>); its punctuation follows the treebank, which drops the diaeresis Petrocchi prints for metre
+    (<i>süave</i> appears as <i>suave</i>).
+  </dd>
+  <dt>UD_Italian-Old: lemmas and morphology</dt>
+  <dd>
+    Every word’s lemma and morphology come from
+    the <a href="https://github.com/UniversalDependencies/UD_Italian-Old">UD_Italian-Old</a> treebank (Claudia
+    Corbetta, Marco Passarotti, Flavio Massimiliano Cecchini and Giovanni Moretti, Università Cattolica del Sacro
+    Cuore, Milan), as released in Universal Dependencies 2.18, commit <code>{UD_COMMIT}</code>,
+    licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. It converts the lemmas and
+    grammatical analysis of DanteSearch (Mirko Tavoni and others, University of Pisa) to Universal Dependencies,
+    with corrections, and adds dependency relations, which the reader does not show. Lemmas are modern Italian
+    citation forms: <i>loco</i> is filed under <i>luogo</i>, <i>fé</i> under <i>fare</i> or <i>fede</i>. A
+    written word that joins two words (<i>del</i> = <i>di</i> + <i>il</i>, <i>dimmi</i> = <i>di’</i> + <i>mi</i>,
+    <i>meco</i> = <i>me</i> + <i>con</i>) shows the analysis of each. The treebank’s README calls it still under
+    revision; the reader is pinned to one release.
+    <details>
+      <summary>Lemmas corrected ({fixes.length})</summary>
+      <p>The treebank writes a few final accents as apostrophes and misspells one lemma. Every token is changed.</p>
+      <ul>
+        {fixes.map(([from, to]) => <li><i lang="it">{from}</i> becomes <i lang="it">{to}</i></li>)}
+      </ul>
+    </details>
+  </dd>
+  <dt>Morphology</dt>
+  <dd>
+    The treebank’s UD features are shown as Italian grammar names them: <i>Tense=Past</i> with imperfective aspect
+    is the imperfect, with perfective aspect the past historic (<i>passato remoto</i>). The treebank marks most past
+    participles passive, including those of compound tenses, so the reader does not show their voice. The eight
+    lines of Arnaut Daniel in Purgatorio 26 are Old Occitan; the treebank analyses them as Italian words and labels
+    them Old French, and the reader labels them Old Occitan. Latin words (<i>Beati pauperes spiritu</i>) and
+    words of no language (<i>Pape Satàn, pape Satàn aleppe</i>) are marked as words of another language.
+  </dd>
+  <dt>Lines and spacing</dt>
+  <dd>
+    The treebank gives the canto and line of nearly every word. It leaves them off punctuation and off 1,250 words
+    of the Paradiso. Those words are placed by comparing the treebank’s words, in order, with the lines of the
+    Italian text of Project Gutenberg #1012 (<a href={FILES["gutenberg-italian.txt"]![0]}>pinned by hash</a>), which has
+    the same cantos and lines and a few dozen other readings; punctuation goes with the word before it, opening
+    quotation marks with the word after. Where the two texts disagree on a line, or Gutenberg reads a word otherwise
+    and its neighbours fall on different lines, an entry in the build’s tables decides ({placements} entries).
+    The treebank records spaces after words completely only for the Inferno; the reader spaces the whole poem by
+    the rules that reproduce the Inferno’s spacing: none before closing punctuation, none after an opening mark, and
+    none after an elided word ending in a consonant (<i>ch’i’</i>, <i>l’altre</i>) except <i>ver’</i>. The
+    Purgatorio and Paradiso write quotation marks as straight quotes, which open and close in turn; the Purgatorio
+    writes some quotations within speeches as » … «. Such marks are printed as curly quotes, and {marks} marks that
+    the rules would misplace are listed in the build.
+  </dd>
+</dl>
+
+<h2>English</h2>
+<dl>
+  <dt>Henry Wadsworth Longfellow, <i>The Divine Comedy of Dante Alighieri</i> (Boston: Ticknor and Fields, 1867)</dt>
+  <dd>
+    Public domain. Project Gutenberg #1004 (<a href={FILES["longfellow.txt"]![0]}>pinned by hash</a>), produced by
+    Dennis McCarthy. Longfellow translated line for line in blank verse, so every canto has the Italian’s number of
+    lines and its tercets. Each row of the reader is one tercet, and line <i>n</i> of the English is line <i>n</i> of
+    the Italian, though the sense sometimes runs across lines differently. His one note, the translation of Arnaut
+    Daniel’s Occitan in Purgatorio 26, is shown as a note to that tercet. The subject of each canto under its title
+    is the first item of the edition’s table of contents.
+  </dd>
+</dl>
+
+<h2>Dictionaries</h2>
+<dl>
+  <dt>Wiktionary, Italian entries</dt>
+  <dd>
+    English Wiktionary’s Italian entries, extracted by <a href="https://github.com/tatuylonen/wiktextract">Wiktextract</a>
+    and published by <a href="https://kaikki.org/dictionary/Italian/">kaikki.org</a>,
+    licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> and the GNU Free Documentation
+    License; © Wiktionary contributors. kaikki.org replaces the file weekly, so the reader uses the Internet Archive’s
+    capture of 21 June 2025 (<code>{KAIKKI[0]}</code>, SHA-256 <code>{KAIKKI[1]}</code>). A lemma finds the entries spelt
+    as it is, else those spelt with other accents; a verb Wiktionary lists only as pronominal is found under
+    its <i>-rsi</i> form (<i>accorgere</i>, <i>accorgersi</i>). Wiktionary records many of Dante’s words as archaic or
+    poetic spellings of a modern word (<i>surgere</i>, an alternative form of <i>sorgere</i>); the panel then shows
+    that entry and the modern word’s. Sense labels (<i>archaic</i>, <i>poetic</i>, <i>figuratively</i>) are
+    Wiktionary’s. About one word in a hundred has a lemma Wiktionary lacks, mostly Latinisms and rare old forms.
+  </dd>
+  <dt>Paget Toynbee, <i>A Concise Dictionary of Proper Names and Notable Matters in the Works of Dante</i> (Oxford: Clarendon Press, 1914)</dt>
+  <dd>
+    Public domain. The Internet Archive’s OCR text of the University of California’s
+    copy (<a href={FILES["toynbee.txt"]![0]}>pinned by hash</a>), cut into entries and repaired by the build: page
+    headings removed, words divided at line ends joined, misread digits in citations corrected against the lines they
+    cite. Citations of the Commedia are written as the reader cites (<i>Inf. 5.116</i>); citations of Dante’s other
+    works are left as printed. Every name in the poem is matched to its entry: by spelling, or by a table where
+    Toynbee spells the name otherwise than the treebank’s lemma ({respelt} names). {unlisted} lemmas the treebank
+    files as names have no entry, mostly words it capitalizes for personification or reverence. Where Toynbee has
+    several entries under one name, the panel shows those that cite the canto being read.
+  </dd>
+</dl>

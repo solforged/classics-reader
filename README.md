@@ -11,6 +11,7 @@ public-domain English translation, one aligned stanza, verse, chapter or paragra
 - **The Homer Reader**: the Iliad and the Odyssey, book 1 of each, in Greek.
 - **The Genesis Reader**: Genesis 1–11 in Hebrew.
 - **The Analects Reader**: the Analects of Confucius, all 20 books, in Classical Chinese.
+- **The Dante Reader**: the Divine Comedy, all 100 cantos, in Dante's Italian.
 
 ## Navigation
 
@@ -187,6 +188,24 @@ pinyin and Middle Chinese reading, Kyoto's gloss for that occurrence, then Wikti
 entries; names have only Kyoto's gloss. Variant characters are interchangeable in lookup and
 search (*為* finds *爲*). Citations read `An. 2.4`. Credits are in `corpora/analects/Sources.astro`.
 
+## The Dante Reader
+
+The whole Commedia, one work per canto and one row per tercet, in Petrocchi's text with the lemma
+and morphology of UD_Italian-Old (Universal Dependencies 2.18, CC BY-SA 4.0, from the DanteSearch
+corpus), beside Longfellow's translation (1867), which keeps the Italian's lines and tercets in
+every canto. The treebank gives nearly every word its canto and line; `corpora/dante/lines.ts`
+places the rest (punctuation, and 1,250 words of the Paradiso) by aligning the treebank's words with
+Project Gutenberg's Italian text, and `alignment.ts` lists the few places where that needs help. The
+treebank records spacing fully only in the Inferno, so the reader spaces by rules that reproduce
+the Inferno's. A written word that joins two (*del*, *dimmi*, *meco*) opens a card for each.
+Lemmas are modern citation forms (*loco* under *luogo*) and are looked up in Wiktionary's Italian
+entries (a capture of kaikki.org's file), following Wiktionary from Dante's spellings to the modern
+word (*surgere* to *sorgere*); names also show Paget Toynbee's *Concise Dictionary of Proper Names
+and Notable Matters in the Works of Dante* (1914), parsed from the Internet Archive's OCR text by
+`packs/ita/build/toynbee.ts`. The three cantiche are collections; citations read `Inf. 5.121`.
+Search ignores accents and apostrophes (`perche` finds *perché*). The library shelves the reader
+under Medieval Italian. Credits are in `corpora/dante/Sources.astro`.
+
 ## Building
 
 ```sh
@@ -208,6 +227,7 @@ READER=oldenglish bun run fetch  # ISWOC, Bosworth–Toller, Wiktionary, Thorpe,
 READER=homer bun run fetch       # AGDT, Perseus Greek and English, Autenrieth, Middle Liddell, LSJ (about 335 MB)
 READER=genesis bun run fetch     # OSHB, Open Scriptures lexicon, JPS 1917
 READER=analects bun run fetch    # Kyoto treebank, Legge, Unihan, Wiktionary
+READER=dante bun run fetch       # UD_Italian-Old, Gutenberg Italian and Longfellow, Toynbee, Wiktionary (streams 650 MB)
 # then READER=<id> bun run data and bun run build:<id> for each
 
 bun run build:site     # every reader's data and site, and the library → dist/site/

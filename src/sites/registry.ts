@@ -9,6 +9,7 @@ export const READERS = {
   oldenglish: { pack: "ang" },
   analects: { pack: "lzh" },
   genesis: { pack: "hbo" },
+  dante: { pack: "ita" },
 } as const satisfies Readonly<Record<string, { pack: string }>>;
 
 export type ReaderId = keyof typeof READERS;
