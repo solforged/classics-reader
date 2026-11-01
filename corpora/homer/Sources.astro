@@ -1,0 +1,142 @@
+---
+// Sources and licences of the Homer Reader (src/pages/sources.astro).
+import { LEMMA_FIXES, TAG_PATCHES } from "./annotation";
+import { AGDT_COMMIT, AUTENRIETH_URL, LEXICA_COMMIT, PERSEUS_COMMIT, REFWK_COMMIT } from "./sources";
+
+const patches = Object.entries(TAG_PATCHES).map(([key, parts]) => {
+  const [poem, line, ...word] = key.split(" ");
+  return { where: `${poem} ${line}`, word: word.join(" "), parts };
+});
+const fixes = Object.entries(LEMMA_FIXES);
+---
+<h2>Greek</h2>
+<dl>
+  <dt>Homer, <i>Iliad</i>, book 1: David B. Monro and Thomas W. Allen (eds.), <i>Homeri Opera</i>, vol. 1–2 (Oxford: Clarendon Press, 3rd ed. 1920)</dt>
+  <dd>
+    Public domain. The text, line numbers and paragraph breaks come from the Perseus Digital
+    Library’s <a href="https://github.com/PerseusDL/canonical-greekLit">canonical-greekLit</a>
+    edition <code>tlg0012.tlg001.perseus-grc2</code>, pinned to commit <code>{PERSEUS_COMMIT}</code>. Perseus’s encoding is
+    licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; this reader uses only the
+    words, punctuation, line numbers and paragraph divisions. This is the edition the treebank annotated.
+  </dd>
+  <dt>Homer, <i>Odyssey</i>, book 1: A. T. Murray (ed.), <i>The Odyssey</i> (Loeb Classical Library, London: Heinemann, 1919)</dt>
+  <dd>
+    Public domain. The Greek of Murray’s Loeb edition, Perseus’s <code>tlg0012.tlg002.perseus-grc2</code> from the
+    same pinned commit and under the same licence. The treebank’s Odyssey annotates this text.
+  </dd>
+  <dt>Perseus Ancient Greek Dependency Treebank 2.1: lemmas and morphology</dt>
+  <dd>
+    Every word’s lemma and morphology come from
+    the <a href="https://github.com/PerseusDL/treebank_data">Ancient Greek Dependency Treebank</a> (Perseus Digital
+    Library, Tufts University; release 2.1, 2015, of annotation made in 2010–2011 by students and editors at Holy
+    Cross and Tufts), <code>tlg0012.tlg001.perseus-grc1.tb</code> and <code>tlg0012.tlg002.perseus-grc1.tb</code>,
+    pinned to commit <code>{AGDT_COMMIT}</code>.
+    Licensed <a href="https://creativecommons.org/licenses/by-sa/3.0/us/">CC BY-SA 3.0 US</a>. Only the lemma, the
+    part-of-speech tag and the relation (which settles whether a conjunction subordinates) are used; the dependency
+    trees are not shown. The treebank’s annotation was made by people, not by a tagger, and has the errors of such
+    work: the sections below list the ones repaired.
+  </dd>
+  <dt>Morphology</dt>
+  <dd>
+    The treebank’s nine-position tags are converted to Universal Dependencies features by a fixed table
+    (<code>packs/grc/build/agdt.ts</code>), following the conventions of the UD Ancient Greek Perseus treebank:
+    the aorist is past tense without aspect, the imperfect past imperfective, the perfect past perfective. The
+    treebank’s one form for middle and passive (<i>e</i>) is shown as “middle or passive”. Nouns whose lemma is
+    capitalized are proper nouns. The build stops on any tag position it has no label for.
+  </dd>
+  <dt>Aligning the edition with the treebank</dt>
+  <dd>
+    Each printed word takes the annotation of the treebank token or tokens with the same letters, in order: the
+    comparison ignores accents, breathings, elision marks, capitals and the form of sigma, because the treebank
+    mistypes some forms (<i>ἄρῤ</i> for <i>ἄρʼ</i>). The treebank cites lines as it counts them; in Odyssey 1.95–269 it is
+    off by a line, so the reader follows the text’s own line numbers. Where the treebank splits one printed word
+    into two (<i>οὐδέ</i> as <i>οὐ</i> + <i>δέ</i>, <i>οὔτε</i>, <i>μηδέ</i>, 44 times in the Iliad, 5 in the Odyssey), the
+    word shows both analyses, each against its own letters. Every printed word of both books matches; no word is
+    left without annotation. The treebank’s “artificial” nodes (words it supplies to complete a construction, which
+    the text does not print) are skipped.
+    <details>
+      <summary>Words repaired in the treebank’s annotation ({patches.length})</summary>
+      <p>
+        The treebank leaves 6 words of Iliad 1 and 10 of Odyssey 1 without lemma or tag, and gives some others a
+        lemma that is not a word’s lemma. Each is repaired here, by hand, from the treebank’s annotation of the same
+        word elsewhere. A tag has nine positions (part of speech, person, number, tense, mood, voice, gender, case,
+        degree).
+      </p>
+      <ul>
+        {patches.map(({ where, word, parts }) => (
+          <li>
+            {where} <i lang="grc">{word}</i>:
+            {parts.map((part) => part && (
+              <> {part.lemma ? <>lemma <i lang="grc">{part.lemma}</i></> : null}{part.lemma && part.postag ? ", " : null}{part.postag ? <>tag <code>{part.postag}</code></> : null};</>
+            ))}
+          </li>
+        ))}
+      </ul>
+    </details>
+    <details>
+      <summary>Lemmas corrected ({fixes.length})</summary>
+      <p>
+        These lemmas are not a dictionary’s headword, or carry a stray mark. Every token of the lemma is changed.
+      </p>
+      <ul>
+        {fixes.map(([from, to]) => <li><i lang="grc">{from}</i> becomes <i lang="grc">{to}</i></li>)}
+      </ul>
+    </details>
+  </dd>
+</dl>
+
+<h2>English</h2>
+<dl>
+  <dt>A. T. Murray, <i>The Iliad</i> (Loeb Classical Library, London: Heinemann, 1924–1925) and <i>The Odyssey</i> (1919)</dt>
+  <dd>
+    Public domain. Perseus’s <code>tlg0012.tlg001.perseus-eng3</code> and <code>tlg0012.tlg002.perseus-eng3</code>,
+    from the same pinned commit, under the same encoding licence as the Greek. Murray’s translation is prose. The
+    reader does not number his lines.
+  </dd>
+  <dt>How the rows are cut</dt>
+  <dd>
+    A row is one page of the Loeb Greek (Perseus’s “card”): the Iliad’s 17 pages and the Odyssey’s 10, each named by
+    the line it opens at (<i>Il. 1.33</i>, <i>Od. 1.44</i>). Murray’s English page opens at the same place and ends
+    where the Greek page ends, on a sentence, so each row sets the Greek page beside its English. Perseus also marks,
+    every fifth line, the point in Murray’s prose that reaches that line; those marks fall mid-sentence and are not
+    used, and the English has no line numbers of its own. Within a row the Greek follows the paragraphs of the
+    edition; the English follows Murray’s. Lines are numbered as in the Greek text, and a citation such
+    as <i>Il. 1.33</i> or <code>#1.33</code> finds that line wherever it falls in a row.
+  </dd>
+</dl>
+
+<h2>Dictionaries</h2>
+<dl>
+  <dt>Georg Autenrieth, <i>A Homeric Dictionary for Schools and Colleges</i>, translated by Robert P. Keep (New York: Harper, 1891)</dt>
+  <dd>
+    The dictionary of Homer’s own words, and the first the word panel shows. The 1891 book is public domain. The
+    digital text is the Perseus Digital Library’s (<code>Perseus:text:1999.04.0073</code>,
+    from <a href={AUTENRIETH_URL}>Perseus’s download of the work</a>); the file states no licence, Perseus says that its
+    texts differ in copyright status, and Perseus refused automated requests for the page that would say which
+    applies to this one, so no licence is claimed for the digital file beyond Perseus’s credit. Perseus has no
+    versioned copy: the build checks the file against the hash it was made with and counts its entries, and Perseus
+    may change the file.
+  </dd>
+  <dt>Henry G. Liddell and Robert Scott, <i>An Intermediate Greek-English Lexicon</i> (Oxford, 1889): the Middle Liddell</dt>
+  <dd>
+    Public domain; the digital text is Perseus’s, <a href="https://github.com/PerseusDL/canonical-pdlrefwk">canonical-pdlrefwk</a>
+    at commit <code>{REFWK_COMMIT}</code>, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+  </dd>
+  <dt>Henry G. Liddell, Robert Scott and Henry S. Jones, <i>A Greek-English Lexicon</i>, 9th ed. (Oxford: Clarendon Press, 1940): the LSJ</dt>
+  <dd>
+    The Perseus Digital Library’s <a href="https://github.com/PerseusDL/lexica">lexica</a> repository at
+    commit <code>{LEXICA_COMMIT}</code> (27 files),
+    licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Only the entries for words these two
+    books use are kept, and those longer than about 14,000 characters of senses (<i>ἐπί</i>, <i>λόγος</i>) are cut after
+    a whole sense, with a note saying how many senses are not shown.
+  </dd>
+  <dt>How a lemma finds its entries</dt>
+  <dd>
+    Each dictionary is searched for the treebank’s lemma, ignoring the marks that dictionaries add (length marks,
+    hyphens in compounds, diaeresis) and case. A lemma that a dictionary spells with another accent is found by
+    ignoring accents (<i>τε</i>, which the dictionaries accent <i>τέ</i>); the word panel then says under which
+    headword it is listed. Every lemma of both books has at least one entry. The lexicon’s short gloss is the first
+    translation in the first dictionary that has one; where an entry only refers the reader on (“see μάλα”) it is the
+    gloss of the word it names.
+  </dd>
+</dl>

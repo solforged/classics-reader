@@ -1,4 +1,4 @@
-# The Edda Reader, the Gītā Reader and the Aeneid Reader
+# Classics Reader
 
 Static parallel-text readers modelled on [The Aristotle Reader](https://aristotle.johnhboyer.com).
 Each reader is one site built from the same pages: the original language sits beside a
@@ -7,6 +7,10 @@ public-domain English translation, one aligned stanza, verse, chapter or paragra
 - **The Edda Reader**: the Poetic and Prose Eddas in Old Norse.
 - **The Gītā Reader**: the Bhagavadgītā, all 18 chapters, in Sanskrit (IAST or Devanagari).
 - **The Aeneid Reader**: Vergil's Aeneid, book 1, in Latin.
+- **The Old English Reader**: *Apollonius of Tyre* and the West-Saxon Gospel of Mark.
+- **The Homer Reader**: the Iliad and the Odyssey, book 1 of each, in Greek.
+- **The Genesis Reader**: Genesis 1–11 in Hebrew.
+- **The Analects Reader**: the Analects of Confucius, all 20 books, in Classical Chinese.
 
 ## Navigation
 
@@ -120,6 +124,63 @@ the panel opens the entries for the word's class. Search ignores macrons, case, 
 (`uirum` finds *virum*). There are no inflection tables yet. Credits are in
 `corpora/aeneid/Sources.astro`.
 
+## The Old English Reader
+
+Both texts and their annotation come from the ISWOC treebank (Kristin Bech, University of Oslo), whose
+lemma and morphology were reviewed by hand for every sentence: **CC BY-NC-SA 4.0**, so the reader's
+Old English data is for non-commercial use only. *Apollonius of Tyre* is ISWOC's text, which follows
+Goolden's edition (1958); its 22 chapters face Benjamin Thorpe's literal translation (1834), cut by
+hand at the Old English chapter openings, with the passages Thorpe supplied from the Latin left out.
+The Gospel of Mark is Skeat's text, one verse per row beside the King James Version; the seven verses
+the edition lacks show the English alone. `packs/ang/build/morph.ts` converts ISWOC's PROIEL tags to
+UD; a value ISWOC leaves undecided (accusative or dative) is shown as such. Written forms of two
+words (*næs*, *nolde*) open two cards. Lemmas show Bosworth–Toller's headwords with macrons
+(*hālig*); its entries (CC BY 4.0) cover 99.8% of the words that are not names, Wiktionary most of
+the rest, and a hand-written glossary (`corpora/oldenglish/names.ts`) the 98 names. Search ignores
+length marks and case and accepts *th* for þ and ð and *ae* for æ (`thaet` finds *þæt*). There are
+no inflection tables. Credits are in `corpora/oldenglish/Sources.astro`.
+
+## The Homer Reader
+
+Iliad 1 and Odyssey 1 in the Monro–Allen text from Perseus, with lemma and morphology from the
+Ancient Greek Dependency Treebank 2.1 (CC BY-SA 3.0 US), which annotates that text. The treebank's
+line citations are unreliable in Odyssey 1.95–269, so `corpora/homer/alignment.ts` pairs words by
+sequence; `annotation.ts` lists the 23 tokens the treebank leaves untagged or splits wrongly and the
+lemmas it misspells, and the build stops on an entry it does not use. Each row is a Loeb page (a
+Perseus card), with A. T. Murray's prose translation of the same page (1924 and 1919, public domain);
+Murray's five-line marks fall mid-sentence and are not used. Lines are numbered as in the Aeneid
+(`Il. 1.33`). *οὐδέ* and *μηδέ*, which the treebank divides, open two cards. The dictionaries are
+Autenrieth's Homeric dictionary, the Middle Liddell and LSJ (Perseus, CC BY-SA), with LSJ's longest
+entries cut after a whole sense; 45 lemmas are found only by ignoring an accent and say so. Search
+ignores accents, breathings and case (`μηνιν` finds *μῆνιν*). Credits are in
+`corpora/homer/Sources.astro`.
+
+## The Genesis Reader
+
+Genesis 1–11, one verse per row, in the Westminster Leningrad Codex with the lemma and morphology of
+the Open Scriptures Hebrew Bible (CC BY 4.0), beside the Jewish Publication Society's translation
+(1917). The Hebrew keeps its vowel points and drops the cantillation marks; it reads right to left
+(`LanguagePack.dir`), with the English in the left column. A written word holds one to four
+morphemes (preposition, article, conjunction, stem, pronominal suffix) and opens a card for each.
+Lemmas are Brown–Driver–Briggs headwords through the Open Scriptures Hebrew Lexicon; 85 entries that
+have no definition there (mostly names) show the lexicon's gloss. Where the text is read otherwise than
+written, the reader prints the reading (qere) and its panel names the written form (ketiv). Chapters
+form the outline, and go-to accepts `Gen 3:1`, `3.1` or a bare chapter number.
+Search ignores points and accents and folds final letters (`בראשית` finds *בְּרֵאשִׁית*). Credits
+are in `corpora/genesis/Sources.astro`.
+
+## The Analects Reader
+
+All 20 books of the Analects, one work per book and one row per chapter of James Legge's
+translation (1861; 2nd ed. 1893), in the text of the Kyoto University treebank for Classical
+Chinese (Universal Dependencies, CC BY-SA 4.0), which supplies the word division, lemma, part of
+speech and a gloss for every word. Kyoto prints no punctuation; the reader carries Legge's across
+by aligning the two Chinese texts character by character (`corpora/analects/alignment.ts` lists the
+differences), and prints each Kyoto sentence on its own line. The word panel shows the word's
+pinyin and Middle Chinese reading, Kyoto's gloss for that occurrence, then Wiktionary and Unihan
+entries; names have only Kyoto's gloss. Variant characters are interchangeable in lookup and
+search (*為* finds *爲*). Citations read `An. 2.4`. Credits are in `corpora/analects/Sources.astro`.
+
 ## Building
 
 ```sh
@@ -136,9 +197,16 @@ bun run build:gita          # → dist/gita/ (READER=gita astro build)
 READER=aeneid bun run fetch # LASLA's 12 Aeneid books, Perseus Latin and English, Frieze → .cache/sources/aeneid
 READER=aeneid bun run data  # → generated/aeneid/
 bun run build:aeneid        # → dist/aeneid/
+
+READER=oldenglish bun run fetch  # ISWOC, Bosworth–Toller, Wiktionary, Thorpe, KJV (about 230 MB)
+READER=homer bun run fetch       # AGDT, Perseus Greek and English, Autenrieth, Middle Liddell, LSJ (about 335 MB)
+READER=genesis bun run fetch     # OSHB, Open Scriptures lexicon, JPS 1917
+READER=analects bun run fetch    # Kyoto treebank, Legge, Unihan, Wiktionary
+# then READER=<id> bun run data and bun run build:<id> for each
 ```
 
-`READER` picks the reader for every step and defaults to `edda`; `bun run all` runs all three.
+`READER` picks the reader for every step and defaults to `edda`; `bun run all` runs the steps for
+the reader `READER` names.
 `bun test` runs the unit tests (`src/lib/cite.test.ts`: citation formatting and parsing).
 
 ## Layout
@@ -158,7 +226,8 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   text (words with analyses, in the pack's language) or a translation; rows store their units per
   side id, and the reader's column toggle, the search filter and `search.json` follow the list.
   Each work names its citation `levels`, outermost first (`["Stanza"]`, or `["Book", "Line"]` with
-  row ids like `1.23`); a listed level (a prose work's chapters) is the work's outline, and the
+  row ids like `1.23`); a listed level (a prose work's chapters) is the work's outline, listed by
+  heading or, with `opening`, by the division's first words, and the
   go-to box accepts `1.23`, `1 23` or `1:23`. A source unit with `firstLine` is
   numbered stichic verse (an epic paragraph): its lines carry their numbers, every fifth shows one,
   the outline lists its paragraphs, and the go-to box, `#1.23` links and concordance citations reach
@@ -169,8 +238,9 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
 - `src/lib/cite.ts`: citations as printed (`formatCite`: `Vsp 45`, `BhG 12.47`, `Aen. 1.742`) and
   as typed (`resolveCite`, for the go-to box).
 - `src/lang/types.ts` is the pack contract the shared code uses (spelling fold, search key,
-  morphology labels, dictionary list, optional inflection tables and scripts); `src/lang/index.ts`
-  exposes the reader's pack as `lang`.
+  morphology labels, dictionary list, optional inflection tables and scripts, and `dir` for a
+  right-to-left script); `src/lang/index.ts` exposes the reader's pack as `lang`. A dictionary
+  record may carry a `reading` (Chinese pinyin), shown beside the lemma.
 - `src/lib/morph.ts`: the analysis format. Word analyses carry Universal Dependencies morphology,
   e.g. `NOUN Case=Acc|Definite=Ind|Gender=Masc|Number=Sing`.
 - `src/lib/entry.ts`: renders dictionary articles for the word panel and the lemma pages. A section
@@ -190,6 +260,17 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
 - `packs/lat/`: Latin. Lookup folds macrons, case, v/u and j/i. The build helpers read LASLA
   CoNLL-UP (`lasla.ts`), adjust its UD features (`morph.ts`: noun gender dropped, deponents marked)
   and read Frieze's vocabulary from DCC (`frieze.ts`).
+- `packs/ang/`: Old English. Lookup folds length marks, case, ð to þ and ƿ to w. The build helpers
+  read ISWOC's PROIEL XML (`iswoc.ts`), convert its tags to UD (`morph.ts`), parse Bosworth–Toller
+  (`bt.ts`) and Wiktionary (`wiktionary.ts`), and map ISWOC lemmas to headwords (`lemmas.ts`).
+- `packs/grc/`: Ancient Greek. The build helpers read the AGDT (`agdt.ts`, tags to UD), convert
+  Beta Code (`beta.ts`), parse the three Perseus lexica (`lexica.ts`) and find headwords
+  (`headwords.ts`).
+- `packs/hbo/`: Biblical Hebrew. The build helpers read OSHB (`oshb.ts`), convert its morphology
+  codes to UD (`morph.ts`) and resolve lemmas to BDB (`lexicon.ts`, `bdb.ts`).
+- `packs/lzh/`: Classical Chinese. The build helpers read Kyoto CoNLL-U (`conllu.ts`), label its
+  features (`morph.ts`) and build entries from Unihan and Wiktionary (`unihan.ts`,
+  `wiktionary.ts`, `dictionary.ts`).
 - `corpora/edda/`: the Edda build (`build.ts`, `catalog.ts`) and its parsers (`lib/`: `eae.ts`,
   `bugge.ts`, `bellows.ts`, `snorra.ts`, Bellows's name index `names.ts`). It fails if an
   alignment misses or repeats a unit. `alignment/<slug>.json` is the curated row-by-row crosswalk
@@ -203,6 +284,11 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   for Greenough and Williams (`lib/perseus.ts`), and the word-by-word pairing with LASLA
   (`alignment.ts`). It fails if a line's word count differs from LASLA's, if Greenough's and
   Williams's paragraphs differ, or if a listed reading is no longer in the text.
+- `corpora/oldenglish/`, `corpora/homer/`, `corpora/genesis/`, `corpora/analects/`: the same shape as
+  the Aeneid (pinned `sources.ts`, `fetch.ts`, parsers in `lib/`, exception tables in
+  `alignment.ts`, plus `names.ts` for Old English names and `annotation.ts` for Homer's treebank
+  repairs). Each build stops on an unexplained difference between its texts, on a morphology value
+  with no English label, and on an exception it does not use.
 - `src/pages/`: home, works and collection pages (`[slug]`, rendering `src/components/WorkPage.astro`
   or `CollectionPage.astro`), search, lexicon, sources.
 

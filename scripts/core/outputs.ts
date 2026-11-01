@@ -107,6 +107,15 @@ interface LemmaBucket {
   occ: [string, string, string, number, number][];
 }
 
+/** Concordance options. */
+export interface ConcordanceOptions {
+  /**
+   * Mark each concordance word at its own place in the line. Otherwise the first occurrence of its text is marked,
+   * which is wrong for a script without spaces, where one character recurs within a line.
+   */
+  markPosition?: boolean;
+}
+
 /** Full-text search rows and the lexicon's frequencies and concordance lines. Source sides supply the words. */
 export class Concordance {
   private readonly search: SearchRow[] = [];
@@ -114,7 +123,7 @@ export class Concordance {
   private occurrence = 0;
   private readonly sources: readonly string[];
 
-  constructor(private readonly sides: readonly SideSpec[]) {
+  constructor(private readonly sides: readonly SideSpec[], private readonly options: ConcordanceOptions = {}) {
     this.sources = sides.filter((side) => side.role === "source").map((side) => side.id);
   }
 
@@ -128,7 +137,10 @@ export class Concordance {
           // Numbered verse cites its line (1.742), which the reader finds inside the row; other units cite the row.
           const cite = u.firstLine === undefined ? row.id : [...row.id.split(".").slice(0, -1), u.firstLine + l].join(".");
           const lineText = line.map((p) => (typeof p === "string" ? p : p[0])).join("");
+          let offset = 0;
           for (const p of line) {
+            const start = offset;
+            offset += typeof p === "string" ? p.length : p[0].length;
             if (typeof p === "string") continue;
             counts.words++;
             if (p[1].length) counts.parsed++;
@@ -156,7 +168,12 @@ export class Concordance {
               }
               st.count++;
               st.works[slug] = (st.works[slug] ?? 0) + 1;
-              if (st.occ.length < 400) st.occ.push([slug, cite, lineText.replace(p[0], `⟦${p[0]}⟧`), probable, this.occurrence]);
+              if (st.occ.length < 400) {
+                const marked = this.options.markPosition
+                  ? `${lineText.slice(0, start)}⟦${p[0]}⟧${lineText.slice(start + p[0].length)}`
+                  : lineText.replace(p[0], `⟦${p[0]}⟧`);
+                st.occ.push([slug, cite, marked, probable, this.occurrence]);
+              }
               this.occurrence++;
             }
           }

@@ -159,10 +159,12 @@ const searched = new Intl.ListFormat("en", { type: "conjunction" }).format(site.
     // The longest span first among those starting together, so a word match does not cut a segment's mark short.
     spans.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
     const first = spans[0]![0];
-    const start = Math.max(0, text.lastIndexOf(" ", Math.max(0, first - 90)));
+    // A row that opens with a unit without lines (a chapter heading's number) starts with the separator " / ".
+    const lead = text.startsWith(" / ") ? 3 : 0;
+    const start = Math.max(lead, text.lastIndexOf(" ", Math.max(0, first - 90)));
     let end = Math.min(text.length, first + 260);
     if (whole) while (end < text.length && !/\s/.test(text[end]!)) end++;
-    let out = start > 0 ? "… " : "";
+    let out = start > lead ? "… " : "";
     let pos = start;
     for (const [a, b] of spans) {
       if (a < pos || a >= end) continue;

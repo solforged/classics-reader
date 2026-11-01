@@ -1,0 +1,153 @@
+---
+// Sources and licences of the Old English Reader (src/pages/sources.astro).
+import { FIXES, SPELLINGS, WITHOUT_ENTRY } from "../../packs/ang/build/lemmas";
+import { CHAPTER_STARTS, MISSING_VERSES } from "./alignment";
+import { ISWOC_COMMIT, SOURCES, THORPE_REVISIONS } from "./sources";
+
+const pins = Object.entries(SOURCES).map(([file, [url, sha]]) => ({ file, url, sha }));
+const pages = Object.keys(THORPE_REVISIONS).map(Number);
+---
+<h2>Old English</h2>
+<dl>
+  <dt>ISWOC, the Oslo Old English treebank (Kristin Bech and Kristine Eide, 2014)</dt>
+  <dd>
+    Every word’s form, lemma, part of speech, morphology and punctuation come from ISWOC’s two
+    files <code>apt.xml</code> (<i>Apollonius of Tyre</i>) and <code>wscp.xml</code> (the West-Saxon Gospels), in PROIEL XML,
+    as <a href="https://syntacticus.org/">Syntacticus</a> publishes them
+    (<a href="https://github.com/syntacticus/syntacticus-treebank-data">syntacticus-treebank-data</a>,
+    commit <code>{ISWOC_COMMIT.slice(0, 12)}</code>). Both files are
+    marked <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>, so this reader’s Old English text
+    and annotation, and the word data built from them, may be reused only for non-commercial purposes, with attribution
+    and under the same licence. Every sentence in the two files is marked reviewed. The reader shows each token’s form
+    as the treebank prints it, with its punctuation; <i>næs</i>, <i>to gegaderod</i> and the like, which ISWOC writes
+    as two tokens joined, are one written word with two analyses, and forms ISWOC prints with a space
+    (<i>æt nehstan</i>) stay one word.
+  </dd>
+  <dt>Apollonius of Tyre: Peter Goolden’s edition (1958)</dt>
+  <dd>
+    ISWOC took the text from the York–Toronto–Helsinki Corpus of Old English Prose, whose <i>coapollo</i> is Goolden’s
+    edition, <i>The Old English Apollonius of Tyre</i> (Oxford University Press, 1958), of Cambridge, Corpus Christi
+    College 201. That edition is in copyright. The reader uses it only as ISWOC redistributes it, under the
+    non-commercial, share-alike licence above, which is the only grant this reader relies on for it. The Old English is
+    the first part of the story, the treebank’s title sentence and 22 chapters; the part after the break in the
+    manuscript is not in the treebank.
+  </dd>
+  <dt>The West-Saxon Gospel of Mark: Walter W. Skeat’s edition (1871–77)</dt>
+  <dd>
+    ISWOC’s text of Mark is Skeat’s edition of Corpus Christi College 140, which is in the public domain. All sixteen
+    chapters are present, but the Old English has no verse {MISSING_VERSES.join(", ")} (they are not in the edition);
+    the reader shows the King James verse alone for those seven rows.
+  </dd>
+  <dt>Morphology</dt>
+  <dd>
+    ISWOC’s PROIEL tags are converted to Universal Dependencies (<code>packs/ang/build/morph.ts</code>; the build
+    stops on any tag or value the conversion does not know). Nouns, adjectives, participles and pronouns keep their
+    case, gender and number; verbs their person, number, tense and mood. Auxiliaries
+    are <i>wesan</i>, <i>bēon</i>, the modals (
+    <i>magan</i>, <i>willan</i>, <i>sculan</i>, <i>mōtan</i>, <i>durran</i>, <i>þurfan</i>)
+    and <i>habban</i> when ISWOC tags it auxiliary. A demonstrative or quantifier that modifies a noun
+    is a determiner, otherwise a pronoun. Where ISWOC marks a value as undecided, the reader says so rather than choosing:
+    case <i>e</i> (accusative or dative), <i>c</i> (genitive or dative) and <i>o</i> (any case but the nominative)
+    become several values (<i>accusative or dative</i>), and the same for gender (<i>p</i>, <i>o</i>, <i>r</i>); an
+    uncertain value (<i>x</i>) and a value that says nothing are left out.
+  </dd>
+  <dt>Lemmas</dt>
+  <dd>
+    ISWOC’s lemmas are ASCII, spell <i>and</i> as <code>&amp;</code> and number homographs. The reader finds each
+    lemma’s Bosworth–Toller entry (ignoring length marks, case, ð and þ, hyphens), and shows Bosworth–Toller’s
+    headword with its length marks as macrons (<i>hālig</i>). A lemma ISWOC spells differently from the dictionary
+    keeps ISWOC’s spelling, and its entry is “listed as” the dictionary’s ({Object.keys(SPELLINGS).length} lemmas). ISWOC lemmatizes
+    some words under an inflected form, a misspelling or one of several variants; {Object.keys(FIXES).length} lemmas are
+    corrected by hand, among them the nine lemmas of the third-person pronoun (
+    <i>his</i>, <i>him</i>, <i>hit</i>, <i>hī</i>, <i>hēo</i> …), which count together
+    under <i>hē</i>, and the variant lemmas of one name
+    (<i>Satanas</i> and <i>Satan</i>). {Object.keys(WITHOUT_ENTRY).length} lemmas have no entry in Bosworth–Toller and take
+    Wiktionary’s or none. The build stops on a lemma that neither dictionary has and that is not listed
+    (<code>packs/ang/build/lemmas.ts</code>), and on a listed lemma that nothing uses.
+  </dd>
+</dl>
+
+<h2>English</h2>
+<dl>
+  <dt>Benjamin Thorpe, <i>The Anglo-Saxon Version of the Story of Apollonius of Tyre</i> (1834)</dt>
+  <dd>
+    Thorpe’s literal English translation, which faces his Old English text, is in the public domain. The reader
+    uses <a href="https://en.wikisource.org/wiki/Index:The_Anglo-Saxon_version_of_the_story_of_Apollonius_of_Tyre.djvu">Wikisource’s
+    proofread transcription</a> of pages {pages[0]}–{pages.at(-1)}, each page pinned to the revision named
+    in <code>corpora/oldenglish/sources.ts</code> and fetched through the MediaWiki API. Wikisource’s text and transcription
+    are available under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. The page numbers of
+    the Old English printed in brackets are removed, words split over a page break are joined, and seven misreadings of
+    the scan (<i>hut</i>, <i>hack</i>, <i>und</i> twice, <i>lie</i>, <i>hare</i>, <i>end</i>) are corrected; the build
+    stops if one of them is gone or occurs twice. Thorpe’s footnotes are kept (the <i>n</i> buttons).
+  </dd>
+  <dt>Cutting Thorpe’s English to ISWOC’s chapters</dt>
+  <dd>
+    Thorpe does not divide his text into chapters. The chapter of each row is the stretch of his English from the clause
+    that translates the chapter’s first Old English words to the one that translates the next chapter’s. The
+    {CHAPTER_STARTS.length} opening phrases were found by hand (<code>corpora/oldenglish/alignment.ts</code>); the
+    build stops unless each occurs once and in order. Three chapters begin in the middle of an English sentence (the
+    previous row then ends with a comma). Where the Old English breaks off, Thorpe goes on with a translation of the
+    Latin, and he notes that the Old English resumes later; the reader stops where ISWOC’s text stops, with his note.
+    The alignment is a judgement, not data.
+  </dd>
+  <dt>The King James Version of Mark (1611)</dt>
+  <dd>
+    Public domain, taken from <a href="https://www.gutenberg.org/ebooks/10">Project Gutenberg’s ebook #10</a>, one verse
+    to a row. It translates the Greek, not the Latin Vulgate that the West-Saxon version follows, so the two differ
+    in wording and sometimes in content. Project Gutenberg re-releases its ebooks now and then; the build checks the
+    file’s hash.
+  </dd>
+</dl>
+
+<h2>Dictionaries</h2>
+<dl>
+  <dt>Bosworth–Toller, <i>An Anglo-Saxon Dictionary Online</i> (Ondřej Tichý et al., Charles University)</dt>
+  <dd>
+    Joseph Bosworth and T. Northcote Toller’s dictionary (1898), with Toller’s Supplement (1921), as digitized and
+    released by <a href="http://hdl.handle.net/11234/1-3532">LINDAT/CLARIAH-CZ</a> (data of 2021-04-09, version 0.1),
+    licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. The reader turns each entry’s XML
+    into numbered senses with a few Old English citations and their English, and marks long vowels with macrons where
+    the dictionary marks them with acutes. A cross-reference entry (<i>v. þanne</i>) opens its target’s. The dictionary’s
+    own readme warns that not all of its entries have been checked or tagged.
+  </dd>
+  <dt>Wiktionary, Old English entries</dt>
+  <dd>
+    For words Bosworth–Toller lacks, the entries of <a href="https://en.wiktionary.org/">English Wiktionary</a>
+    as <a href="https://kaikki.org/">kaikki.org</a> extracts them,
+    licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> (and GFDL). kaikki.org regenerates its
+    file from Wiktionary’s dumps, so upstream will drift: the build checks the file against the extract this reader was
+    made with.
+  </dd>
+  <dt>Names</dt>
+  <dd>
+    The line that says who or what each proper name is was written for this reader; neither dictionary covers most of
+    them.
+  </dd>
+</dl>
+
+<h2>Pinned files</h2>
+<p>
+  The build downloads these files into <code>.cache/sources/oldenglish</code> and stops if a file’s SHA-256 is not the
+  one below.
+</p>
+<table class="pins">
+  <thead><tr><th>File</th><th>SHA-256</th></tr></thead>
+  <tbody>
+    {pins.map(({ file, url, sha }) => <tr><td><a href={url}><code>{file}</code></a></td><td><code>{sha}</code></td></tr>)}
+  </tbody>
+</table>
+
+<style>
+  .pins {
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+  .pins th, .pins td {
+    text-align: left;
+    padding: 0.2rem 0.8rem 0.2rem 0;
+    vertical-align: top;
+  }
+  .pins code {
+    overflow-wrap: anywhere;
+  }
+</style>

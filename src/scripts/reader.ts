@@ -74,9 +74,16 @@ function jumpToLine(el: HTMLElement, cite: string) {
   setTimeout(() => el.classList.remove("flash"), 1600);
 }
 
-/** Goes to a row, a stanza label or a numbered line of this work ("12", "1.23"); false when there is none. */
+/**
+ * Goes to a row, a stanza label or a numbered line of this work ("12", "1.23"); false when there is none. In a work
+ * whose rows are verses of listed chapters (Genesis 3.1), a bare number is the chapter: its first row.
+ */
 function goLocal(want: string): boolean {
   if (rowIds.has(want) && jump(want)) return true;
+  if (work.levels.length > 1 && work.levels[0]!.list && /^\d+$/.test(want)) {
+    const first = [...rowIds].find((id) => id.startsWith(`${want}.`));
+    if (first && jump(first)) return true;
+  }
   for (const lab of text.querySelectorAll<HTMLElement>(".col.source .slabel, .col.source .chap, .col.translation .slabel")) {
     if (lab.textContent === want) {
       const row = lab.closest<HTMLElement>(".row");
@@ -423,6 +430,9 @@ async function showWord(el: HTMLElement, fromHistory = false) {
         area.hidden = !props.length;
       }
     }
+    // A dictionary may record how the lemma is read (Chinese: pinyin and Middle Chinese), shown beside it.
+    const reading = hits.get(lemma)?.reading;
+    if (reading) block.querySelector(".lemma")!.insertAdjacentHTML("afterend", ` <span class="reading">${esc(reading)}</span>`);
     const content = dictionaryHtml(hits.get(lemma), { lemma, morph, work: slug, parts, properNoun: source === "n" });
     block.querySelector(".dict-slot")!.outerHTML = `<div class="dict">${content}</div>`;
   });

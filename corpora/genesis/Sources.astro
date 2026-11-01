@@ -1,0 +1,84 @@
+---
+// Sources and licences of the Genesis Reader (src/pages/sources.astro).
+import { KETIV_QERE, SUFFIX_LEMMAS } from "./alignment";
+import { LEXICON_COMMIT, OSHB_COMMIT } from "./sources";
+
+const ketivs = Object.keys(KETIV_QERE).map((id) => id.replace(".", ":"));
+const pronouns = Object.keys(SUFFIX_LEMMAS).length;
+---
+<h2>Hebrew</h2>
+<dl>
+  <dt>The Westminster Leningrad Codex (WLC), Genesis 1–11</dt>
+  <dd>
+    Public domain. The text is the Leningrad Codex as the Open Scriptures Hebrew Bible (OSHB) encodes it in <a href="https://github.com/openscriptures/morphhb">openscriptures/morphhb</a> (<code>wlc/Gen.xml</code>,
+    pinned to commit <code>{OSHB_COMMIT}</code>), in the Masoretic verse numbering. It is
+    printed as OSHB has it, without normalization: the letters, vowel points, <i>dagesh</i>, <i>meteg</i>, <i>maqqef</i>,
+    <i>paseq</i> and <i>sof pasuq</i>. The cantillation accents (the <i>te‘amim</i>, U+0591–U+05AF) are left out,
+    because they stack on the vowel points and are hard to read; search ignores the points as well, so a query in bare
+    consonants finds the pointed word. The open and closed paragraph marks of the manuscript (<i>petuhah</i>,
+    <i>setumah</i>) are printed as <span lang="hbo" dir="rtl">{"{פ}"}</span> and <span lang="hbo" dir="rtl">{"{ס}"}</span>.
+    Words joined by a <i>maqqef</i> are separate words, each clickable.
+  </dd>
+  <dt>Open Scriptures Hebrew Bible, lemmas and morphology</dt>
+  <dd>
+    Every word’s lemma and grammatical analysis come from the OSHB Parsing Project (<a href="https://hb.openscriptures.org/">hb.openscriptures.org</a>),
+    licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Original work of the Open Scriptures
+    Hebrew Bible available at <a href="https://github.com/openscriptures/morphhb">github.com/openscriptures/morphhb</a>.
+    The analysis is the volunteer project’s, checked by its editors, not a single scholar’s treebank.
+  </dd>
+  <dt>Morphology</dt>
+  <dd>
+    OSHB splits a written word into its morphemes, and the word panel gives each its own card: a prefixed conjunction,
+    preposition, article or relative <span lang="hbo" dir="rtl">שֶׁ</span>, the stem, and a pronominal suffix.
+    OSHB’s codes are mapped to Universal Dependencies, with the Hebrew verbal stem as <code>HebBinyan</code>
+    (<i>Qal</i> is OSHB’s <i>PAAL</i>, <i>Hiphil</i> is <i>HIFIL</i>) and the conjugation as aspect and mood: perfect,
+    imperfect, <i>wayyiqtol</i> and <i>weqatal</i>, participle, infinitive. A preposition with the article fused into its
+    vowels (<span lang="hbo" dir="rtl">בַּ</span>, <span lang="hbo" dir="rtl">לַ</span>) is shown as two cards,
+    preposition and article. A pronominal suffix has no lemma in OSHB; it takes the independent pronoun of its person,
+    gender and number ({pronouns} are used), and the directional and paragogic <i>he</i> and <i>nun</i> have entries of
+    their own. Entries that share a headword are numbered (<span lang="hbo" dir="rtl">אֵת</span>¹ the sign of the
+    accusative, <span lang="hbo" dir="rtl">אֵת</span>² “with”).
+  </dd>
+  <dt>Ketiv and qere</dt>
+  <dd>
+    Where the manuscript writes one word and the Masoretes direct the reader to say another, OSHB analyses both. The
+    reader prints the word as it is read (<i>qere</i>), with its pointing, and notes the consonants as written
+    (<i>ketiv</i>) in the word’s card. In Genesis 1–11 this is {ketivs.join(", ")} only
+    (<span lang="hbo" dir="rtl">הוצא</span> written, <span lang="hbo" dir="rtl">הַיְצֵא</span> read).
+  </dd>
+</dl>
+
+<h2>English</h2>
+<dl>
+  <dt><i>The Holy Scriptures according to the Masoretic Text</i>, Jewish Publication Society of America (1917)</dt>
+  <dd>
+    Public domain (<a href="https://ebible.org/engjps/copyright.htm">eBible.org’s copyright statement</a>). The text is
+    eBible.org’s USFM edition, <a href="https://ebible.org/Scriptures/engjps_usfm.zip">engjps_usfm.zip</a>, one line
+    to a verse. eBible regenerates its archive, so the archive cannot be hash-pinned: the build pins the
+    extracted <code>02-GENengjps.usfm</code> by its SHA-256 and stops if the text changes. JPS follows the Hebrew
+    verses one for one in Genesis 1–11, which the build checks. The straight quotation marks of the file are printed as
+    typographic ones. The print sets the first words of the book in small capitals, and eBible copies them as capitals
+    (“IN THE beginning”); here they read “In the beginning”, and the build stops if any other verse opens that way.
+    The LORD of the Tetragrammaton stays in capitals. Nothing else is changed.
+  </dd>
+</dl>
+
+<h2>Dictionaries</h2>
+<dl>
+  <dt>Francis Brown, S. R. Driver and Charles A. Briggs, <i>A Hebrew and English Lexicon of the Old Testament</i> (1906)</dt>
+  <dd>
+    Public domain, as encoded by the Open Scriptures <a href="https://github.com/openscriptures/HebrewLexicon">Hebrew Lexicon</a> (commit <code>{LEXICON_COMMIT}</code>),
+    whose compilation and indexes are licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+    Each OSHB lemma number is joined to its BDB entry through the project’s <code>AugIndex.xml</code> and
+    <code>LexicalIndex.xml</code>. The word panel shows the entry’s numbered senses, flattened to two levels, with the
+    verbal stems on lines of their own. Many entries (most proper names) have no definition in the Open Scriptures
+    encoding of BDB; they show BDB’s grammar line with the index’s gloss in italics. The lexicon list gives each
+    lemma’s first definitions from BDB, or that gloss.
+  </dd>
+  <dt>James Strong, <i>Strong’s Hebrew Dictionary</i> (1894)</dt>
+  <dd>
+    Public domain, as the Open Scriptures lexical index carries it. Strong’s numbers (H853 …) identify the lemmas in
+    OSHB; the “OSHB lexicon” line of each word’s entry gives the number with the index’s transliteration and
+    one-word gloss. The index’s TWOT numbers are not used.
+  </dd>
+</dl>

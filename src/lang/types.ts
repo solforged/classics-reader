@@ -86,6 +86,8 @@ export interface LanguagePack {
   code: string;
   /** English name, e.g. "Old Norse". */
   name: string;
+  /** Direction of the source language's script. Absent: left to right. */
+  dir?: "rtl";
   /** Lookup key for lemmas and forms; dictionary and table shards are keyed by it. */
   fold(text: string): string;
   /** Search key: fold() reduced further so a query typed without diacritics matches. */

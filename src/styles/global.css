@@ -142,6 +142,37 @@ button { font: inherit; color: inherit; }
   font-feature-settings: "locl" 0;
 }
 
+/* Classical Chinese (packs/lzh). Traditional-form Han faces before EB Garamond, whose Latin typography does not apply:
+   no italic, small caps, letter-spacing or hyphenation, and strict line breaking (no line starts with a closing mark). */
+:lang(lzh) {
+  font-family: "Noto Serif TC", "Source Han Serif TC", "Noto Serif CJK TC", "Songti TC", "STSongti-TC-Regular", "PMingLiU", "MingLiU",
+    "AR PL UMing TW", var(--serif);
+  font-style: normal;
+  font-variant: normal;
+  letter-spacing: 0;
+  text-transform: none;
+  hyphens: manual;
+  line-break: strict;
+}
+.col.source:lang(lzh) { font-size: 1.18em; line-height: 1.95; }
+/* The sentences of a chapter are lines of one passage, not verse: no alternate indent. */
+.col.source:lang(lzh) .stanza .l:nth-child(even of .l) { padding-left: 1.2em; }
+
+/* Biblical Hebrew (packs/hbo). Faces that place vowel points and accents correctly come before EB Garamond, which has no
+   Hebrew; pointed Hebrew is set larger than Latin, and the text taller still. Matched by attribute so labels inside the
+   text keep their own faces. Elements marked hbo do not nest, so the sizes do not compound. */
+[lang="hbo"] {
+  font-size: 1.15em;
+  font-family: "SBL Hebrew", "Ezra SIL", "Noto Serif Hebrew", "Frank Ruehl CLM", "David CLM", "Cardo", "Times New Roman",
+    "Arial Hebrew", var(--serif);
+  font-style: normal;
+  font-variant: normal;
+  letter-spacing: 0;
+  text-transform: none;
+  hyphens: manual;
+}
+.col.source[lang="hbo"] { font-size: 1.3em; line-height: 2.1; }
+
 .page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
 .page.wide { max-width: 72rem; }
 

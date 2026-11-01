@@ -33,6 +33,12 @@ const scripts = lang.scripts?.length
 const scriptKey = `${site.id}-script`;
 const scriptIds = scripts.map((s) => s.id).filter(Boolean);
 const hideUnconverted = `html[data-script]:not([data-script=""]) [lang="${lang.code}"] { visibility: hidden; }`;
+// A right-to-left source language (LanguagePack.dir) sets every element marked with its code, from the work's columns to
+// a lemma in the word panel, in that direction, isolated from the left-to-right text around it. A page heading stays
+// at the left with the labels around it.
+const direction = lang.dir
+  ? `[lang="${lang.code}"] { direction: ${lang.dir}; unicode-bidi: isolate; } h1[lang="${lang.code}"] { text-align: left; }`
+  : "";
 ---
 
 <!doctype html>
@@ -65,6 +71,7 @@ const hideUnconverted = `html[data-script]:not([data-script=""]) [lang="${lang.c
         </>
       )
     }
+    {direction && <style set:html={direction} />}
   </head>
   <body class={bodyClass}>
     <header class="topbar">

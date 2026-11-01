@@ -42,6 +42,8 @@ export interface DictHit {
   via?: string;
   /** Compound parts when no dictionary has the whole word; each part has its own record under fold(part). */
   parts?: string[];
+  /** How the lemma is read, shown beside it in the word panel and on its lemma page (Chinese: pinyin and Middle Chinese). */
+  reading?: string;
 }
 
 /** A dictionary article as digitized: headword and definition chunks (sanitized HTML). Input to the parsers. */

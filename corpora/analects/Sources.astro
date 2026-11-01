@@ -1,0 +1,145 @@
+---
+// Sources and licences of the Analects Reader (src/pages/sources.astro).
+import { GLOSS_CODES } from "../../packs/lzh/morph";
+import { VARIANTS } from "../../packs/lzh/spelling";
+import { DIFFERENCES, MISSING_MARKERS, REPEATED, SUBSTITUTES } from "./alignment";
+import { KAIKKI, KYOTO_COMMIT, LEGGE, UNICODE_VERSION } from "./sources";
+
+const treebank = `https://github.com/UniversalDependencies/UD_Classical_Chinese-Kyoto/tree/${KYOTO_COMMIT}`;
+const shown = (chars: string) => chars || "nothing";
+---
+<h2>Classical Chinese</h2>
+<dl>
+  <dt>Kyoto University Treebank for Classical Chinese, in Universal Dependencies</dt>
+  <dd>
+    The characters, words, lemmas, parts of speech, features and English glosses of every token come
+    from <a href="https://github.com/UniversalDependencies/UD_Classical_Chinese-Kyoto">UD_Classical_Chinese-Kyoto</a>,
+    Universal Dependencies 2.18, pinned to commit <a href={treebank}><code>{KYOTO_COMMIT}</code></a>: the work of
+    Koichi Yasuoka, Christian Wittern and others at the Institute for Research in Humanities, Kyoto University. The
+    Analects are its documents <code>KR1h0004_001</code> to <code>_020</code>, which it spreads over its training,
+    development and test files; the reader merges them in book order. The treebank’s text is the Kanripo / CHANT
+    edition of the Analects. Its lemmas, parts of speech and features were annotated by hand in the Kyoto scheme and
+    converted to Universal Dependencies, with some manual corrections. The repository’s README metadata says “PD”
+    but its <code>LICENSE.txt</code>
+    says <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; the reader follows the licence
+    file, so its Chinese text and annotation, and the word data built from them, may be reused only under the same
+    licence, with attribution.
+  </dd>
+  <dt>Words</dt>
+  <dd>
+    The text is the treebank’s, with its word division: a word of several characters
+    (<i lang="lzh-Hant">君子</i>, <i lang="lzh-Hant">孔子</i>) is one clickable piece. The treebank lemmatizes in Kanripo’s forms;
+    where the text prints another form of the same character, the reader shows the printed one as the lemma
+    ({Object.entries(VARIANTS).map(([from, to], i) => <>{i ? ", " : ""}<span lang="lzh-Hant">{from} as {to}</span></>)}),
+    and lexicon, dictionary and search treat the pair as one spelling. Unihan relates nine of these twelve pairs as
+    variants; the build checks that it does not relate the other three.
+  </dd>
+  <dt>Parts of speech and glosses</dt>
+  <dd>
+    The treebank’s Universal Dependencies word classes (it has no adjectives: those are verbs) and its sparse
+    features are kept and labelled in English, and the first line of the word panel is the treebank’s own English
+    gloss of the word in this place. Its own, finer tags (“verb, action, motion”, “noun, person, role”) supply the
+    class under the word class. Words with no English equivalent are glossed with codes in brackets, which the panel
+    spells out:
+    <details>
+      <summary>The treebank’s gloss codes</summary>
+      <ul>
+        {Object.entries(GLOSS_CODES).map(([code, meaning]) => <li><code>{code}</code> {meaning}</li>)}
+      </ul>
+    </details>
+    The treebank also gives every word its place in a dependency tree; this reader does not show it.
+  </dd>
+  <dt>Punctuation</dt>
+  <dd>
+    The treebank is unpunctuated. The reader prints the marks <span lang="lzh-Hant">、 。 ； ？</span> of
+    Legge’s Chinese text (below): the characters of each book in the two texts are aligned, and a mark Legge prints after
+    a character is printed after the word of the treebank that ends with the corresponding character. The marks are
+    Legge’s reading of the sentences, not the treebank’s; a line ends after each <span lang="lzh-Hant">。</span>. The
+    marks are never inside a word and never change the text, and search ignores them.
+  </dd>
+</dl>
+
+<h2>English and chapters</h2>
+<dl>
+  <dt>James Legge, <i>The Chinese Classics</i>, vol. 1: <i>Confucian Analects, the Great Learning and the Doctrine of the Mean</i> (Oxford: Clarendon Press, 1861; 2nd ed. 1893)</dt>
+  <dd>
+    Public domain. The English, the chapter divisions (499, numbered as Legge numbers them) and the punctuation come
+    from <a href="https://www.gutenberg.org/ebooks/4094">Project Gutenberg #4094</a>, which prints Legge’s Chinese with his English,
+    fetched from <code>{LEGGE[0]}</code> and checked against SHA-256 <code>{LEGGE[1]}</code>. Project
+    Gutenberg regenerates this file, so a change upstream stops the fetch until the new copy is checked. The English
+    keeps Legge’s romanizations (<i>Hsio R</i>, <i>Chung-ni</i>) and his book headings, which this reader shows after
+    each book’s first words; his notes are not included. The reader’s chapters are Legge’s: the treebank’s own paragraph
+    divisions, which differ from his (book 10 has 27 paragraphs there and 18 chapters in Legge’s), are not used.
+  </dd>
+  <dt>Aligning Legge’s Chinese with the treebank’s</dt>
+  <dd>
+    Legge’s Chinese was typed in the Big5 encoding, which has no code for some rare characters: where Project Gutenberg
+    describes one in parentheses, the build replaces it with the treebank’s character
+    ({Object.values(SUBSTITUTES).map((char, i) => <>{i ? ", " : ""}<span lang="lzh-Hant">{char}</span></>)}). The characters of
+    each book are then aligned one against the other. The build stops on any difference it has not been told about:
+    <ul>
+      <li>
+        One-for-one substitutions of up to two characters are accepted as variants or other readings (<span lang="lzh-Hant">修</span>
+        and <span lang="lzh-Hant">脩</span>, <span lang="lzh-Hant">惟</span> and <span lang="lzh-Hant">唯</span>) or
+        as typographical slips of one text: Legge’s text prints <span lang="lzh-Hant">李</span> for <span lang="lzh-Hant">季</span> nineteen times, in
+        the name of the Ji clan. The page always shows the treebank’s character.
+      </li>
+      <li>
+        Fourteen other differences, a character that one text has and the other lacks (three in book 4), are each listed in the build with the characters before them:
+        <details>
+          <summary>Where the texts differ</summary>
+          <ul>
+            {DIFFERENCES.map((d) => <li>Book {d.book}, after <span lang="lzh-Hant">{d.before}</span>: the treebank has <span lang="lzh-Hant">{shown(d.kyoto)}</span>, Legge <span lang="lzh-Hant">{shown(d.legge)}</span></li>)}
+          </ul>
+        </details>
+      </li>
+      <li>
+        Six chapters lack their number in Legge’s Chinese, though his English numbers them; each starts at the words
+        <details>
+          <summary>Chapters found by their first words</summary>
+          <ul>
+            {Object.entries(MISSING_MARKERS).map(([chapter, words]) => <li>{chapter}: <span lang="lzh-Hant">{words}</span></li>)}
+          </ul>
+        </details>
+      </li>
+      <li>
+        Book 17 prints <span lang="lzh-Hant">{REPEATED[0]!.text}</span> twice in a row in the treebank (once in each
+        of its two paragraphs); the second copy is left out of the alignment but stays in the text.
+      </li>
+    </ul>
+    The word that Legge’s mark follows must end a treebank word; a mark inside a word would stop the build.
+  </dd>
+</dl>
+
+<h2>Dictionaries</h2>
+<dl>
+  <dt>Unicode Unihan database {UNICODE_VERSION}</dt>
+  <dd>
+    <a href="https://www.unicode.org/charts/unihan.html">Unihan</a>’s <code>kDefinition</code>, <code>kMandarin</code>
+    and <code>kCantonese</code> give the one-line definition and the pinyin and Jyutping of a character, and its variant
+    relations check the spelling pairs above. © Unicode, Inc., used under
+    the <a href="https://www.unicode.org/copyright.html">Unicode Terms of Use</a>.
+  </dd>
+  <dt>Wiktionary</dt>
+  <dd>
+    The entries of the English Wiktionary for Chinese, as extracted
+    by <a href="https://github.com/tatuylonen/wiktextract">Wiktextract</a> and published
+    at <a href="https://kaikki.org/dictionary/Chinese/">kaikki.org</a>,
+    licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> and the GNU Free Documentation License;
+    © Wiktionary contributors. The reader takes each lemma’s definitions (literary senses first), its pinyin, its Middle
+    Chinese (in Baxter’s transcription) and its Old Chinese reconstructions. The dump is regenerated about weekly
+    and is not versioned: the build pins the snapshot with SHA-256 <code>{KAIKKI[1]}</code> (retrieved
+    from <code>{KAIKKI[0]}</code>) and the fetch stops when kaikki.org publishes another, which then has to be checked.
+  </dd>
+  <dt>The treebank’s glosses</dt>
+  <dd>
+    Each lemma’s page lists the glosses the treebank gives it, for each word class, with the number of occurrences.
+    The lexicon’s short gloss is the lemma’s pinyin and its most frequent gloss for the word class.
+  </dd>
+</dl>
+
+<style>
+  code {
+    overflow-wrap: anywhere;
+  }
+</style>

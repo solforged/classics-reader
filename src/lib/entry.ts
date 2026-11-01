@@ -94,7 +94,9 @@ function articleHtml(dict: Dictionary, article: Article, morph?: string): string
     }
     return `<section class="entry-section">${source}</section>`;
   }).join("");
-  return `<article class="dict-article"><b class="entry-headword" data-entry-ui>${esc(article.head)}</b>${blocks}</article>`;
+  // A right-to-left language's headword carries its code, which sets its direction and font (Base.astro, global.css).
+  const attrs = lang.dir ? ` lang="${lang.code}"` : "";
+  return `<article class="dict-article"><b class="entry-headword"${attrs} data-entry-ui>${esc(article.head)}</b>${blocks}</article>`;
 }
 
 /** First gloss of an "article" entry, for a compound's component. */

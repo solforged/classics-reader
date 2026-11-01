@@ -17,7 +17,19 @@
     "preview:gita": "READER=gita astro preview",
     "dev:aeneid": "READER=aeneid astro dev",
     "build:aeneid": "READER=aeneid astro build",
-    "preview:aeneid": "READER=aeneid astro preview"
+    "preview:aeneid": "READER=aeneid astro preview",
+    "dev:homer": "READER=homer astro dev",
+    "build:homer": "READER=homer astro build",
+    "preview:homer": "READER=homer astro preview",
+    "dev:oldenglish": "READER=oldenglish astro dev",
+    "build:oldenglish": "READER=oldenglish astro build",
+    "preview:oldenglish": "READER=oldenglish astro preview",
+    "dev:analects": "READER=analects astro dev",
+    "build:analects": "READER=analects astro build",
+    "preview:analects": "READER=analects astro preview",
+    "dev:genesis": "READER=genesis astro dev",
+    "build:genesis": "READER=genesis astro build",
+    "preview:genesis": "READER=genesis astro preview"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4",

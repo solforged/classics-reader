@@ -1,6 +1,7 @@
 # Navigation plan
 
-This plan turns the three separate readers (Edda, Gītā, Aeneid) into one site with five levels of
+This plan turns the separate readers (Edda, Gītā, Aeneid, and since 2026-11-01 Old English, Homer, Genesis and
+the Analects) into one site with five levels of
 navigation: library › reader › collection › work › line. It follows the wireframes agreed on
 2026-10-31. The phases are ordered so that each one ships on its own and leaves every reader working.
 
@@ -22,8 +23,8 @@ flowchart LR
 | Decision | State | Notes |
 |---|---|---|
 | Name of the whole site | Working name | "Classics Reader" (`classics-reader`) on the library page and as the first breadcrumb until a final name is chosen. Keep it in one place (the library layout) so a rename touches one file. |
-| Domain | Settled | `classics-reader.solforged.io`, set as `site` in `astro.config.mjs`. Readers live under `/edda/`, `/gita/`, `/aeneid/`. The host is chosen when Phase 4 is first deployed. |
-| Licence wording | Deferred | The Aeneid's LASLA data is CC BY-NC-SA. Each reader's sources page already states its licences; site-wide wording waits until the site is published. |
+| Domain | Settled | `classics-reader.solforged.io`, set as `site` in `astro.config.mjs`. Readers live under `/edda/`, `/gita/`, `/aeneid/`, `/oldenglish/`, `/homer/`, `/genesis/`, `/analects/`. The host is chosen when Phase 4 is first deployed. |
+| Licence wording | Deferred | The Aeneid's LASLA data and the Old English Reader's ISWOC data are CC BY-NC-SA. Each reader's sources page already states its licences; site-wide wording waits until the site is published. |
 
 ## Phase 1: Citations and breadcrumbs
 
@@ -135,8 +136,9 @@ fields.
    concern, as now), each reader's `astro build` with `BASE=/<id>/`, then the library build.
    `preview:site` serves `dist/site`.
 
-Acceptance: `bun run build:site && bun run preview:site` serves the library at `/` and the three readers at
-`/edda/`, `/gita/`, `/aeneid/`; `Aen. 1.157` typed in the Edda reader opens the Aeneid at
+Acceptance: `bun run build:site && bun run preview:site` serves the library at `/` and the seven readers at
+`/edda/`, `/gita/`, `/aeneid/`, `/oldenglish/`, `/homer/`, `/genesis/`, `/analects/`; `Aen. 1.157` typed in
+the Edda reader opens the Aeneid at
 line 157; each reader's own bundle still contains only its own language pack (check `dist/site/<id>/_astro`).
 
 ## Phase 5: Names, grammar and lemma pages
@@ -183,7 +185,7 @@ opens its definition.
 
 ## Verification for every phase
 
-- `bun run typecheck`; data and site builds for all three readers.
+- `bun run typecheck`; data and site builds for every reader.
 - Equivalence against the previous commit (skill `eddas-reader-refactor-equivalence`). Every
   change in generated data or pages must be one the phase intends.
 - Headless browser check of the phase's acceptance items at desktop and phone widths, with no

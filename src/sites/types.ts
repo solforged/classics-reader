@@ -8,6 +8,8 @@ export interface CitationLevel {
   name: string;
   /** List this level's divisions above the text and number their headings, e.g. the chapters of a prose work. */
   list?: boolean;
+  /** A listed level's outline entry shows the division's opening words when it has no heading text (chapters without titles). */
+  opening?: boolean;
 }
 
 /** One column of the reader: a source text in the site's language or a translation. */
