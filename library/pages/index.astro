@@ -1,0 +1,191 @@
+---
+// The library: every reader by language, a go-to box that takes a citation of any work, and the latest place read.
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import Library from "../layouts/Library.astro";
+import type { CitationIndex } from "../../src/lib/cite";
+import { LIBRARY_NAME } from "../../src/lib/library";
+
+const index = JSON.parse(
+  readFileSync(join(process.cwd(), "generated", "library", "public", "citations.json"), "utf8"),
+) as CitationIndex;
+const base = import.meta.env.BASE_URL;
+const languages = [...new Set(index.readers.map((r) => r.language))];
+const worksOf = (reader: string) => index.works.filter((w) => w.reader === reader);
+const extent = (reader: string) => {
+  const works = worksOf(reader);
+  return works.length === 1 ? works[0]!.title : `${works.length} works`;
+};
+const examples = ["Vsp 45", "Aen. 1.157", "Gen 3:1"];
+---
+
+<Library title={`${LIBRARY_NAME}: classical texts with word-by-word grammar`}
+  description={`Parallel-text readers in ${new Intl.ListFormat("en").format(languages)}, each with English translation, ` +
+    "grammar and dictionary entries for every word, a lexicon and full-text search."}>
+  <main class="page wide">
+    <header class="hero">
+      <p class="eyebrow">{languages.length} languages · {index.works.length} works</p>
+      <h1>{LIBRARY_NAME}</h1>
+      <p class="lede">
+        Classical texts beside public-domain English translations. Click any word in the original for its lemma,
+        grammar and dictionary entries; each reader has its own lexicon and search.
+      </p>
+    </header>
+
+    <div class="cards">
+      <form id="goto" class="card goto">
+        <label class="card-title" for="goto-input">Go to</label>
+        <input id="goto-input" type="search" autocomplete="off" spellcheck="false"
+          placeholder={`e.g. ${examples.join(", ")}`} title="A citation of any work, e.g. Vsp 45, Aen. 1.157, Gen 3:1" />
+      </form>
+      <a class="card resume" id="resume" href="#" hidden>
+        <span class="card-title">Continue reading</span>
+        <span class="eyebrow-muted" id="resume-where"></span>
+        <span class="chev">›</span>
+      </a>
+    </div>
+
+    <section class="shelves">
+      {
+        languages.map((language) => (
+          <section class="shelf">
+            <p class="eyebrow section-label">{language}</p>
+            {index.readers.filter((r) => r.language === language).map((r) => (
+              <a class="card reader" href={`${base}${r.id}/`}>
+                <h3>{r.name}</h3>
+                <p class="on">{r.eyebrow}</p>
+                <p>{extent(r.id)}</p>
+              </a>
+            ))}
+          </section>
+        ))
+      }
+    </section>
+
+    <footer class="site-foot">
+      Each reader names its texts, translations and dictionaries, with their licences, on its sources page:
+      {index.readers.map((r, i) => (
+        <>{i ? ", " : " "}<a href={`${base}${r.id}/sources/`}>{r.shortName}</a></>
+      ))}.
+    </footer>
+  </main>
+  <script type="application/json" id="citations" set:html={JSON.stringify(index)} />
+</Library>
+
+<script>
+  import { formatCite, resolveCite, type CitationIndex } from "../../src/lib/cite";
+
+  const BASE = import.meta.env.BASE_URL;
+  const index = JSON.parse(document.getElementById("citations")!.textContent!) as CitationIndex;
+
+  document.getElementById("goto")!.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("goto-input") as HTMLInputElement;
+    const typed = input.value.trim();
+    if (!typed) return;
+    const found = resolveCite(typed, index.works);
+    if (found) {
+      location.href = `${BASE}${found.work.reader}/${found.work.slug}/${found.cite ? `#${found.cite}` : ""}`;
+      return;
+    }
+    input.setCustomValidity(`No work is cited as ${typed}`);
+    input.reportValidity();
+    setTimeout(() => input.setCustomValidity(""), 1500);
+  });
+
+  // The latest position stored by any reader (src/scripts/reader.ts writes <reader>-last with its time).
+  let latest: { reader: string; slug: string; row?: string; at: number } | undefined;
+  for (const reader of index.readers) {
+    try {
+      const last = JSON.parse(localStorage.getItem(`${reader.id}-last`) ?? "null") as
+        { slug: string; row?: string; at?: number } | null;
+      if (last && (!latest || (last.at ?? 0) > latest.at)) latest = { reader: reader.id, slug: last.slug, row: last.row, at: last.at ?? 0 };
+    } catch {
+      // A malformed entry is the reader's to replace.
+    }
+  }
+  const work = latest && index.works.find((w) => w.reader === latest.reader && w.slug === latest.slug);
+  const card = document.getElementById("resume") as HTMLAnchorElement;
+  if (latest && work) {
+    const reader = index.readers.find((r) => r.id === latest.reader)!;
+    const row = latest.row;
+    const where = row && /^\d/.test(row) ? formatCite(work, row) : work.title;
+    card.href = `${BASE}${reader.id}/${work.slug}/${row ? `#${row}` : ""}`;
+    card.querySelector("#resume-where")!.textContent = `${reader.shortName} · ${where}`;
+    card.hidden = false;
+  }
+</script>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 2.5rem 0 1.5rem;
+  }
+  .hero h1 {
+    font-weight: 400;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    margin: 0.4rem 0 0.8rem;
+    letter-spacing: 0.01em;
+  }
+  .lede {
+    max-width: 34rem;
+    margin: 0 auto;
+    color: var(--muted);
+  }
+  .cards {
+    max-width: 34rem;
+    margin: 1.5rem auto 3rem;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .cards .card {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+  }
+  .cards .card[hidden] {
+    display: none;
+  }
+  .goto {
+    align-items: center !important;
+  }
+  .goto input {
+    flex: 1;
+    min-width: 0;
+    font-size: 1rem;
+  }
+  .card-title {
+    font-size: 1.2rem;
+    color: var(--accent);
+  }
+  .eyebrow-muted {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .chev {
+    margin-left: auto;
+    color: var(--muted);
+  }
+  .shelves {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1.5rem 1.25rem;
+  }
+  .section-label {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    color: var(--muted);
+  }
+  .reader h3 {
+    color: var(--accent);
+  }
+  .site-foot {
+    margin-top: 4rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>

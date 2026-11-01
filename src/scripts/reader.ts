@@ -1,6 +1,6 @@
 // Reader page behaviour: column view, word panel, translator's notes, go-to, citation links, reading position.
 import { lang, shardOf } from "../lang";
-import { formatCite, resolveCite, type CiteWork } from "../lib/cite";
+import { formatCite, resolveCite, type CitationIndex, type CiteWork } from "../lib/cite";
 import type { DictHit } from "../lib/dict";
 import { dictionaryHtml } from "../lib/entry";
 import { expandMorph, formatMorph, parseMorph } from "../lib/morph";
@@ -20,6 +20,8 @@ const rowIds = new Set(json<string[]>("row-ids"));
 const works = json<CiteWork[]>("works");
 const site = json<{ sourceNotes: Record<string, string>; noteCredit: string }>("site");
 const READER = import.meta.env.PUBLIC_READER;
+// The library root on the combined site ("/"), where citations.json lists every reader's works; "" when standalone.
+const LIBRARY: string = import.meta.env.PUBLIC_LIBRARY ?? "";
 const text = document.querySelector<HTMLElement>(".text")!;
 const slug = text.dataset.slug!;
 const work = works.find((w) => w.slug === slug)!;
@@ -96,20 +98,36 @@ function goLocal(want: string): boolean {
   return true;
 }
 
-// The go-to box takes a place in this work ("12", "1 23", "1:23") or a citation of any work ("Háv 77"); other words
-// open search.
-document.getElementById("goto")?.addEventListener("submit", (e) => {
+/** Every reader's works, from the combined site's citation index; empty when the reader stands alone. */
+let libraryWorks: Promise<CitationIndex["works"]> | undefined;
+const loadLibraryWorks = (): Promise<CitationIndex["works"]> =>
+  (libraryWorks ??= LIBRARY
+    ? fetch(`${LIBRARY}citations.json`)
+      .then((r) => (r.ok ? (r.json() as Promise<CitationIndex>) : undefined))
+      .then((index) => index?.works ?? [], () => [])
+    : Promise.resolve([]));
+
+// The go-to box takes a place in this work ("12", "1 23", "1:23") or a citation of any work ("Háv 77"), in this
+// reader first and then, on the combined site, in the others ("Aen. 1.157" from the Edda); other words open search.
+document.getElementById("goto")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const input = document.getElementById("goto-input") as HTMLInputElement;
   const typed = input.value.trim();
   if (!typed) return;
   if (goLocal(typed.replace(/\s*[\s,:]\s*/g, "."))) return;
   const found = resolveCite(typed, works);
-  if (found && found.slug !== slug) {
-    location.href = `${BASE}${found.slug}/${found.cite ? `#${found.cite}` : ""}`;
+  if (found && found.work.slug !== slug) {
+    location.href = `${BASE}${found.work.slug}/${found.cite ? `#${found.cite}` : ""}`;
     return;
   }
   if (found && (!found.cite || goLocal(found.cite))) return;
+  if (!found) {
+    const elsewhere = resolveCite(typed, (await loadLibraryWorks()).filter((w) => w.reader !== READER));
+    if (elsewhere) {
+      location.href = `${LIBRARY}${elsewhere.work.reader}/${elsewhere.work.slug}/${elsewhere.cite ? `#${elsewhere.cite}` : ""}`;
+      return;
+    }
+  }
   if (!found && /\p{L}{2,}/u.test(typed)) {
     location.href = `${BASE}search/?q=${encodeURIComponent(typed)}`;
     return;
@@ -204,13 +222,13 @@ addEventListener("scroll", () => {
 }, { passive: true });
 showProgress();
 
-// Remember the reading position for "Continue reading".
+// Remember the reading position for "Continue reading", with its time, so the library can show the latest reader's.
 const seen = new IntersectionObserver(
   (entries) => {
     const top = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
     if (!top) return;
     const row = (top.target as HTMLElement).id;
-    localStorage.setItem(`${READER}-last`, JSON.stringify({ slug, row }));
+    localStorage.setItem(`${READER}-last`, JSON.stringify({ slug, row, at: Date.now() }));
     showPosition(row);
   },
   { rootMargin: "-20% 0px -70% 0px" },

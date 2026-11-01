@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { formatCite, resolveCite, type CiteWork } from "./cite";
+import { formatCite, resolveCite as resolveWork, type CiteWork } from "./cite";
 
 const stanza = [{ name: "Stanza" }];
 const works: CiteWork[] = [
@@ -11,8 +11,14 @@ const works: CiteWork[] = [
   { slug: "bhagavad-gita-1", abbr: "BhG 1", levels: [{ name: "Verse" }] },
   { slug: "bhagavad-gita-12", abbr: "BhG 12", levels: [{ name: "Verse" }] },
   { slug: "aeneid-1", abbr: "Aen. 1", levels: [{ name: "Book" }, { name: "Line" }] },
+  { slug: "oddrunargratr", abbr: "Od", levels: stanza },
+  { slug: "odyssey-1", abbr: "Od. 1", levels: [{ name: "Book" }, { name: "Line" }] },
 ];
 const work = (slug: string) => works.find((w) => w.slug === slug)!;
+const resolveCite = (input: string, list: readonly CiteWork[]) => {
+  const found = resolveWork(input, list);
+  return found && { slug: found.work.slug, cite: found.cite };
+};
 
 describe("formatCite", () => {
   test("joins a plain abbreviation and a row with a space", () => {
@@ -46,6 +52,12 @@ describe("resolveCite", () => {
   });
   test("keeps a full citation that repeats the abbreviation's division", () => {
     expect(resolveCite("Aen. 1 1.157", works)).toEqual({ slug: "aeneid-1", cite: "1.157" });
+  });
+  test("passes over a work whose levels cannot hold the citation", () => {
+    expect(resolveCite("Od 5", works)).toEqual({ slug: "oddrunargratr", cite: "5" });
+    expect(resolveCite("Od 1.33", works)).toEqual({ slug: "odyssey-1", cite: "1.33" });
+    expect(resolveCite("Od 1", works)).toEqual({ slug: "odyssey-1", cite: "" });
+    expect(resolveCite("Vsp 4.5", works)).toBeUndefined();
   });
   test("names the whole work when no row follows", () => {
     expect(resolveCite("Gylf", works)).toEqual({ slug: "gylfaginning", cite: "" });

@@ -235,8 +235,11 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
   .topbar > nav { gap: 0.7rem; }
   .topbar > nav .wide-only { display: none; }
   .topbar .crumbs .here { max-width: 9rem; }
-  /* Keep only the home link and the last crumb (with its separator) on phones. */
+  /* Keep only the home link and the last crumb (with its separator) on phones. On the combined site the reader's
+     crumb is the home link; below the reader's home page the library's link and its separator give way to it. */
   .topbar .crumbs > :not(.home-link):not(:nth-last-child(-n + 2)) { display: none; }
+  .topbar .crumbs > .library-link:has(+ .sep + .home-link + .sep),
+  .topbar .crumbs > .library-link + .sep:has(+ .home-link + .sep) { display: none; }
 }
 
 .toast {

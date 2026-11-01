@@ -2,6 +2,7 @@
 import { lang } from "../lang";
 import { site } from "../sites";
 import "../styles/global.css";
+import { library, LIBRARY_NAME } from "../lib/library";
 
 /** A breadcrumb; `siblings` (the other items at its level, the crumb's own marked current) open as a menu. */
 export interface Crumb {
@@ -39,6 +40,14 @@ const hideUnconverted = `html[data-script]:not([data-script=""]) [lang="${lang.c
 const direction = lang.dir
   ? `[lang="${lang.code}"] { direction: ${lang.dir}; unicode-bidi: isolate; } h1[lang="${lang.code}"] { text-align: left; }`
   : "";
+// On the combined site the library comes first and the reader's own crumb lists the other readers.
+const trail: Crumb[] = library
+  ? [{
+    href: base,
+    label: site.shortName,
+    siblings: library.index.readers.map((r) => ({ href: `${library.root}${r.id}/`, label: r.shortName, current: r.id === site.id })),
+  }, ...crumbs]
+  : crumbs;
 ---
 
 <!doctype html>
@@ -76,12 +85,13 @@ const direction = lang.dir
   <body class={bodyClass}>
     <header class="topbar">
       <div class="crumbs">
-        <a class="home-link" href={base}>{site.shortName}</a>
+        <a class={library ? "home-link library-link" : "home-link"} href={library ? library.root : base}>{library ? LIBRARY_NAME : site.shortName}</a>
         {
-          crumbs.map((c, i) => (
+          trail.map((c, i) => (
             <>
               <span class="sep">›</span>
-              <span class="crumb">
+              {/* On phones the reader's crumb, not the library's, stands first (global.css). */}
+              <span class={library && i === 0 ? "crumb home-link" : "crumb"}>
                 {c.href ? <a href={c.href}>{c.label}</a> : <span class="here">{c.label}</span>}
                 {
                   c.siblings && c.siblings.length > 1 && (

@@ -1,0 +1,49 @@
+---
+// The library's layout: the readers' top bar and theme without a language pack (src/layouts/Base.astro).
+import { LIBRARY_NAME } from "../../src/lib/library";
+import "../../src/styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <script is:inline>
+      (function () {
+        var t = localStorage.getItem("theme");
+        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body class="home">
+    <header class="topbar">
+      <div class="crumbs">
+        <a class="home-link" href={base}>{LIBRARY_NAME}</a>
+      </div>
+      <nav>
+        <button class="icon-btn theme-toggle" type="button" aria-label="Toggle night mode" title="Toggle night mode">◐</button>
+      </nav>
+    </header>
+    <slot />
+    <script>
+      document.querySelector(".theme-toggle")?.addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem("theme", next);
+      });
+    </script>
+  </body>
+</html>

@@ -14,12 +14,18 @@ public-domain English translation, one aligned stanza, verse, chapter or paragra
 
 ## Navigation
 
-- **Breadcrumbs.** Reader › collection › work. Each crumb's ▾ lists the other items at its level.
-  The collection level appears only in a reader with several collections: the Edda has pages
+- **Library.** The combined site (`bun run build:site`) serves every reader from one server: the
+  library page at `/` lists the readers by language, takes a citation of any work in its go-to box,
+  and offers to continue at the latest place read in any reader. Each reader lives at `/<id>/`.
+- **Breadcrumbs.** Library › reader › collection › work. Each crumb's ▾ lists the other items at its
+  level; the reader's crumb lists the other readers. The library crumb appears only on the combined
+  site. The collection level appears only in a reader with several collections: the Edda has pages
   for the Poetic Edda (`/poetic-edda/`) and the Prose Edda (`/prose-edda/`).
 - **Go-to.** The box in a work's toolbar takes a place in the open work (`45`, `1 23`, `1:23`) or a
   citation of any work in the reader (`Háv 77`, `BhG 2.47`, `Aen. 1.157`; accents and case are
-  optional). Anything else with words opens search.
+  optional). On the combined site it also reaches the other readers (`Gen 3:1` from the Edda): the
+  reader's own works come first, so `Od 5` in the Edda is Oddrúnargrátr, while `Od 1.33`, which a
+  stanza number cannot hold, is the Odyssey. Anything else with words opens search.
 - **Outline.** The rail beside the text (or the Outline sheet on narrower screens) lists a prose
   work's chapters with their headings, or an epic's paragraphs by first line and opening words, and
   then the other works of the collection. It marks where the reader is.
@@ -203,16 +209,21 @@ READER=homer bun run fetch       # AGDT, Perseus Greek and English, Autenrieth, 
 READER=genesis bun run fetch     # OSHB, Open Scriptures lexicon, JPS 1917
 READER=analects bun run fetch    # Kyoto treebank, Legge, Unihan, Wiktionary
 # then READER=<id> bun run data and bun run build:<id> for each
+
+bun run build:site     # every reader's data and site, and the library → dist/site/
+bun run build:site -- --no-data   # the same without the data builds
+bun run preview:site   # serve dist/site/ (library at /, readers at /<id>/)
 ```
 
 `READER` picks the reader for every step and defaults to `edda`; `bun run all` runs the steps for
-the reader `READER` names.
+the reader `READER` names. `build:site` needs every reader's sources fetched first.
 `bun test` runs the unit tests (`src/lib/cite.test.ts`: citation formatting and parsing).
 
 ## Layout
 
 ```text
 src/                 shared pages, word panel, search, lexicon, script toggle
+library/             the combined site's library page (astro.library.mjs)
 packs/<lang>/        a language: runtime pack (index.ts) and build helpers (build/)
 corpora/<id>/        a reader site: site.ts, Sources.astro, fetch.ts, build.ts, alignment data
 scripts/core/        what every build shares: outputs, data types, analysis table, HTML helpers
@@ -222,6 +233,13 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   `astro.config.mjs` aliases `@reader/site`, `@reader/pack` and `@reader/sources` to its files,
   so each browser bundle ships only its own pack. `scripts/run.ts` runs a reader's `fetch.ts`
   or `build.ts`.
+- The combined site: `scripts/site.ts` (`build:site`) writes the citation index with
+  `scripts/library.ts` (`generated/library/public/citations.json`: every reader's works and
+  abbreviations; it fails if two readers share an abbreviation), builds the library page with
+  `astro.library.mjs` into `dist/site/`, then each reader with `BASE=/<id>/` into `dist/site/<id>/`.
+  `BASE` sets Astro's `base` and tells the reader where the library is (`src/lib/library.ts`): its
+  breadcrumb starts at the library, and its go-to box fetches `citations.json` for citations it
+  cannot resolve itself. Standalone builds are unchanged.
 - `src/sites/types.ts` is the site contract. A site lists its columns as `sides`, each a source
   text (words with analyses, in the pack's language) or a translation; rows store their units per
   side id, and the reader's column toggle, the search filter and `search.json` follow the list.

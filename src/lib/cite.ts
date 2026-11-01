@@ -20,28 +20,53 @@ export function formatCite(work: CiteWork, cite: string): string {
 }
 
 /** Lowercase, without accents, with dots, commas, colons and spaces as single spaces: "Aen. 1.157" → "aen 1 157". */
-function key(text: string): string {
+export function citeKey(text: string): string {
   return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[\s.,:]+/g, " ").trim();
 }
 
 /**
  * The work and row or line a typed citation names, or undefined when it names no work. The longest abbreviation
- * that the input starts with wins, so "HHv 3" is not read as "HH" and "BhG 12" not as "BhG 1". The returned
- * citation is "" when the input names only the work.
+ * that the input starts with wins, so "HHv 3" is not read as "HH" and "BhG 12" not as "BhG 1". A work is passed
+ * over when the citation has more values than the work has levels: across readers, "Od 1.1" is the Odyssey
+ * ("Od. 1"), not Oddrúnargrátr ("Od"), whose stanzas have one number. The returned citation is "" when the input
+ * names only the work.
  */
-export function resolveCite(input: string, works: readonly CiteWork[]): { slug: string; cite: string } | undefined {
-  const typed = key(input);
-  let best: { work: CiteWork; length: number } | undefined;
+export function resolveCite<W extends CiteWork>(input: string, works: readonly W[]): { work: W; cite: string } | undefined {
+  const typed = citeKey(input);
+  let best: { work: W; cite: string; length: number } | undefined;
   for (const work of works) {
-    const abbr = key(work.abbr);
+    const abbr = citeKey(work.abbr);
     if (!abbr || (typed !== abbr && !typed.startsWith(`${abbr} `))) continue;
-    if (!best || abbr.length > best.length) best = { work, length: abbr.length };
+    if (best && abbr.length <= best.length) continue;
+    const rest = typed.slice(abbr.length).split(" ").filter(Boolean);
+    const number = abbrNumber(work.abbr);
+    // "Aen. 1.157" cites book 1, line 157: the abbreviation supplies the outer level the input left out.
+    const parts = number !== undefined && rest.length > 0 && rest.length < work.levels.length ? [number, ...rest] : rest;
+    if (parts.length > work.levels.length) continue;
+    best = { work, cite: parts.join("."), length: abbr.length };
   }
-  if (!best) return undefined;
-  const { work, length } = best;
-  const rest = typed.slice(length).split(" ").filter(Boolean);
-  const number = abbrNumber(work.abbr);
-  // "Aen. 1.157" cites book 1, line 157: the abbreviation supplies the outer level the input left out.
-  const parts = number !== undefined && rest.length > 0 && rest.length < work.levels.length ? [number, ...rest] : rest;
-  return { slug: work.slug, cite: parts.join(".") };
+  return best && { work: best.work, cite: best.cite };
+}
+
+/** A work in the library's citation index: the works of every reader on the combined site. */
+export interface LibraryWork extends CiteWork {
+  /** Reader id, the reader's directory under the library root. */
+  reader: string;
+  title: string;
+}
+
+/** A reader in the citation index. */
+export interface LibraryReader {
+  id: string;
+  name: string;
+  shortName: string;
+  /** English name of the reader's language, e.g. "Old Norse". */
+  language: string;
+  eyebrow: string;
+}
+
+/** The combined site's citation index (scripts/library.ts), published as citations.json at the library root. */
+export interface CitationIndex {
+  readers: LibraryReader[];
+  works: LibraryWork[];
 }

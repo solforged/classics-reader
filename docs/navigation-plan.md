@@ -113,6 +113,13 @@ fields.
 
 ## Phase 4: Combined site and library
 
+Status: done (2026-11-01). Departures from the plan: an abbreviation may begin another reader's
+(the Edda's `Od` and the Odyssey's `Od. 1`); `resolveCite` passes over a work whose citation levels
+cannot hold the typed citation, so `Od 1.33` is the Odyssey everywhere and `Od 5` is Oddrúnargrátr,
+and `scripts/library.ts` fails only on identical abbreviations. The reader's crumb, not the library
+crumb, carries the menu of readers, and on phones it replaces the library crumb below a reader's home
+page. The library page has a go-to box but no search across readers.
+
 1. **Base paths.** `astro.config.mjs` reads `BASE` (default `/`) and sets `base` and
    `outDir: dist/site/<reader>` when it is set. All links already go through `BASE_URL` (no
    hard-coded root paths in `src/`), so no page changes are expected. Per-reader `dev` and

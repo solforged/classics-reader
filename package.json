@@ -11,6 +11,8 @@
     "fetch": "bun scripts/run.ts fetch",
     "data": "bun scripts/run.ts build",
     "all": "bun scripts/run.ts fetch && bun scripts/run.ts build && astro build",
+    "build:site": "bun scripts/site.ts",
+    "preview:site": "astro preview --config astro.library.mjs",
     "align": "bun corpora/edda/check-alignment.ts",
     "dev:gita": "READER=gita astro dev",
     "build:gita": "READER=gita astro build",
