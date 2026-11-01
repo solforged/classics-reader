@@ -53,7 +53,7 @@ const workTitles = Object.fromEntries(WORKS.map((w) => [w.slug, w.title]));
     </section>
 
     <footer class="site-foot">
-      <Fragment set:html={site.credits} />
+      <Fragment set:html={site.credits} />{" "}
       <a href={`${base}sources/`}>Sources &amp; licences</a>.
     </footer>
   </main>

@@ -12,9 +12,9 @@ const readings = Object.entries(READINGS).map(([key, lasla]) => {
 <dl>
   <dt>J. B. Greenough (ed.), <i>The Bucolics, Aeneid, and Georgics of Virgil</i> (Boston: Ginn, 1881)</dt>
   <dd>
-    Public domain. The text, line numbers and paragraphs come from the Perseus Digital Library’s
-    <a href="https://github.com/PerseusDL/canonical-latinLit">canonical-latinLit</a> edition
-    <code>phi0690.phi003.perseus-lat2</code>, pinned to commit <code>{PERSEUS_COMMIT}</code>. Perseus’s encoding
+    Public domain. The text, line numbers and paragraphs come from the Perseus Digital
+    Library’s <a href="https://github.com/PerseusDL/canonical-latinLit">canonical-latinLit</a>
+    edition <code>phi0690.phi003.perseus-lat2</code>, pinned to commit <code>{PERSEUS_COMMIT}</code>. Perseus’s encoding
     is licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; this reader uses only
     Greenough’s words, punctuation, line numbers and paragraph divisions. Lines 426 and 711, which Greenough
     brackets as spurious, are shown in square brackets. Greenough’s speech marks are not printed.
@@ -22,8 +22,8 @@ const readings = Object.entries(READINGS).map(([key, lasla]) => {
   <dt>LASLA, Université de Liège: lemmatized and tagged Aeneid</dt>
   <dd>
     Every word’s lemma and morphology come from the LASLA corpus as converted to CoNLL-U by CIRCSE
-    (<a href="https://github.com/CIRCSE/LASLA">CIRCSE/LASLA</a>, release v1.0.1, commit
-    <code>{LASLA_COMMIT}</code>; <a href="https://doi.org/10.5281/zenodo.8370759">Zenodo</a>). LASLA’s data is
+    (<a href="https://github.com/CIRCSE/LASLA">CIRCSE/LASLA</a>, release v1.0.1,
+    commit <code>{LASLA_COMMIT}</code>; <a href="https://doi.org/10.5281/zenodo.8370759">Zenodo</a>). LASLA’s data is
     licensed <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>, so this reader’s Latin
     annotation, and the word data built from it, may be reused only for non-commercial purposes, with attribution and
     under the same licence.
@@ -34,8 +34,8 @@ const readings = Object.entries(READINGS).map(([key, lasla]) => {
     changes: nouns take their gender from the dictionary, because LASLA files first-declension masculines
     (<i>Aeneas</i>, <i>agricola</i>) as feminine; and verbs whose lemma ends in <i>-or</i> are labelled deponent
     rather than passive. LASLA’s lemmas are lowercase and spell consonantal u and i as <i>u</i> and <i>i</i>; the
-    reader shows the matching form of Frieze’s headword instead (<i>uir</i> as <i>vir</i>, <i>cano</i> as
-    <i>canō</i>).
+    reader shows the matching form of Frieze’s headword instead (<i>uir</i> as <i>vir</i>, <i>cano</i>
+    as <i>canō</i>).
   </dd>
   <dt>Aligning Greenough’s text with LASLA’s</dt>
   <dd>
