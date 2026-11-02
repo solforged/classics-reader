@@ -1,0 +1,734 @@
+# generator = UDPipe 2, https://lindat.mff.cuni.cz/services/udpipe
+# udpipe_model = italian-isdt-ud-2.17-251125
+# udpipe_model_licence = CC BY-NC-SA
+# unit = 24
+# par = 0
+# sent_id = 24-0-1
+# text = Perchè i Principi d'Italia abbino perduto i loro Stati.
+1	Perchè	perché	ADV	CS	_	7	mark	_	_
+2	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	3	det	_	_
+3	Principi	principe	NOUN	S	Gender=Masc|Number=Plur	7	nsubj	_	_
+4	d'	di	ADP	E	_	5	case	_	SpaceAfter=No
+5	Italia	Italia	PROPN	SP	_	3	nmod	_	_
+6	abbino	avere	AUX	VA	Mood=Sub|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	7	aux	_	_
+7	perduto	perdere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	0	root	_	_
+8	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	10	det	_	_
+9	loro	loro	DET	AP	Poss=Yes|PronType=Prs	10	det:poss	_	_
+10	Stati	stato	NOUN	S	Gender=Masc|Number=Plur	7	obj	_	SpaceAfter=No
+11	.	.	PUNCT	FS	_	7	punct	_	SpacesAfter=\n\n
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-1
+# text = Le cose sopradette osservate prudentemente fanno parere un Principe nuovo antico;
+1	Le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	2	det	_	_
+2	cose	cosa	NOUN	S	Gender=Fem|Number=Plur	6	nsubj	_	_
+3	sopradette	sopradetto	ADJ	A	Gender=Fem|Number=Plur	2	amod	_	_
+4	osservate	osservare	VERB	V	Gender=Fem|Number=Plur|Tense=Past|VerbForm=Part	2	acl	_	_
+5	prudentemente	prudentemente	ADV	B	_	4	advmod	_	_
+6	fanno	fare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+7	parere	parere	VERB	S	VerbForm=Inf	6	obj	_	_
+8	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	9	det	_	_
+9	Principe	principe	NOUN	S	Gender=Masc|Number=Sing	6	obj	_	_
+10	nuovo	nuovo	ADJ	A	Gender=Masc|Number=Sing	9	amod	_	_
+11	antico	antico	ADJ	A	Gender=Masc|Number=Sing	9	amod	_	SpaceAfter=No
+12	;	;	PUNCT	FC	_	6	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-2
+# text = e lo rendono subito più sicuro e più fermo nello Stato, che se vi fosse anticato dentro.
+1	e	e	CCONJ	CC	_	3	cc	_	_
+2	lo	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	3	obj	_	_
+3	rendono	rendere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+4	subito	subito	ADV	B	_	3	advmod	_	_
+5	più	più	ADV	B	_	6	advmod	_	_
+6	sicuro	sicuro	ADJ	A	Gender=Masc|Number=Sing	3	xcomp	_	_
+7	e	e	CCONJ	CC	_	9	cc	_	_
+8	più	più	ADV	B	_	9	advmod	_	_
+9	fermo	fermo	ADJ	A	Gender=Masc|Number=Sing	6	conj	_	_
+10-11	nello	_	_	_	_	_	_	_	_
+10	in	in	ADP	E	_	12	case	_	_
+11	lo	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	12	det	_	_
+12	Stato	stato	NOUN	SP	Gender=Masc|Number=Sing	9	obl	_	SpaceAfter=No
+13	,	,	PUNCT	FF	_	3	punct	_	_
+14	che	che	SCONJ	CS	_	18	mark	_	_
+15	se	se	SCONJ	CS	_	18	mark	_	_
+16	vi	vi	PRON	PC	Clitic=Yes|PronType=Prs	18	expl	_	_
+17	fosse	essere	AUX	VA	Mood=Sub|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	18	aux	_	_
+18	anticato	anticare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	3	advcl	_	_
+19	dentro	dentro	ADV	B	_	18	advmod	_	SpaceAfter=No
+20	.	.	PUNCT	FS	_	3	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-3
+# text = Perchè un Principe nuovo è molto più osservato nelle sue azioni, che uno ereditario;
+1	Perchè	perché	SCONJ	CS	_	8	mark	_	_
+2	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	3	det	_	_
+3	Principe	principe	NOUN	S	Gender=Masc|Number=Sing	8	nsubj	_	_
+4	nuovo	nuovo	ADJ	A	Gender=Masc|Number=Sing	3	amod	_	_
+5	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	8	cop	_	_
+6	molto	molto	ADV	B	_	7	advmod	_	_
+7	più	più	ADV	B	_	8	advmod	_	_
+8	osservato	osservare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	0	root	_	_
+9-10	nelle	_	_	_	_	_	_	_	_
+9	in	in	ADP	E	_	12	case	_	_
+10	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	12	det	_	_
+11	sue	suo	DET	AP	Gender=Fem|Number=Plur|Poss=Yes|PronType=Prs	12	det:poss	_	_
+12	azioni	azione	NOUN	S	Gender=Fem|Number=Plur	8	obl	_	SpaceAfter=No
+13	,	,	PUNCT	FF	_	15	punct	_	_
+14	che	che	ADP	E	_	15	case	_	_
+15	uno	uno	PRON	RI	Gender=Masc|Number=Sing|PronType=Ind	8	obl	_	_
+16	ereditario	ereditario	ADJ	A	Gender=Masc|Number=Sing	15	amod	_	SpaceAfter=No
+17	;	;	PUNCT	FC	_	8	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-4
+# text = e quando le son cognosciute virtuose, si guadagnano molto più gli uomini, e molto più gli obbligano, che il sangue antico;
+1	e	e	CCONJ	CC	_	9	cc	_	_
+2	quando	quando	SCONJ	CS	_	5	mark	_	_
+3	le	le	PRON	PC	Clitic=Yes|Gender=Fem|Number=Plur|Person=3|PronType=Prs	5	obj	_	_
+4	son	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	5	aux:pass	_	_
+5	cognosciute	conoscere	VERB	V	Gender=Fem|Number=Plur|Tense=Past|VerbForm=Part	9	advcl	_	_
+6	virtuose	virtuoso	ADJ	A	Gender=Fem|Number=Plur	5	xcomp	_	SpaceAfter=No
+7	,	,	PUNCT	FF	_	5	punct	_	_
+8	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	9	expl:pass	_	_
+9	guadagnano	guadagnare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+10	molto	molto	ADV	B	_	11	advmod	_	_
+11	più	più	ADV	B	_	9	advmod	_	_
+12	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	13	det	_	_
+13	uomini	uomo	NOUN	S	Gender=Masc|Number=Plur	9	nsubj:pass	_	SpaceAfter=No
+14	,	,	PUNCT	FF	_	19	punct	_	_
+15	e	e	CCONJ	CC	_	19	cc	_	_
+16	molto	molto	ADV	B	_	17	advmod	_	_
+17	più	più	ADV	B	_	19	advmod	_	_
+18	gli	li	PRON	PC	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	19	obj	_	_
+19	obbligano	obbligare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	9	conj	_	SpaceAfter=No
+20	,	,	PUNCT	FF	_	19	punct	_	_
+21	che	che	ADP	E	_	23	case	_	_
+22	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	23	det	_	_
+23	sangue	sangue	NOUN	S	Gender=Masc|Number=Sing	19	obl	_	_
+24	antico	antico	ADJ	A	Gender=Masc|Number=Sing	23	amod	_	SpaceAfter=No
+25	;	;	PUNCT	FC	_	9	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-5
+# text = perchè gli uomini sono molto più presi dalle cose presenti, che dalle passate, e quando nelle presenti ei trovano il bene, vi si godono, e non cercano altro;
+1	perchè	perché	SCONJ	CS	_	7	mark	_	_
+2	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	3	det	_	_
+3	uomini	uomo	NOUN	S	Gender=Masc|Number=Plur	7	nsubj	_	_
+4	sono	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	7	cop	_	_
+5	molto	molto	ADV	B	_	6	advmod	_	_
+6	più	più	ADV	B	_	7	advmod	_	_
+7	presi	prendere	VERB	A	Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part	0	root	_	_
+8-9	dalle	_	_	_	_	_	_	_	_
+8	da	da	ADP	E	_	10	case	_	_
+9	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	10	det	_	_
+10	cose	cosa	NOUN	S	Gender=Fem|Number=Plur	7	obl	_	_
+11	presenti	presente	ADJ	A	Number=Plur	10	amod	_	SpaceAfter=No
+12	,	,	PUNCT	FF	_	16	punct	_	_
+13	che	che	ADP	E	_	16	case	_	_
+14-15	dalle	_	_	_	_	_	_	_	_
+14	da	da	ADP	E	_	16	case	_	_
+15	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	16	det	_	_
+16	passate	passato	ADJ	S	Gender=Fem|Number=Plur	7	obl	_	SpaceAfter=No
+17	,	,	PUNCT	FF	_	30	punct	_	_
+18	e	e	CCONJ	CC	_	30	cc	_	_
+19	quando	quando	SCONJ	CS	_	24	mark	_	_
+20-21	nelle	_	_	_	_	_	_	_	_
+20	in	in	ADP	E	_	22	case	_	_
+21	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	22	det	_	_
+22	presenti	presente	ADJ	S	Number=Plur	24	obl	_	_
+23	ei	essi	PRON	PE	Gender=Masc|Number=Plur|Person=3|PronType=Prs	24	nsubj	_	_
+24	trovano	trovare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	30	advcl	_	_
+25	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	26	det	_	_
+26	bene	bene	NOUN	S	Gender=Masc|Number=Sing	24	obj	_	SpaceAfter=No
+27	,	,	PUNCT	FF	_	24	punct	_	_
+28	vi	vi	PRON	PC	Clitic=Yes|PronType=Prs	30	expl	_	_
+29	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	30	expl	_	_
+30	godono	godere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	7	conj	_	SpaceAfter=No
+31	,	,	PUNCT	FF	_	34	punct	_	_
+32	e	e	CCONJ	CC	_	34	cc	_	_
+33	non	non	ADV	BN	PronType=Neg	34	advmod	_	_
+34	cercano	cercare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	30	conj	_	_
+35	altro	altro	PRON	PI	Gender=Masc|Number=Sing|PronType=Ind	34	obj	_	SpaceAfter=No
+36	;	;	PUNCT	FC	_	7	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-6
+# text = anzi pigliano ogni difesa di lui, quando il Principe non manchi nelle altre cose a sè medesimo.
+1	anzi	anzi	ADV	B	_	2	advmod	_	_
+2	pigliano	prendere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+3	ogni	ogni	DET	DI	Number=Sing|PronType=Ind	4	det	_	_
+4	difesa	difesa	NOUN	S	Gender=Fem|Number=Sing	2	obj	_	_
+5	di	di	ADP	E	_	6	case	_	_
+6	lui	lui	PRON	PE	Gender=Masc|Number=Sing|Person=3|PronType=Prs	4	nmod	_	SpaceAfter=No
+7	,	,	PUNCT	FF	_	2	punct	_	_
+8	quando	quando	SCONJ	CS	_	12	mark	_	_
+9	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	10	det	_	_
+10	Principe	principe	NOUN	SP	Gender=Masc|Number=Sing	12	nsubj	_	_
+11	non	non	ADV	BN	PronType=Neg	12	advmod	_	_
+12	manchi	mancare	VERB	V	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	2	advcl	_	_
+13-14	nelle	_	_	_	_	_	_	_	_
+13	in	in	ADP	E	_	16	case	_	_
+14	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	16	det	_	_
+15	altre	altro	ADJ	A	Gender=Fem|Number=Plur	16	amod	_	_
+16	cose	cosa	NOUN	S	Gender=Fem|Number=Plur	12	obl	_	_
+17	a	a	ADP	E	_	18	case	_	_
+18	sè	sé	PRON	PE	Number=Sing|Person=3|PronType=Prs	12	obl	_	_
+19	medesimo	medesimo	ADJ	A	Gender=Masc|Number=Sing	18	amod	_	SpaceAfter=No
+20	.	.	PUNCT	FS	_	2	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-7
+# text = E così arà duplicata gloria di aver dato principio a un Principato nuovo, ed ornatolo, e corroboratolo di buone leggi, di buone armi, di buoni amici, e di buoni esempi;
+1	E	e	CCONJ	CC	_	5	cc	_	_
+2	così	così	ADV	B	_	5	advmod	_	_
+3	arà	avere	VERB	VA	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	5	cop	_	_
+4	duplicata	duplicato	ADJ	A	Gender=Fem|Number=Sing	5	amod	_	_
+5	gloria	gloria	NOUN	S	Gender=Fem|Number=Sing	0	root	_	_
+6	di	di	ADP	E	_	8	mark	_	_
+7	aver	avere	AUX	VA	VerbForm=Inf	8	aux	_	_
+8	dato	dare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	5	acl	_	_
+9	principio	principio	NOUN	S	Gender=Masc|Number=Sing	8	obj	_	_
+10	a	a	ADP	E	_	12	case	_	_
+11	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	12	det	_	_
+12	Principato	principato	NOUN	S	Gender=Masc|Number=Sing	8	obl	_	_
+13	nuovo	nuovo	ADJ	A	Gender=Masc|Number=Sing	12	amod	_	SpaceAfter=No
+14	,	,	PUNCT	FF	_	16	punct	_	_
+15	ed	e	CCONJ	CC	_	16	cc	_	_
+16-17	ornatolo	_	_	_	_	_	_	_	SpaceAfter=No
+16	ornato	ornare	VERB	_	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	8	conj	_	_
+17	lo	lo	PRON	_	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	16	obj	_	_
+18	,	,	PUNCT	FF	_	20	punct	_	_
+19	e	e	CCONJ	CC	_	20	cc	_	_
+20-21	corroboratolo	_	_	_	_	_	_	_	_
+20	corroborato	corroborare	VERB	_	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	8	conj	_	_
+21	lo	lo	PRON	_	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	20	obj	_	_
+22	di	di	ADP	E	_	24	case	_	_
+23	buone	buono	ADJ	A	Gender=Fem|Number=Plur	24	amod	_	_
+24	leggi	legge	NOUN	S	Gender=Fem|Number=Plur	20	obl	_	SpaceAfter=No
+25	,	,	PUNCT	FF	_	28	punct	_	_
+26	di	di	ADP	E	_	28	case	_	_
+27	buone	buono	ADJ	A	Gender=Fem|Number=Plur	28	amod	_	_
+28	armi	arma	NOUN	S	Gender=Fem|Number=Plur	24	conj	_	SpaceAfter=No
+29	,	,	PUNCT	FF	_	32	punct	_	_
+30	di	di	ADP	E	_	32	case	_	_
+31	buoni	buono	ADJ	A	Gender=Masc|Number=Plur	32	amod	_	_
+32	amici	amico	NOUN	S	Gender=Masc|Number=Plur	24	conj	_	SpaceAfter=No
+33	,	,	PUNCT	FF	_	37	punct	_	_
+34	e	e	CCONJ	CC	_	37	cc	_	_
+35	di	di	ADP	E	_	37	case	_	_
+36	buoni	buono	ADJ	A	Gender=Masc|Number=Plur	37	amod	_	_
+37	esempi	esempio	NOUN	S	Gender=Masc|Number=Plur	24	conj	_	SpaceAfter=No
+38	;	;	PUNCT	FC	_	5	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-8
+# text = come quello arà duplicata vergogna, che è nato Principe, e per sua poca prudenza l'ha perduto.
+1	come	come	SCONJ	E	_	2	case	_	_
+2	quello	quello	PRON	PD	Gender=Masc|Number=Sing|PronType=Dem	5	nmod	_	_
+3	arà	avere	VERB	VA	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	5	cop	_	_
+4	duplicata	duplicato	ADJ	A	Gender=Fem|Number=Sing	5	amod	_	_
+5	vergogna	vergogna	NOUN	S	Gender=Fem|Number=Sing	0	root	_	SpaceAfter=No
+6	,	,	PUNCT	FF	_	5	punct	_	_
+7	che	che	PRON	PR	PronType=Rel	9	nsubj	_	_
+8	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	9	aux	_	_
+9	nato	nascere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	5	acl:relcl	_	_
+10	Principe	principe	NOUN	SP	Gender=Masc|Number=Sing	9	xcomp	_	SpaceAfter=No
+11	,	,	PUNCT	FF	_	19	punct	_	_
+12	e	e	CCONJ	CC	_	19	cc	_	_
+13	per	per	ADP	E	_	16	case	_	_
+14	sua	suo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	16	det:poss	_	_
+15	poca	poco	ADJ	A	Gender=Fem|Number=Sing	16	amod	_	_
+16	prudenza	prudenza	NOUN	S	Gender=Fem|Number=Sing	19	obl	_	_
+17	l'	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	19	obj	_	SpaceAfter=No
+18	ha	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	19	aux	_	_
+19	perduto	perdere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	9	conj	_	SpaceAfter=No
+20	.	.	PUNCT	FS	_	5	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-9
+# text = E se si considera quelli Signori che in Italia hanno perduto lo Stato ne' nostri tempi, come il Re di Napoli, Duca di Milano, e altri, si troverà in loro prima un comune difetto quanto all'armi, per le cagioni che di sopra a lungo si sono discorse;
+1	E	e	CCONJ	CC	_	33	cc	_	_
+2	se	se	SCONJ	CS	_	4	mark	_	_
+3	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	4	expl:impers	_	_
+4	considera	considerare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	33	advcl	_	_
+5	quelli	quello	DET	DD	Gender=Masc|Number=Plur|PronType=Dem	6	det	_	_
+6	Signori	signore	NOUN	SP	Gender=Masc|Number=Plur	4	obj	_	_
+7	che	che	PRON	PR	PronType=Rel	11	nsubj	_	_
+8	in	in	ADP	E	_	9	case	_	_
+9	Italia	Italia	PROPN	SP	_	11	obl	_	_
+10	hanno	avere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	11	aux	_	_
+11	perduto	perdere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	6	acl:relcl	_	_
+12	lo	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	13	det	_	_
+13	Stato	stato	NOUN	SP	Gender=Masc|Number=Sing	11	obj	_	_
+14-15	ne'	_	_	_	_	_	_	_	_
+14	in	in	ADP	B	_	17	case	_	_
+15	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	17	det	_	_
+16	nostri	nostro	DET	AP	Gender=Masc|Number=Plur|Poss=Yes|PronType=Prs	17	det:poss	_	_
+17	tempi	tempo	NOUN	S	Gender=Masc|Number=Plur	11	obl	_	SpaceAfter=No
+18	,	,	PUNCT	FF	_	6	punct	_	_
+19	come	come	SCONJ	E	_	21	case	_	_
+20	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	21	det	_	_
+21	Re	re	NOUN	SP	Gender=Masc|Number=Sing	6	nmod	_	_
+22	di	di	ADP	E	_	23	case	_	_
+23	Napoli	Napoli	PROPN	SP	_	21	nmod	_	SpaceAfter=No
+24	,	,	PUNCT	FF	_	25	punct	_	_
+25	Duca	duca	NOUN	SP	Gender=Masc|Number=Sing	21	conj	_	_
+26	di	di	ADP	E	_	27	case	_	_
+27	Milano	Milano	PROPN	SP	_	25	nmod	_	SpaceAfter=No
+28	,	,	PUNCT	FF	_	30	punct	_	_
+29	e	e	CCONJ	CC	_	30	cc	_	_
+30	altri	altro	PRON	PI	Gender=Masc|Number=Plur|PronType=Ind	21	conj	_	SpaceAfter=No
+31	,	,	PUNCT	FF	_	4	punct	_	_
+32	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	33	expl	_	_
+33	troverà	trovare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	0	root	_	_
+34	in	in	ADP	E	_	35	case	_	_
+35	loro	loro	PRON	PE	Number=Plur|Person=3|PronType=Prs	33	obl	_	_
+36	prima	prima	ADV	B	_	33	advmod	_	_
+37	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	39	det	_	_
+38	comune	comune	ADJ	A	Number=Sing	39	amod	_	_
+39	difetto	difetto	NOUN	S	Gender=Masc|Number=Sing	33	obj	_	_
+40	quanto	quanto	ADV	B	ExtPos=ADP	43	case	_	_
+41-42	all'	_	_	_	_	_	_	_	SpaceAfter=No
+41	a	a	ADP	E	_	43	case	_	_
+42	l'	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	43	det	_	_
+43	armi	arma	NOUN	S	Gender=Fem|Number=Plur	39	nmod	_	SpaceAfter=No
+44	,	,	PUNCT	FF	_	33	punct	_	_
+45	per	per	ADP	E	_	47	case	_	_
+46	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	47	det	_	_
+47	cagioni	cagione	NOUN	S	Gender=Fem|Number=Plur	33	obl	_	_
+48	che	che	PRON	PR	PronType=Rel	55	nsubj	_	_
+49	di	di	ADP	E	_	50	case	_	_
+50	sopra	sopra	ADV	B	_	52	advmod	_	_
+51	a	a	ADP	E	_	52	case	_	_
+52	lungo	lungo	ADV	A	_	55	obl	_	_
+53	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	55	expl	_	_
+54	sono	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	55	aux	_	_
+55	discorse	discorrere	VERB	V	Gender=Fem|Number=Plur|Tense=Past|VerbForm=Part	47	acl:relcl	_	SpaceAfter=No
+56	;	;	PUNCT	FC	_	33	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-10
+# text = dipoi si vedrà alcun di loro o che arà avuto nimici i popoli, o se arà avuto amico il popolo, non si sarà saputo assicurare de' grandi;
+1	dipoi	poi	ADV	S	_	3	nsubj	_	_
+2	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	3	expl:impers	_	_
+3	vedrà	vedere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	0	root	_	_
+4	alcun	alcuno	PRON	PI	Gender=Masc|Number=Sing|PronType=Ind	3	obj	_	_
+5	di	di	ADP	E	_	6	case	_	_
+6	loro	loro	PRON	PE	Number=Plur|Person=3|PronType=Prs	4	nmod	_	_
+7	o	o	CCONJ	CC	_	10	cc	_	_
+8	che	che	PRON	PR	PronType=Rel	10	nsubj	_	_
+9	arà	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	10	aux	_	_
+10	avuto	avere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	3	conj	_	_
+11	nimici	nemico	ADJ	A	Gender=Masc|Number=Plur	10	xcomp	_	_
+12	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	13	det	_	_
+13	popoli	popolo	NOUN	S	Gender=Masc|Number=Plur	10	obj	_	SpaceAfter=No
+14	,	,	PUNCT	FF	_	26	punct	_	_
+15	o	o	CCONJ	CC	_	26	cc	_	_
+16	se	se	SCONJ	CS	_	18	mark	_	_
+17	arà	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	18	aux	_	_
+18	avuto	avere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	26	advcl	_	_
+19	amico	amico	ADJ	S	Gender=Masc|Number=Sing	18	obj	_	_
+20	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	21	det	_	_
+21	popolo	popolo	NOUN	S	Gender=Masc|Number=Sing	18	obj	_	SpaceAfter=No
+22	,	,	PUNCT	FF	_	18	punct	_	_
+23	non	non	ADV	BN	PronType=Neg	26	advmod	_	_
+24	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	26	expl:impers	_	_
+25	sarà	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	26	aux	_	_
+26	saputo	sapere	AUX	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	3	conj	_	_
+27	assicurare	assicurare	VERB	V	VerbForm=Inf	26	xcomp	_	_
+28-29	de'	_	_	_	_	_	_	_	_
+28	di	di	ADP	E	_	30	case	_	_
+29	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	30	det	_	_
+30	grandi	grande	NOUN	S	Gender=Masc|Number=Plur	27	obl	_	SpaceAfter=No
+31	;	;	PUNCT	FC	_	3	punct	_	_
+
+# unit = 24
+# par = 1
+# sent_id = 24-1-11
+# text = perchè senza questi difetti non si perdono gli Stati, che abbino tanto nervi, che possino tenere un esercito alla campagna.
+1	perchè	perché	SCONJ	CS	_	7	mark	_	_
+2	senza	senza	ADP	E	_	4	case	_	_
+3	questi	questo	DET	DD	Gender=Masc|Number=Plur|PronType=Dem	4	det	_	_
+4	difetti	difetto	NOUN	S	Gender=Masc|Number=Plur	7	obl	_	_
+5	non	non	ADV	BN	PronType=Neg	7	advmod	_	_
+6	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	7	expl:pass	_	_
+7	perdono	perdere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+8	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	9	det	_	_
+9	Stati	stato	NOUN	S	Gender=Masc|Number=Plur	7	nsubj:pass	_	SpaceAfter=No
+10	,	,	PUNCT	FF	_	12	punct	_	_
+11	che	che	PRON	PR	PronType=Rel	12	nsubj	_	_
+12	abbino	avere	VERB	V	Mood=Sub|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	9	acl:relcl	_	_
+13	tanto	tanto	ADV	B	_	14	advmod	_	_
+14	nervi	nervo	NOUN	S	Gender=Masc|Number=Plur	12	obj	_	SpaceAfter=No
+15	,	,	PUNCT	FF	_	12	punct	_	_
+16	che	che	SCONJ	CS	_	18	mark	_	_
+17	possino	potere	AUX	VM	Mood=Sub|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	18	aux	_	_
+18	tenere	tenere	VERB	V	VerbForm=Inf	12	advcl	_	_
+19	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	20	det	_	_
+20	esercito	esercito	NOUN	S	Gender=Masc|Number=Sing	18	obj	_	_
+21-22	alla	_	_	_	_	_	_	_	_
+21	a	a	ADP	E	_	23	case	_	_
+22	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	23	det	_	_
+23	campagna	campagna	NOUN	S	Gender=Fem|Number=Sing	18	obl	_	SpaceAfter=No
+24	.	.	PUNCT	FS	_	7	punct	_	SpacesAfter=\n\n
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-1
+# text = Filippo Macedone, non il padre di Alessandro Magno, ma quello che fu da Tito Quinzio vinto, aveva non molto Stato rispetto alla grandezza de' Romani, e di Grecia, che l'assaltò;
+1	Filippo	Filippo	PROPN	SP	_	20	nsubj	_	_
+2	Macedone	Macedone	PROPN	SP	_	1	flat:name	_	SpaceAfter=No
+3	,	,	PUNCT	FF	_	1	punct	_	_
+4	non	non	ADV	BN	PronType=Neg	6	advmod	_	_
+5	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	6	det	_	_
+6	padre	padre	NOUN	S	Gender=Masc|Number=Sing	1	appos	_	_
+7	di	di	ADP	E	_	8	case	_	_
+8	Alessandro	Alessandro	PROPN	SP	_	6	nmod	_	_
+9	Magno	Magno	PROPN	SP	_	8	flat:name	_	SpaceAfter=No
+10	,	,	PUNCT	FF	_	12	punct	_	_
+11	ma	ma	CCONJ	CC	_	12	cc	_	_
+12	quello	quello	PRON	PD	Gender=Masc|Number=Sing|PronType=Dem	1	conj	_	_
+13	che	che	PRON	PR	PronType=Rel	14	nsubj	_	_
+14	fu	essere	AUX	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	12	acl:relcl	_	_
+15	da	da	ADP	E	_	16	case	_	_
+16	Tito	Tito	PROPN	SP	_	17	flat:name	_	_
+17	Quinzio	Quinzio	PROPN	SP	_	20	nsubj	_	_
+18	vinto	vincere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	17	acl	_	SpaceAfter=No
+19	,	,	PUNCT	FF	_	17	punct	_	_
+20	aveva	avere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	0	root	_	_
+21	non	non	ADV	BN	PronType=Neg	23	advmod	_	_
+22	molto	molto	ADV	B	_	23	advmod	_	_
+23	Stato	stato	NOUN	SP	Gender=Masc|Number=Sing	20	obj	_	_
+24	rispetto	rispetto	NOUN	S	ExtPos=ADP|Gender=Masc|Number=Sing	27	case	_	_
+25-26	alla	_	_	_	_	_	_	_	_
+25	a	a	ADP	E	_	24	fixed	_	_
+26	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	27	det	_	_
+27	grandezza	grandezza	NOUN	S	Gender=Fem|Number=Sing	23	nmod	_	_
+28-29	de'	_	_	_	_	_	_	_	_
+28	di	di	ADP	E	_	30	case	_	_
+29	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	30	det	_	_
+30	Romani	romano	NOUN	S	Gender=Masc|Number=Plur	27	nmod	_	SpaceAfter=No
+31	,	,	PUNCT	FF	_	34	punct	_	_
+32	e	e	CCONJ	CC	_	34	cc	_	_
+33	di	di	ADP	E	_	34	case	_	_
+34	Grecia	Grecia	PROPN	SP	_	30	conj	_	SpaceAfter=No
+35	,	,	PUNCT	FF	_	34	punct	_	_
+36	che	che	PRON	PR	PronType=Rel	38	nsubj	_	_
+37	l'	lo	PRON	PC	Clitic=Yes|Number=Sing|Person=3|PronType=Prs	38	obj	_	SpaceAfter=No
+38	assaltò	assaltare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	27	acl:relcl	_	SpaceAfter=No
+39	;	;	PUNCT	FC	_	20	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-2
+# text = nientedimeno, per essere uomo militare, e che sapeva intrattenere i popoli, ed assicurarsi de' grandi, sostenne più anni la guerra contro di quelli;
+1	nientedimeno	nondimeno	ADV	B	_	22	advmod	_	SpaceAfter=No
+2	,	,	PUNCT	FF	_	1	punct	_	_
+3	per	per	ADP	E	_	5	mark	_	_
+4	essere	essere	AUX	VA	VerbForm=Inf	5	cop	_	_
+5	uomo	uomo	NOUN	S	Gender=Masc|Number=Sing	22	advcl	_	_
+6	militare	militare	ADJ	A	Number=Sing	5	amod	_	SpaceAfter=No
+7	,	,	PUNCT	FF	_	10	punct	_	_
+8	e	e	CCONJ	CC	_	10	cc	_	_
+9	che	che	PRON	PR	PronType=Rel	10	nsubj	_	_
+10	sapeva	sapere	AUX	V	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	5	conj	_	_
+11	intrattenere	intrattenere	VERB	V	VerbForm=Inf	10	xcomp	_	_
+12	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	13	det	_	_
+13	popoli	popolo	NOUN	S	Gender=Masc|Number=Plur	11	obj	_	SpaceAfter=No
+14	,	,	PUNCT	FF	_	16	punct	_	_
+15	ed	e	CCONJ	CC	_	16	cc	_	_
+16-17	assicurarsi	_	_	_	_	_	_	_	_
+16	assicurar	assicurare	VERB	V	VerbForm=Inf	11	conj	_	_
+17	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	16	expl	_	_
+18-19	de'	_	_	_	_	_	_	_	_
+18	di	di	ADP	E	_	20	case	_	_
+19	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	20	det	_	_
+20	grandi	grande	NOUN	S	Gender=Masc|Number=Plur	16	obl	_	SpaceAfter=No
+21	,	,	PUNCT	FF	_	5	punct	_	_
+22	sostenne	sostenere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+23	più	più	DET	DI	PronType=Ind	24	det	_	_
+24	anni	anno	NOUN	S	Gender=Masc|Number=Plur	22	obl	_	_
+25	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	26	det	_	_
+26	guerra	guerra	NOUN	S	Gender=Fem|Number=Sing	22	obj	_	_
+27	contro	contro	ADV	B	ExtPos=ADP	29	case	_	_
+28	di	di	ADP	E	_	27	fixed	_	_
+29	quelli	quello	PRON	PD	Gender=Masc|Number=Plur|PronType=Dem	26	nmod	_	SpaceAfter=No
+30	;	;	PUNCT	FC	_	22	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-3
+# text = e se alla fine perdè il dominio di qualche città, gli rimase nondimanco il Regno.
+1	e	e	CCONJ	CC	_	14	cc	_	_
+2	se	se	SCONJ	CS	_	6	mark	_	_
+3-4	alla	_	_	_	_	_	_	_	_
+3	a	a	ADP	E	_	5	case	_	_
+4	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	5	det	_	_
+5	fine	fine	NOUN	S	Gender=Fem|Number=Sing	6	obl	_	_
+6	perdè	perdere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	14	advcl	_	_
+7	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	8	det	_	_
+8	dominio	dominio	NOUN	S	Gender=Masc|Number=Sing	6	obj	_	_
+9	di	di	ADP	E	_	11	case	_	_
+10	qualche	qualche	DET	DI	Number=Sing|PronType=Ind	11	det	_	_
+11	città	città	NOUN	S	Gender=Fem|Number=Sing	8	nmod	_	SpaceAfter=No
+12	,	,	PUNCT	FF	_	6	punct	_	_
+13	gli	gli	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	14	iobj	_	_
+14	rimase	rimanere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+15	nondimanco	nondimeno	ADV	A	_	14	xcomp	_	_
+16	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	17	det	_	_
+17	Regno	regno	NOUN	SP	Gender=Masc|Number=Sing	14	nsubj	_	SpaceAfter=No
+18	.	.	PUNCT	FS	_	14	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-4
+# text = Pertanto questi nostri Principi, i quali molti anni erano stati nel loro Principato, per averlo dipoi perso, non accusino la fortuna, ma l'ignavia loro;
+1	Pertanto	pertanto	ADV	B	_	24	advmod	_	_
+2	questi	questo	DET	DD	Gender=Masc|Number=Plur|PronType=Dem	4	det	_	_
+3	nostri	nostro	DET	AP	Gender=Masc|Number=Plur|Poss=Yes|PronType=Prs	4	det:poss	_	_
+4	Principi	principe	NOUN	S	Gender=Masc|Number=Plur	24	nsubj	_	SpaceAfter=No
+5	,	,	PUNCT	FF	_	4	punct	_	_
+6	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	7	det	_	_
+7	quali	quale	PRON	PR	Number=Plur|PronType=Rel	11	nsubj	_	_
+8	molti	molto	DET	DI	Gender=Masc|Number=Plur|PronType=Ind	9	det	_	_
+9	anni	anno	NOUN	S	Gender=Masc|Number=Plur	11	obl	_	_
+10	erano	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin	11	aux	_	_
+11	stati	essere	VERB	V	Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part	4	acl:relcl	_	_
+12-13	nel	_	_	_	_	_	_	_	_
+12	in	in	ADP	E	_	15	case	_	_
+13	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	15	det	_	_
+14	loro	loro	DET	AP	Poss=Yes|PronType=Prs	15	det:poss	_	_
+15	Principato	principato	NOUN	S	Gender=Masc|Number=Sing	11	obl	_	SpaceAfter=No
+16	,	,	PUNCT	FF	_	4	punct	_	_
+17	per	per	ADP	E	_	20	mark	_	_
+18-19	averlo	_	_	_	_	_	_	_	_
+18	aver	avere	AUX	VA	VerbForm=Inf	20	aux	_	_
+19	lo	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	20	obj	_	_
+20	dipoi	poi	ADV	V	_	11	advcl	_	_
+21	perso	perdere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	20	advcl	_	SpaceAfter=No
+22	,	,	PUNCT	FF	_	4	punct	_	_
+23	non	non	ADV	BN	PronType=Neg	24	advmod	_	_
+24	accusino	accusare	VERB	V	Mood=Sub|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+25	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	26	det	_	_
+26	fortuna	fortuna	NOUN	S	Gender=Fem|Number=Sing	24	obj	_	SpaceAfter=No
+27	,	,	PUNCT	FF	_	30	punct	_	_
+28	ma	ma	CCONJ	CC	_	30	cc	_	_
+29	l'	il	DET	PC	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	30	obj	_	SpaceAfter=No
+30	ignavia	ignavia	NOUN	V	Gender=Fem|Number=Sing	24	conj	_	_
+31	loro	loro	PRON	PE	Number=Plur|Person=3|PronType=Prs	30	iobj	_	SpaceAfter=No
+32	;	;	PUNCT	FC	_	24	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-5
+# text = perchè non avendo mai pensato ne' tempi quieti che possino mutarsi;
+1	perchè	perché	SCONJ	CS	_	5	mark	_	_
+2	non	non	ADV	BN	PronType=Neg	5	advmod	_	_
+3	avendo	avere	AUX	VA	VerbForm=Ger	5	aux	_	_
+4	mai	mai	ADV	B	_	5	advmod	_	_
+5	pensato	pensare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	0	root	_	_
+6-7	ne'	_	_	_	_	_	_	_	_
+6	in	in	ADP	PC	_	5	iobj	_	_
+7	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	8	det	_	_
+8	tempi	tempo	NOUN	S	Gender=Masc|Number=Plur	5	obj	_	_
+9	quieti	quieto	ADJ	A	Gender=Masc|Number=Plur	8	amod	_	_
+10	che	che	SCONJ	PR	_	12	nsubj	_	_
+11	possino	potere	AUX	VM	Mood=Sub|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	12	aux	_	_
+12-13	mutarsi	_	_	_	_	_	_	_	SpaceAfter=No
+12	mutar	mutare	VERB	V	VerbForm=Inf	8	acl:relcl	_	_
+13	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	12	expl	_	_
+14	;	;	PUNCT	FC	_	5	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-6
+# text = (il che è comune difetto degli uomini non far conto nella bonaccia della tempesta) quando poi vennero i tempi avversi, pensarono a fuggirsi, non a difendersi, e sperarono che i populi, infastiditi per la insolenza de' vincitori, gli richiamassero.
+1	(	(	PUNCT	FB	_	6	punct	_	SpaceAfter=No
+2	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	3	det	_	_
+3	che	che	PRON	PR	PronType=Rel	6	nsubj	_	_
+4	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	6	cop	_	_
+5	comune	comune	ADJ	A	Number=Sing	6	amod	_	_
+6	difetto	difetto	NOUN	S	Gender=Masc|Number=Sing	11	nsubj	_	_
+7-8	degli	_	_	_	_	_	_	_	_
+7	di	di	ADP	E	_	9	case	_	_
+8	gli	li	DET	RD	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	9	det	_	_
+9	uomini	uomo	NOUN	S	Gender=Masc|Number=Plur	6	nmod	_	_
+10	non	non	ADV	BN	PronType=Neg	11	advmod	_	_
+11	far	fare	VERB	V	VerbForm=Inf	27	xcomp	_	_
+12	conto	conto	NOUN	S	Gender=Masc|Number=Sing	11	obj	_	_
+13-14	nella	_	_	_	_	_	_	_	_
+13	in	in	ADP	E	_	15	case	_	_
+14	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	15	det	_	_
+15	bonaccia	bonaccia	NOUN	S	Gender=Fem|Number=Sing	11	obl	_	_
+16-17	della	_	_	_	_	_	_	_	_
+16	di	di	ADP	E	_	18	case	_	_
+17	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	18	det	_	_
+18	tempesta	tempesta	NOUN	S	Gender=Fem|Number=Sing	15	nmod	_	SpaceAfter=No
+19	)	)	PUNCT	FB	_	11	punct	_	_
+20	quando	quando	SCONJ	CS	_	22	mark	_	_
+21	poi	poi	ADV	B	_	22	advmod	_	_
+22	vennero	venire	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	27	advcl	_	_
+23	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	24	det	_	_
+24	tempi	tempo	NOUN	S	Gender=Masc|Number=Plur	22	nsubj	_	_
+25	avversi	avverso	ADJ	A	Gender=Masc|Number=Plur	24	amod	_	SpaceAfter=No
+26	,	,	PUNCT	FF	_	22	punct	_	_
+27	pensarono	pensare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+28	a	a	ADP	E	_	29	mark	_	_
+29-30	fuggirsi	_	_	_	_	_	_	_	SpaceAfter=No
+29	fuggir	fuggire	VERB	V	VerbForm=Inf	27	xcomp	_	_
+30	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	29	expl	_	_
+31	,	,	PUNCT	FF	_	34	punct	_	_
+32	non	non	ADV	BN	PronType=Neg	34	advmod	_	_
+33	a	a	ADP	E	_	34	mark	_	_
+34-35	difendersi	_	_	_	_	_	_	_	SpaceAfter=No
+34	difender	difendere	VERB	V	VerbForm=Inf	29	conj	_	_
+35	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	34	expl	_	_
+36	,	,	PUNCT	FF	_	38	punct	_	_
+37	e	e	CCONJ	CC	_	38	cc	_	_
+38	sperarono	sperare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	27	conj	_	_
+39	che	che	SCONJ	CS	_	52	mark	_	_
+40	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	41	det	_	_
+41	populi	popolo	NOUN	S	Gender=Masc|Number=Plur	52	nsubj	_	SpaceAfter=No
+42	,	,	PUNCT	FF	_	41	punct	_	_
+43	infastiditi	infastidire	VERB	V	Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part	41	acl	_	_
+44	per	per	ADP	E	_	46	case	_	_
+45	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	46	det	_	_
+46	insolenza	insolenza	NOUN	S	Gender=Fem|Number=Sing	43	obl	_	_
+47-48	de'	_	_	_	_	_	_	_	_
+47	di	di	ADP	E	_	49	case	_	_
+48	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	49	det	_	_
+49	vincitori	vincitore	NOUN	S	Gender=Masc|Number=Plur	46	nmod	_	SpaceAfter=No
+50	,	,	PUNCT	FF	_	41	punct	_	_
+51	gli	gli	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	52	iobj	_	_
+52	richiamassero	richiamare	VERB	V	Mood=Sub|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin	38	ccomp	_	SpaceAfter=No
+53	.	.	PUNCT	FS	_	27	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-7
+# text = Il quale partito, quando mancano li altri, è buono;
+1	Il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	2	det	_	_
+2	quale	quale	DET	PR	Number=Sing|PronType=Rel	3	nsubj	_	_
+3	partito	partito	NOUN	V	Gender=Masc|Number=Sing	11	advcl	_	SpaceAfter=No
+4	,	,	PUNCT	FF	_	3	punct	_	_
+5	quando	quando	SCONJ	CS	_	6	mark	_	_
+6	mancano	mancare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	11	advcl	_	_
+7	li	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	8	det	_	_
+8	altri	altro	PRON	PI	Gender=Masc|Number=Plur|PronType=Ind	6	nsubj	_	SpaceAfter=No
+9	,	,	PUNCT	FF	_	6	punct	_	_
+10	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	11	cop	_	_
+11	buono	buono	ADJ	A	Gender=Masc|Number=Sing	0	root	_	SpaceAfter=No
+12	;	;	PUNCT	FC	_	11	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-8
+# text = ma è ben male avere lasciato gli altri rimedi per quello;
+1	ma	ma	CCONJ	CC	_	4	cc	_	_
+2	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	4	cop	_	_
+3	ben	bene	ADV	B	_	4	advmod	_	_
+4	male	male	ADV	B	_	0	root	_	_
+5	avere	avere	AUX	VA	VerbForm=Inf	6	aux	_	_
+6	lasciato	lasciare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	4	csubj	_	_
+7	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	9	det	_	_
+8	altri	altro	ADJ	A	Gender=Masc|Number=Plur	9	amod	_	_
+9	rimedi	rimedio	NOUN	S	Gender=Masc|Number=Plur	6	obj	_	_
+10	per	per	ADP	E	_	11	case	_	_
+11	quello	quello	PRON	PD	Gender=Masc|Number=Sing|PronType=Dem	6	obl	_	SpaceAfter=No
+12	;	;	PUNCT	FC	_	4	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-9
+# text = perchè non si vorrebbe mai cadere per credere poi di trovare chi ti ricolga.
+1	perchè	perché	SCONJ	CS	_	6	mark	_	_
+2	non	non	ADV	BN	PronType=Neg	6	advmod	_	_
+3	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	6	expl:impers	_	_
+4	vorrebbe	volere	AUX	VM	Mood=Cnd|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	6	aux	_	_
+5	mai	mai	ADV	B	_	6	advmod	_	_
+6	cadere	cadere	VERB	V	VerbForm=Inf	0	root	_	_
+7	per	per	ADP	E	_	8	mark	_	_
+8	credere	credere	VERB	V	VerbForm=Inf	6	advcl	_	_
+9	poi	poi	ADV	B	_	8	advmod	_	_
+10	di	di	ADP	E	_	11	mark	_	_
+11	trovare	trovare	VERB	V	VerbForm=Inf	8	xcomp	_	_
+12	chi	chi	PRON	PR	Number=Sing|PronType=Rel	11	obj	_	_
+13	ti	ti	PRON	PC	Clitic=Yes|Number=Sing|Person=2|PronType=Prs	14	obj	_	_
+14	ricolga	raccogliere	VERB	V	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	12	acl:relcl	_	SpaceAfter=No
+15	.	.	PUNCT	FS	_	6	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-10
+# text = Il che, o non avviene, o se egli avviene, non è con tua sicurtà, per essere quella difesa vile, e non dipendere da te;
+1	Il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	2	det	_	_
+2	che	che	PRON	PR	PronType=Rel	17	nsubj	_	SpaceAfter=No
+3	,	,	PUNCT	FF	_	6	punct	_	_
+4	o	o	CCONJ	CC	_	6	cc	_	_
+5	non	non	ADV	BN	PronType=Neg	6	advmod	_	_
+6	avviene	avvenire	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	2	conj	_	SpaceAfter=No
+7	,	,	PUNCT	FF	_	11	punct	_	_
+8	o	o	CCONJ	CC	_	11	cc	_	_
+9	se	se	SCONJ	CS	_	11	mark	_	_
+10	egli	egli	PRON	PE	Gender=Masc|Number=Sing|Person=3|PronType=Prs	11	nsubj	_	_
+11	avviene	avvenire	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	6	conj	_	SpaceAfter=No
+12	,	,	PUNCT	FF	_	6	punct	_	_
+13	non	non	ADV	BN	PronType=Neg	17	advmod	_	_
+14	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	17	cop	_	_
+15	con	con	ADP	E	_	17	case	_	_
+16	tua	tuo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	17	det:poss	_	_
+17	sicurtà	sicurezza	NOUN	S	Gender=Fem|Number=Sing	0	root	_	SpaceAfter=No
+18	,	,	PUNCT	FF	_	17	punct	_	_
+19	per	per	ADP	E	_	22	mark	_	_
+20	essere	essere	AUX	VA	VerbForm=Inf	22	cop	_	_
+21	quella	quello	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	22	det	_	_
+22	difesa	difesa	NOUN	S	Gender=Fem|Number=Sing	17	advcl	_	_
+23	vile	vile	ADJ	A	Number=Sing	22	amod	_	SpaceAfter=No
+24	,	,	PUNCT	FF	_	27	punct	_	_
+25	e	e	CCONJ	CC	_	27	cc	_	_
+26	non	non	ADV	BN	PronType=Neg	27	advmod	_	_
+27	dipendere	dipendere	VERB	V	VerbForm=Inf	22	conj	_	_
+28	da	da	ADP	E	_	29	case	_	_
+29	te	te	PRON	PE	Number=Sing|Person=2|PronType=Prs	27	obl	_	SpaceAfter=No
+30	;	;	PUNCT	FC	_	17	punct	_	_
+
+# unit = 24
+# par = 2
+# sent_id = 24-2-11
+# text = e quelle difese solamente sono buone, certe, e durabili, che dipendono da te proprio, e dalla virtù tua.
+1	e	e	CCONJ	CC	_	6	cc	_	_
+2	quelle	quello	DET	PD	Gender=Fem|Number=Plur|PronType=Dem	6	nsubj	_	_
+3	difese	difesa	NOUN	A	Gender=Fem|Number=Plur	2	amod	_	_
+4	solamente	solamente	ADV	B	_	6	advmod	_	_
+5	sono	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	6	cop	_	_
+6	buone	buono	ADJ	A	Gender=Fem|Number=Plur	0	root	_	SpaceAfter=No
+7	,	,	PUNCT	FF	_	8	punct	_	_
+8	certe	certo	ADJ	A	Gender=Fem|Number=Plur	6	conj	_	SpaceAfter=No
+9	,	,	PUNCT	FF	_	11	punct	_	_
+10	e	e	CCONJ	CC	_	11	cc	_	_
+11	durabili	durabile	ADJ	A	Number=Plur	6	conj	_	SpaceAfter=No
+12	,	,	PUNCT	FF	_	14	punct	_	_
+13	che	che	PRON	PR	PronType=Rel	14	nsubj	_	_
+14	dipendono	dipendere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	6	acl:relcl	_	_
+15	da	da	ADP	E	_	16	case	_	_
+16	te	te	PRON	PE	Number=Sing|Person=2|PronType=Prs	14	obl	_	_
+17	proprio	proprio	ADJ	AP	Gender=Masc|Number=Sing	16	det:poss	_	SpaceAfter=No
+18	,	,	PUNCT	FF	_	22	punct	_	_
+19	e	e	CCONJ	CC	_	22	cc	_	_
+20-21	dalla	_	_	_	_	_	_	_	_
+20	da	da	ADP	E	_	22	case	_	_
+21	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	22	det	_	_
+22	virtù	virtù	NOUN	S	Gender=Fem|Number=Sing	16	conj	_	_
+23	tua	tuo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	22	det:poss	_	SpaceAfter=No
+24	.	.	PUNCT	FS	_	6	punct	_	SpaceAfter=No

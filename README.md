@@ -12,6 +12,7 @@ public-domain English translation, one aligned stanza, verse, chapter or paragra
 - **The Genesis Reader**: Genesis 1–11 in Hebrew.
 - **The Analects Reader**: the Analects of Confucius, all 20 books, in Classical Chinese.
 - **The Dante Reader**: the Divine Comedy, all 100 cantos, in Dante's Italian.
+- **The Machiavelli Reader**: *Il Principe*, the dedication and all 26 chapters, in Italian.
 
 ## Navigation
 
@@ -206,6 +207,23 @@ and Notable Matters in the Works of Dante* (1914), parsed from the Internet Arch
 Search ignores accents and apostrophes (`perche` finds *perché*). The library shelves the reader
 under Medieval Italian. Credits are in `corpora/dante/Sources.astro`.
 
+## The Machiavelli Reader
+
+*Il Principe* in the Italian Wikisource transcription of the anonymous "Italia, 1814" printing
+(CC BY-SA 3.0 and GFDL, proofread against the scan), one row per Italian paragraph, beside Luigi
+Ricci's translation (Oxford, 1909; Project Gutenberg #57037). No hand-annotated text of Machiavelli
+exists, so the morphology is machine-tagged: UDPipe 2 with the UD_Italian-ISDT model
+(`italian-isdt-ud-2.17-251125`; the service marks its output CC BY-NC-SA), then checked by hand
+word by word (lemma, part of speech, features, splitting of *del*, *de'* and enclitic clusters). The
+tagger is a web service, so the reviewed CoNLL-U is checked into `corpora/machiavelli/data/` and
+pinned by hash. `lib/morph.ts` rewrites ISDT's conventions into those `packs/ita/morph.ts` labels
+(the gerund, the past historic). Ricci's sentences are aligned to the Italian sentences by a
+length-based pass corrected by hand (`data/alignment/`), which places his English at the Italian
+paragraph breaks; Ricci leaves out the close of chapter 13, and the reader says so there. Lemmas
+are looked up in Wiktionary as in the Dante Reader. Citations read `Prin. 18.2` (chapter,
+paragraph); the dedication is `Prin. 0`. The reader shares the Medieval Italian shelf. Credits are in
+`corpora/machiavelli/Sources.astro`.
+
 ## Building
 
 ```sh
@@ -228,6 +246,7 @@ READER=homer bun run fetch       # AGDT, Perseus Greek and English, Autenrieth, 
 READER=genesis bun run fetch     # OSHB, Open Scriptures lexicon, JPS 1917
 READER=analects bun run fetch    # Kyoto treebank, Legge, Unihan, Wiktionary
 READER=dante bun run fetch       # UD_Italian-Old, Gutenberg Italian and Longfellow, Toynbee, Wiktionary (streams 650 MB)
+READER=machiavelli bun run fetch # Ricci, Wiktionary (streams 650 MB); the CoNLL-U is in the repo
 # then READER=<id> bun run data and bun run build:<id> for each
 
 bun run build:site     # every reader's data and site, and the library → dist/site/
@@ -322,11 +341,12 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   for Greenough and Williams (`lib/perseus.ts`), and the word-by-word pairing with LASLA
   (`alignment.ts`). It fails if a line's word count differs from LASLA's, if Greenough's and
   Williams's paragraphs differ, or if a listed reading is no longer in the text.
-- `corpora/oldenglish/`, `corpora/homer/`, `corpora/genesis/`, `corpora/analects/`: the same shape as
-  the Aeneid (pinned `sources.ts`, `fetch.ts`, parsers in `lib/`, exception tables in
-  `alignment.ts`, plus `names.ts` for Old English names and `annotation.ts` for Homer's treebank
-  repairs). Each build stops on an unexplained difference between its texts, on a morphology value
-  with no English label, and on an exception it does not use.
+- `corpora/oldenglish/`, `corpora/homer/`, `corpora/genesis/`, `corpora/analects/`,
+  `corpora/machiavelli/`: the same shape as the Aeneid (pinned `sources.ts`, `fetch.ts`, parsers in
+  `lib/`, exception tables in `alignment.ts`, plus `names.ts` for Old English names and
+  `annotation.ts` for Homer's treebank repairs). Each build stops on an unexplained difference
+  between its texts, on a morphology value with no English label, and on an exception it does not
+  use.
 - `src/pages/`: home, works and collection pages (`[slug]`, rendering `src/components/WorkPage.astro`
   or `CollectionPage.astro`), search, lexicon, sources.
 

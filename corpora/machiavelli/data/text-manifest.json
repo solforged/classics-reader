@@ -1,0 +1,275 @@
+{
+  "source": "it.wikisource.org Il Principe, 1814 Italia edition",
+  "units": {
+    "dedica": {
+      "title": "Il Principe/Dedica",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Dedica&oldid=3702275",
+      "oldid": 3702275,
+      "pages": "<pages index=\"Il Principe.djvu\" from=13 to=14 />",
+      "rubric": "",
+      "paragraphs": 2,
+      "words": 417,
+      "sha256": "1effcf5360f70f365ca9338599d7dea8736849f85290869d876abbb428ceb026"
+    },
+    "01": {
+      "title": "Il Principe/Capitolo I",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_I&oldid=3702249",
+      "oldid": 3702249,
+      "pages": "<pages index=\"Il Principe.djvu\" from=15 to=15 />",
+      "rubric": "Quante siano le specie de' Principati, e con quali modi si acquistino.",
+      "paragraphs": 1,
+      "words": 127,
+      "sha256": "39cd815a784eecaea2b479cb8c91df9543386c6899b15d0b345dcf4514a80b9a"
+    },
+    "02": {
+      "title": "Il Principe/Capitolo II",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_II&oldid=3702250",
+      "oldid": 3702250,
+      "pages": "<pages index=\"Il Principe.djvu\" from=16 to=16 />",
+      "rubric": "De' Principati ereditari.",
+      "paragraphs": 1,
+      "words": 215,
+      "sha256": "202446790a2029e4bb2b590d51bcb7af9d01606d82e0ec8401cc4e41102d7b96"
+    },
+    "03": {
+      "title": "Il Principe/Capitolo III",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_III&oldid=3702251",
+      "oldid": 3702251,
+      "pages": "<pages index=\"Il Principe.djvu\" from=17 to=25 />",
+      "rubric": "De' principati misti.",
+      "paragraphs": 6,
+      "words": 2549,
+      "sha256": "5afce1d1c27c5c5813ef85e98dac14d7b6a6f57b80a89521a0803897674a879b"
+    },
+    "04": {
+      "title": "Il Principe/Capitolo IV",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_IV&oldid=3702252",
+      "oldid": 3702252,
+      "pages": "<pages index=\"Il Principe.djvu\" from=26 to=29 tosection=s1 />",
+      "rubric": "Perchè il Regno di Dario da Alessandro occupato non si ribellò dalli successori di Alessandro dopo la sua morte.",
+      "paragraphs": 3,
+      "words": 850,
+      "sha256": "25cc67e28d6e3c76b8095c39f245247c8c8f2a92640d75e5d14f0dd60c51ee1a"
+    },
+    "05": {
+      "title": "Il Principe/Capitolo V",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_V&oldid=3702254",
+      "oldid": 3702254,
+      "pages": "<pages index=\"Il Principe.djvu\" from=29 to=30 fromsection=s2 tosection=s1 />",
+      "rubric": "In che modo siano da governare le città o Principati, quali, prima che occupati fussino, vivevano con le loro leggi.",
+      "paragraphs": 2,
+      "words": 406,
+      "sha256": "9eb1f48ac9d6f35761c2fd32d12cea54da5b3523eac38747e11f3a6e7a12c15c"
+    },
+    "06": {
+      "title": "Il Principe/Capitolo VI",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_VI&oldid=3702255",
+      "oldid": 3702255,
+      "pages": "<pages index=\"Il Principe.djvu\" from=30 to=34 fromsection=s2 tosection=s1 />",
+      "rubric": "De' Principati nuovi, che con le proprie armi e virtù si acquistano.",
+      "paragraphs": 3,
+      "words": 1048,
+      "sha256": "369662d89ff96ab1e76452d182fcb75f30bbcc16b296fa396998ae9630c4b320"
+    },
+    "07": {
+      "title": "Il Principe/Capitolo VII",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_VII&oldid=3702256",
+      "oldid": 3702256,
+      "pages": "<pages index=\"Il Principe.djvu\" from=34 to=42 fromsection=s2 tosection=s1 />",
+      "rubric": "De' Principati nuovi, che con forze d'altri e per fortuna si acquistano.",
+      "paragraphs": 8,
+      "words": 2223,
+      "sha256": "3db8ea943763173fb1e7cb39dc9e0d04bbc909ec9ce81083eb2dc5644564c27e"
+    },
+    "08": {
+      "title": "Il Principe/Capitolo VIII",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_VIII&oldid=3702257",
+      "oldid": 3702257,
+      "pages": "<pages index=\"Il Principe.djvu\" from=42 to=47 fromsection=s2 tosection=s1 />",
+      "rubric": "Di quelli che per scelleratezze sono pervenuti al Principato.",
+      "paragraphs": 4,
+      "words": 1332,
+      "sha256": "84eb81fe0794a91f1615ab448ed4847859a9915a68e0188fe8f5417ec07e4935"
+    },
+    "09": {
+      "title": "Il Principe/Capitolo IX",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_IX&oldid=3702253",
+      "oldid": 3702253,
+      "pages": "<pages index=\"Il Principe.djvu\" from=47 to=51 fromsection=s2 tosection=s1 />",
+      "rubric": "Del Principato civile.",
+      "paragraphs": 3,
+      "words": 1112,
+      "sha256": "29b388e90c77b2f0d37b721d0130c285bd890143c44a39fae751c09356b9f9f0"
+    },
+    "10": {
+      "title": "Il Principe/Capitolo X",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_X&oldid=3702258",
+      "oldid": 3702258,
+      "pages": "<pages index=\"Il Principe.djvu\" from=51 to=53 fromsection=s2 tosection=s1 />",
+      "rubric": "In che modo le forze di tutti i Principati si debbino misurare.",
+      "paragraphs": 3,
+      "words": 628,
+      "sha256": "cb619abc436e694a2b49dcd7b7582a2d83aa88518943310e580c8492b495bb20"
+    },
+    "11": {
+      "title": "Il Principe/Capitolo XI",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XI&oldid=3702259",
+      "oldid": 3702259,
+      "pages": "<pages index=\"Il Principe.djvu\" from=53 to=56 fromsection=s2 tosection=s1 />",
+      "rubric": "De' Principati Ecclesiastici.",
+      "paragraphs": 3,
+      "words": 758,
+      "sha256": "f88aa0cb6d18237409a7c562dc393cd731188ba9a05158642b87b3a2f5e1b67e"
+    },
+    "12": {
+      "title": "Il Principe/Capitolo XII",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XII&oldid=3702260",
+      "oldid": 3702260,
+      "pages": "<pages index=\"Il Principe.djvu\" from=56 to=61 fromsection=s2 tosection=s1 />",
+      "rubric": "Quante siano le spezie della milizia, e de' soldati mercenari.",
+      "paragraphs": 6,
+      "words": 1486,
+      "sha256": "3d526d7474e5420cc385a96ea3cf7a0a4e8b0a8de0ada7445cf43d53a1771e24"
+    },
+    "13": {
+      "title": "Il Principe/Capitolo XIII",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XIII&oldid=3702261",
+      "oldid": 3702261,
+      "pages": "<pages index=\"Il Principe.djvu\" from=61 to=65 fromsection=s2 tosection=s1 />",
+      "rubric": "De' soldati ausiliari, misti, e propri.",
+      "paragraphs": 5,
+      "words": 1100,
+      "sha256": "0d32e6c4e38cda2a107d2586cd00cedcf409c3e86f967abb62ed8b525285f390"
+    },
+    "14": {
+      "title": "Il Principe/Capitolo XIV",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XIV&oldid=3702262",
+      "oldid": 3702262,
+      "pages": "<pages index=\"Il Principe.djvu\" from=65 to=68 fromsection=s2 tosection=s1 />",
+      "rubric": "Quello che al Principe si appartenga circa la milizia.",
+      "paragraphs": 3,
+      "words": 792,
+      "sha256": "3cdd148d91d6f08eb07306efa59b85f47f9672da15b3aa14e384e9e0b40a4528"
+    },
+    "15": {
+      "title": "Il Principe/Capitolo XV",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XV&oldid=3702264",
+      "oldid": 3702264,
+      "pages": "<pages index=\"Il Principe.djvu\" from=68 to=70 fromsection=s2 tosection=s1/>",
+      "rubric": "Delle cose, mediante le quali gli uomini, e massimamente i Principi, sono lodati o vituperati.",
+      "paragraphs": 2,
+      "words": 454,
+      "sha256": "adc73936414aa10d25953c6deeec30a22a2076af3f8309bd68f858b43a5d4369"
+    },
+    "16": {
+      "title": "Il Principe/Capitolo XVI",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XVI&oldid=3702265",
+      "oldid": 3702265,
+      "pages": "<pages index=\"Il Principe.djvu\" from=70 to=72 fromsection=s2/>",
+      "rubric": "Della liberalità e miseria.",
+      "paragraphs": 2,
+      "words": 712,
+      "sha256": "e787ad02c9a8960fd0101a6df21aa5e1d3c6239bce6eee7c8eba71f52891e360"
+    },
+    "17": {
+      "title": "Il Principe/Capitolo XVII",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XVII&oldid=3702266",
+      "oldid": 3702266,
+      "pages": "<pages index=\"Il Principe.djvu\" from=73 to=76 tosection=s1 />",
+      "rubric": "Della crudeltà e clemenzia; e se egli è meglio essere amato, che temuto.",
+      "paragraphs": 5,
+      "words": 949,
+      "sha256": "5847dbe529476c102ebe55c6bdb8da8d2ceb8375f0096dedbe1bf806ae5fc0cd"
+    },
+    "18": {
+      "title": "Il Principe/Capitolo XVIII",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XVIII&oldid=3702267",
+      "oldid": 3702267,
+      "pages": "<pages index=\"Il Principe.djvu\" from=76 to=79 fromsection=s2 tosection=s1/>",
+      "rubric": "In che modo i Principi debbino osservare la fede.",
+      "paragraphs": 3,
+      "words": 826,
+      "sha256": "851ebdd71ec767e58380c4a01240a7812c9c17ef17cba5b645add71d1de071b2"
+    },
+    "19": {
+      "title": "Il Principe/Capitolo XIX",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XIX&oldid=3702263",
+      "oldid": 3702263,
+      "pages": "<pages index=\"Il Principe.djvu\" from=79 to=90 fromsection=s2 tosection=s1/>",
+      "rubric": "Che si debbe fuggire l'essere disprezzato e odiato.",
+      "paragraphs": 8,
+      "words": 3127,
+      "sha256": "58b91f044a1bb91047b6e195e884d0c656bd38926c1c3af28a007db4a9f752cc"
+    },
+    "20": {
+      "title": "Il Principe/Capitolo XX",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XX&oldid=3702268",
+      "oldid": 3702268,
+      "pages": "<pages index=\"Il Principe.djvu\" from=90 to=95 fromsection=s2 tosection=s1/>",
+      "rubric": "Se le fortezze, e molte altre cose che spesse volte i Principi fanno, sono utili o dannose.",
+      "paragraphs": 4,
+      "words": 1373,
+      "sha256": "1daca53af2deaaf050328e467d8b680ebb7f752a7f571516fa38e58b284cda82"
+    },
+    "21": {
+      "title": "Il Principe/Capitolo XXI",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XXI&oldid=3702269",
+      "oldid": 3702269,
+      "pages": "<pages index=\"Il Principe.djvu\" from=95 to=99 fromsection=s2 tosection=s1/>",
+      "rubric": "Come si debba governare un Principe per acquistarsi riputazione.",
+      "paragraphs": 4,
+      "words": 1141,
+      "sha256": "4cf7da261f977f5f8307c9fee26ab97a212016be4fbd3db9afeb93a285b13662"
+    },
+    "22": {
+      "title": "Il Principe/Capitolo XXII",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XXII&oldid=3702270",
+      "oldid": 3702270,
+      "pages": "<pages index=\"Il Principe.djvu\" from=99 to=101 fromsection=s2 tosection=s1/>",
+      "rubric": "Delli segretari de' Principi.",
+      "paragraphs": 2,
+      "words": 392,
+      "sha256": "cebc983c8438292693fad417023f842dbb401ea240f90fc8dff595cf71180f7c"
+    },
+    "23": {
+      "title": "Il Principe/Capitolo XXIII",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XXIII&oldid=3702271",
+      "oldid": 3702271,
+      "pages": "<pages index=\"Il Principe.djvu\" from=101 to=103 fromsection=s2 tosection=s1 />",
+      "rubric": "Come si debbino fuggire gli adulatori.",
+      "paragraphs": 2,
+      "words": 600,
+      "sha256": "4847209e0c2d9c67642a56f221e4ddb28b550655c9753806cdf88d17237d52eb"
+    },
+    "24": {
+      "title": "Il Principe/Capitolo XXIV",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XXIV&oldid=3702272",
+      "oldid": 3702272,
+      "pages": "<pages index=\"Il Principe.djvu\" from=103 to=105 fromsection=s2 tosection=s1 />",
+      "rubric": "Perchè i Principi d'Italia abbino perduto i loro Stati.",
+      "paragraphs": 2,
+      "words": 475,
+      "sha256": "cfa2a49d31c2c86291ded50deaf091000124f715561ad136e70525d30dfe1266"
+    },
+    "25": {
+      "title": "Il Principe/Capitolo XXV",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XXV&oldid=3702273",
+      "oldid": 3702273,
+      "pages": "<pages index=\"Il Principe.djvu\" from=105 to=108 fromsection=s2 tosection=s1 />",
+      "rubric": "Quanto possa nelle umane cose la fortuna, e in che modo se gli possa ostare.",
+      "paragraphs": 3,
+      "words": 1036,
+      "sha256": "8f00e29abf352f1faedb7e5f4033cd2081c2485543983ba17fa11ad145037181"
+    },
+    "26": {
+      "title": "Il Principe/Capitolo XXVI",
+      "url": "https://it.wikisource.org/w/index.php?title=Il_Principe/Capitolo_XXVI&oldid=3702274",
+      "oldid": 3702274,
+      "pages": "<pages index=\"Il Principe.djvu\" from=108 to=112 fromsection=s2 />",
+      "rubric": "Esortazione a liberare la Italia da' barbari.",
+      "paragraphs": 7,
+      "words": 1221,
+      "sha256": "9ef484d5aa3faca6feb0f73c7ad2d933b96a58ee97eb9acef98740e61c848822"
+    }
+  }
+}

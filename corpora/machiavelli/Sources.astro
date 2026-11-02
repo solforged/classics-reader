@@ -1,0 +1,60 @@
+---
+// Sources and licences of the Machiavelli Reader (src/pages/sources.astro).
+import { GUTENBERG, KAIKKI, MODEL, MODEL_SERVICE, TEXT, UNITS, WIKISOURCE_OLDID, WIKISOURCE_URL } from "./sources";
+---
+<h2>Italian</h2>
+<dl>
+  <dt>Niccolò Machiavelli, <i>Il Principe</i> (“Italia”, 1814)</dt>
+  <dd>
+    The anonymous imprint of 1814, no named editor and no publisher, as proofread on <a href={WIKISOURCE_URL}>Italian Wikisource</a> (page oldid {WIKISOURCE_OLDID}) against the scan <a href="https://archive.org/details/ilprincipedinic00machgoog">ilprincipedinic00machgoog</a>.
+    The transcription is <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a> and the <a href="https://www.gnu.org/licenses/fdl-1.3.html">GNU Free Documentation License</a>.
+    Spelling is the edition’s (<i>debbe</i>, <i>sperienza</i>, <i>de'</i>), not a modernised text and not Machiavelli’s autograph.
+    Each chapter’s heading is its rubric; the dedication has none, and its address is the first paragraph.
+    <details>
+      <summary>Wikisource revisions of the twenty-seven pages</summary>
+      <ul>
+        {UNITS.map((unit) => <li><a href={TEXT[unit]!.url}>{TEXT[unit]!.title}</a>, oldid {TEXT[unit]!.oldid}</li>)}
+      </ul>
+    </details>
+  </dd>
+  <dt>Morphology: UDPipe 2, model <code>{MODEL}</code>, checked word by word</dt>
+  <dd>
+    There is no gold treebank of the <i>Principe</i>. Every word’s lemma and morphology were tagged by <a href={MODEL_SERVICE}>UDPipe 2</a> with the Italian ISDT model <code>{MODEL}</code>, and then checked word by word.
+    The service states the model output is <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA</a>; this reader’s morphological data may be reused only on those terms.
+    The tagger’s own sentence breaks are finer than the paragraphs, and a written word that joins two words (<i>del</i> = <i>di</i> + <i>il</i>, <i>de'</i> = <i>di</i> + <i>i</i>, an enclitic such as <i>dilettarsi</i>) is one clickable word with an analysis of each part.
+    Dependency relations are in the annotation and are not shown.
+  </dd>
+  <dt>How the grammar is named</dt>
+  <dd>
+    The labels are those of the reader’s Italian pack, which follows UD Italian-Old’s conventions rather than ISDT’s. A gerund, which ISDT marks <i>VerbForm=Ger</i>, is shown as a gerund (<i>VerbForm=Conv</i>). A finite past with no aspect, which is the past historic, is shown as <i>Tense=Past</i> with perfective aspect; a participle’s past tense is left as a past participle. <i>Tense=Imp</i> is already the imperfect, and is left as the model wrote it. <i>ExtPos</i>, <i>Typo</i> and <i>Polarity</i> carry nothing the word panel shows, and are dropped. Any other feature the annotation adds stops the build rather than appearing unlabelled.
+  </dd>
+</dl>
+
+<h2>English</h2>
+<dl>
+  <dt>Luigi Ricci, <i>The Prince</i> (London: Humphrey Milford, Oxford University Press, 1909)</dt>
+  <dd>
+    Public domain. <a href={GUTENBERG[0]}>Project Gutenberg #57037</a>, SHA-256 <code>{GUTENBERG[1]}</code>.
+    Gutenberg regenerates this file, so a change upstream stops the fetch until the new copy is checked.
+    Ricci’s preface and his footnotes are not included. His paragraphs do not match the Italian ones (some chapters he runs together, some he splits), so the columns are aligned by sentence: each Italian paragraph is shown with the English sentences aligned to it, and an English sentence with no Italian sentence is shown with the paragraph before it. Chapter 13 of this translation, and of the 1921 reprint of the same text, ends at “much inferior to national forces.” The close of the chapter is not in Ricci’s 1909 wording. A 1935 revision by E. R. P. Vincent includes it, in his own wording, and is not used. The Italian of that close is shown with a note and no English.
+    A chapter’s English heading is the sentence aligned to its rubric, shown in title case with the chapter number set off (“Chapter I. The Various Kinds of Government…”).
+  </dd>
+</dl>
+
+<h2>Dictionary</h2>
+<dl>
+  <dt>Wiktionary, Italian entries</dt>
+  <dd>
+    English Wiktionary’s Italian entries, extracted by <a href="https://github.com/tatuylonen/wiktextract">Wiktextract</a> and published by <a href="https://kaikki.org/dictionary/Italian/">kaikki.org</a>, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> and the GNU Free Documentation License; © Wiktionary contributors.
+    The same capture the Dante Reader uses, of 21 June 2025 (<code>{KAIKKI[0]}</code>, SHA-256 <code>{KAIKKI[1]}</code>).
+    A lemma finds the entries spelt as it is, else those spelt with other accents; a verb Wiktionary lists only as pronominal is found under its <i>-rsi</i> form.
+    A page that only names another spelling is followed to that spelling.
+    Sense labels (<i>archaic</i>, <i>literary</i>) are Wiktionary’s, in Wiktionary’s order.
+  </dd>
+</dl>
+
+<style>
+  code {
+    overflow-wrap: anywhere;
+  }
+</style>

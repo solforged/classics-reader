@@ -34,7 +34,10 @@
     "preview:genesis": "READER=genesis astro preview",
     "dev:dante": "READER=dante astro dev",
     "build:dante": "READER=dante astro build",
-    "preview:dante": "READER=dante astro preview"
+    "preview:dante": "READER=dante astro preview",
+    "dev:machiavelli": "READER=machiavelli astro dev",
+    "build:machiavelli": "READER=machiavelli astro build",
+    "preview:machiavelli": "READER=machiavelli astro preview"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4",
