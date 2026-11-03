@@ -1,11 +1,12 @@
-// Citations: "Vsp 45", "Gylf 12", "BhG 12.47", "Aen. 1.742". A work's abbreviation may already carry its outermost
-// division ("BhG 12" is chapter 12, "Aen. 1" is book 1); the citation then continues it with a dot.
+// Citations: "Vsp 45", "Gylf 12", "BhG 12.47", "Aen. 1.742", "Muq. 1.2.14". A work's abbreviation may already carry its
+// outermost division ("BhG 12" is chapter 12, "Aen. 1" is book 1) or its outermost divisions ("Muq. 1.2" is chapter 1,
+// discussion 2); the citation then continues it with a dot.
 import type { WorkInfo } from "../sites/types";
 
 export type CiteWork = Pick<WorkInfo, "slug" | "abbr" | "levels">;
 
-/** The abbreviation's trailing number ("1" in "Aen. 1"), when it names a division. */
-const abbrNumber = (abbr: string): string | undefined => abbr.match(/\s(\d+)$/)?.[1];
+/** The abbreviation's trailing number ("1" in "Aen. 1", "1.2" in "Muq. 1.2"), when it names divisions. */
+const abbrNumber = (abbr: string): string | undefined => abbr.match(/\s(\d+(?:\.\d+)*)$/)?.[1];
 
 /**
  * A citation as printed: the abbreviation and a row id or numbered line. When the abbreviation ends with the
@@ -14,8 +15,7 @@ const abbrNumber = (abbr: string): string | undefined => abbr.match(/\s(\d+)$/)?
 export function formatCite(work: CiteWork, cite: string): string {
   const number = abbrNumber(work.abbr);
   if (number === undefined) return `${work.abbr} ${cite}`;
-  const parts = cite.split(".");
-  if (work.levels.length > 1 && parts.length > 1 && parts[0] === number) return `${work.abbr}.${parts.slice(1).join(".")}`;
+  if (work.levels.length > 1 && cite.startsWith(`${number}.`)) return `${work.abbr}.${cite.slice(number.length + 1)}`;
   return `${work.abbr}.${cite}`;
 }
 
@@ -39,9 +39,9 @@ export function resolveCite<W extends CiteWork>(input: string, works: readonly W
     if (!abbr || (typed !== abbr && !typed.startsWith(`${abbr} `))) continue;
     if (best && abbr.length <= best.length) continue;
     const rest = typed.slice(abbr.length).split(" ").filter(Boolean);
-    const number = abbrNumber(work.abbr);
-    // "Aen. 1.157" cites book 1, line 157: the abbreviation supplies the outer level the input left out.
-    const parts = number !== undefined && rest.length > 0 && rest.length < work.levels.length ? [number, ...rest] : rest;
+    const outer = abbrNumber(work.abbr)?.split(".") ?? [];
+    // "Aen. 1.157" cites book 1, line 157: the abbreviation supplies the outer levels the input left out.
+    const parts = outer.length > 0 && rest.length > 0 && outer.length + rest.length <= work.levels.length ? [...outer, ...rest] : rest;
     if (parts.length > work.levels.length) continue;
     best = { work, cite: parts.join("."), length: abbr.length };
   }

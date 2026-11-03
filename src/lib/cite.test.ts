@@ -68,3 +68,29 @@ describe("resolveCite", () => {
     expect(resolveCite("Vs 45", works)).toBeUndefined();
   });
 });
+
+describe("an abbreviation that names several divisions", () => {
+  const paragraph = [{ name: "Paragraph" }];
+  const muq: CiteWork[] = [
+    { slug: "preface", abbr: "Muq. Pr.", levels: paragraph },
+    { slug: "book-one", abbr: "Muq. 1.0", levels: paragraph },
+    { slug: "discussion-1", abbr: "Muq. 1.1", levels: paragraph },
+    { slug: "discussion-2", abbr: "Muq. 1.2", levels: paragraph },
+  ];
+  test("continues the dotted number with a dot", () => {
+    expect(formatCite(muq[2]!, "14")).toBe("Muq. 1.1.14");
+    expect(formatCite(muq[1]!, "4")).toBe("Muq. 1.0.4");
+    expect(formatCite(muq[0]!, "3")).toBe("Muq. Pr. 3");
+  });
+  test("reads the printed form, with any separator", () => {
+    expect(resolveCite("Muq. 1.1.14", muq)).toEqual({ slug: "discussion-1", cite: "14" });
+    expect(resolveCite("muq 1 2 5", muq)).toEqual({ slug: "discussion-2", cite: "5" });
+    expect(resolveCite("Muq. 1.0.4", muq)).toEqual({ slug: "book-one", cite: "4" });
+    expect(resolveCite("Muq. Pr. 3", muq)).toEqual({ slug: "preface", cite: "3" });
+  });
+  test("names the whole work when no row follows, and no work for a row it cannot hold", () => {
+    expect(resolveCite("Muq. 1.2", muq)).toEqual({ slug: "discussion-2", cite: "" });
+    expect(resolveCite("Muq. 1.1.14.2", muq)).toBeUndefined();
+    expect(resolveCite("Muq. 1.3.1", muq)).toBeUndefined();
+  });
+});

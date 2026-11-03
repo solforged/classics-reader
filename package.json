@@ -38,7 +38,10 @@
     "preview:dante": "READER=dante astro preview",
     "dev:machiavelli": "READER=machiavelli astro dev",
     "build:machiavelli": "READER=machiavelli astro build",
-    "preview:machiavelli": "READER=machiavelli astro preview"
+    "preview:machiavelli": "READER=machiavelli astro preview",
+    "dev:muqaddimah": "READER=muqaddimah astro dev",
+    "build:muqaddimah": "READER=muqaddimah astro build",
+    "preview:muqaddimah": "READER=muqaddimah astro preview"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4",

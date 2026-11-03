@@ -1,0 +1,100 @@
+---
+// Sources and licences of the Muqaddimah Reader (src/pages/sources.astro).
+import { LANE_AVAILABILITY, WIKTIONARY_CREDIT } from "../../packs/ara/dictionaries";
+import units from "./data/units.json";
+import { ANNOTATOR, KAIKKI, LANE, OPENITI, REVIEW_STATUS, WIKTIONARY_SHA } from "./sources";
+
+const reviewed = REVIEW_STATUS === "reviewed";
+const rows = units.units.reduce((sum, unit) => sum + unit.pids.length, 0);
+const words = units.units.reduce((sum, unit) => sum + unit.words, 0);
+const titles = new Map(units.works.map((work) => [work.slug, work.title_en]));
+const reviewNote = reviewed
+  ? `The annotation was then reviewed word by word by ${units.units.length} reviewers, one for each review unit, checking every word’s lemma, root, class and features, and a consistency pass across the units followed. Residual errors are possible; trust the Arabic over the panel.`
+  : "The tags have not been checked by hand yet. A trial of the model on a sample of this text found about four wrong tags in a hundred words of expository prose, and about fifteen in the author’s rhymed preface; expect errors, and trust the Arabic over the panel.";
+---
+<h2>Arabic</h2>
+<dl>
+  <dt>Ibn Khaldūn, <i>al-Muqaddima</i>: Khalīl Shaḥāda’s edition, in OpenITI’s text</dt>
+  <dd>
+    The edition of Khalīl Shaḥāda, revised by Suhayl Zakkār (Beirut: Dār al-Fikr, 1988), typed for al-Maktaba al-Shāmila (book 12320) and carried into the OpenITI corpus (release 2025.1.9, <a href="https://doi.org/10.5281/zenodo.17767721">Zenodo 10.5281/zenodo.17767721</a>), from <a href={OPENITI.url}>{OPENITI.url}</a> (SHA-256 <code>{OPENITI.sha256}</code>, {OPENITI.bytes.toLocaleString("en")} bytes).
+    The reader covers lines 39 to 3204 of the file: the author’s preface, the Introduction, the preface to Book One and the six prefatory discussions of its first chapter ({rows} rows, {words.toLocaleString("en")} words).
+    The text is licensed <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>, and is credited so; this reader’s Arabic text and its annotation may be reused only on those terms, which means non-commercially.
+    The file has no vowel marks, and neither has the text shown: the vocalized forms in the word panel are the tagger’s, not the edition’s.
+    Page markers (<code>PageV01P005</code>), manuscript-folio markers (<code>ms0013</code>) and footnote numbers are not part of the text, and the footnote bodies are not in the file. One footnote the converter left in the text (line 2918, the editor’s note on two diviners) is dropped.
+    A paragraph that a page break cuts is joined again: the converter starts a new paragraph line at every page, and the build joins it to the paragraph before unless that ends a sentence.
+    Every heading of the slice, the title of each work and the sub-headings inside it, is a row of its own. A passage of verse is one row with a line to each verse line; the edition prints each line as two hemistichs divided by “...”, which the reader draws as a gap, and it does not indent alternate lines.
+    A paragraph of the edition of more than 250 words is too long to read beside its English, so it is cut into rows at the ends of sentences (after a full stop, a question mark, an exclamation mark or a colon), each as near 150 words as the sentences allow, so that no row has more than about 250 words. A sentence of more than 110 words, which the edition punctuates hardly at all, is also cut inside, at a comma or before a conjunction, and a last piece of fewer than 40 words stays with the row before it. Headings and verse are never cut.
+    A ¶ opens each row that begins a paragraph of the edition, in both columns; a row cut from the paragraph before it has none.
+    Every row has a number within its work, which is its citation (<i>Muq. 1.2.14</i>: Book One, chapter 1, second discussion, row 14).
+    The build derives the rows from the download and stops unless they are, character for character, the text the annotation tags.
+    <details>
+      <summary>The {units.units.length} review units</summary>
+      <ul>
+        {units.units.map((unit) => <li>{unit.id}: {titles.get(unit.work)}, {unit.pids.length} rows, {unit.words.toLocaleString("en")} words</li>)}
+      </ul>
+    </details>
+  </dd>
+  <dt>Lemma, root and morphology: {ANNOTATOR.tool}</dt>
+  <dd>
+    No hand-annotated treebank of this text exists. Every word was tagged by <a href="https://github.com/CAMeL-Lab/camel_tools">CAMeL Tools</a> (MIT licence), its {ANNOTATOR.model} disambiguator over the <code>{ANNOTATOR.db}</code> analyzer database, and the output was converted to Universal Dependencies by the scripts in <code>corpora/muqaddimah/tools/</code>.
+    The database is licensed GPL-2: the reader keeps its lemma, root, part of speech and features, and not its English glosses.
+    The model is trained on Modern Standard Arabic, not on fourteenth-century prose.
+    Words the tagger cannot analyse (closed-class words, names) are given their lemma and class by hand in a patch table of the conversion script. {reviewNote}
+    A written word with clitics (a conjunction, a preposition, a pronoun suffix) is one clickable word with a card for each of its parts, each showing its own vocalized form; the vocalized form shown for a plain word is the tagger’s guess at the word’s vowels in this context.
+    The word panel shows the lemma’s root beside it. Where the tagger leaves a radical open, the root is resolved against Lane’s list of roots and the lemma’s letters, and shows <span lang="ar" dir="rtl">؟</span> in the place the resolution fails; words with no root (particles, pronouns, names) show none.
+    Dependency relations are not in the annotation.
+  </dd>
+  <dt>How the grammar is named</dt>
+  <dd>
+    The labels are those of the reader’s Arabic pack (<code>packs/ara/morph.ts</code>) for the Universal Dependencies features the annotation uses: aspect, case, definiteness (definite, indefinite, construct), gender, mood, number, person, voice, verb form and pronoun type. A feature or value the pack has no label for stops the build rather than appearing unlabelled.
+  </dd>
+</dl>
+
+<h2>English</h2>
+<dl>
+  <dt>A new translation, made for this reader</dt>
+  <dd>
+    This is not a published translation. It was made for this reader from the Arabic, one English text to each Arabic row, with AI assistance (language models). It was drafted unit by unit; a second reader then reviewed each unit against the Arabic, and a consistency sweep across the units followed, for terms and recurring phrases.
+    The translation was checked against William MacGuckin de Slane’s French, <i>Les Prolégomènes d’Ibn Khaldoun</i> (Paris: Imprimerie impériale, 1863–68, public domain), which was consulted in the transcription of <i>Les Classiques des sciences sociales</i> (Université du Québec à Chicoutimi), made by Pierre Palpant. That text was consulted only and is not reproduced here.
+    De Slane translated another edition of the Arabic text, so a difference between the two can come from the Arabic as well as from the translation.
+    A heading is translated in its own row, and a passage of verse has one English line to each Arabic verse line.
+    Where the translation rests on an emendation of the Arabic, reads an uncertain passage, or the Arabic repeats itself (a dittography) or is corrupt, a translator’s note says so: it is the <b>n</b> after the English, and it opens in the side panel. The Arabic itself is never changed.
+    Its English titles for the works are this reader’s own.
+  </dd>
+</dl>
+
+<h2>Dictionaries</h2>
+<dl>
+  <dt>Edward William Lane, <i>An Arabic–English Lexicon</i> (London: Williams and Norgate, 1863–93)</dt>
+  <dd>
+    Public domain, in the TEI edition of the <a href="https://www.perseus.tufts.edu/">Perseus Digital Library</a> as amended by <a href="https://github.com/laneslexicon/lexicon_xml">laneslexicon</a> (<a href={LANE.url}>commit <code>f3c19fb</code></a>, SHA-256 <code>{LANE.sha256}</code>).
+    Perseus’s availability statement, which stays intact beside the text:
+    <blockquote>
+      {LANE_AVAILABILITY.map((line) => <p>{line}</p>)}
+    </blockquote>
+    A word’s articles are found by its root (resolved as above), and the articles of the lemma’s own headword come first; where Lane has no article of the lemma itself, the first articles of its root are shown instead, under a line that says so. The articles are abridged: a long article is cut after a whole sense, and the full text is in Lane. The digitization is thinner from the letter <i>qāf</i> on, so some roots have no article.
+    Lane’s abbreviations (<i>aor.</i>, <i>inf. n.</i>) and the sigla of his authorities are marked so that their expansions show on hover.
+  </dd>
+  <dt>Wiktionary, Arabic entries</dt>
+  <dd>
+    {WIKTIONARY_CREDIT} © Wiktionary contributors.
+    kaikki.org has deprecated its Arabic file, and no usable archived copy was found, so the reader keeps <code>corpora/muqaddimah/data/wiktionary.json</code>: the entries for its lemmas and the entries those redirect to, pinned by SHA-256 <code>{WIKTIONARY_SHA}</code>.
+    The extract was made from <a href={KAIKKI.url}>{KAIKKI.url}</a> (SHA-256 <code>{KAIKKI.sha256}</code>), and <code>bun corpora/muqaddimah/fetch.ts --kaikki</code> derives it again when that file can still be had.
+    Entries are shown with Wiktionary’s sense order and labels.
+  </dd>
+</dl>
+
+<style>
+  code {
+    overflow-wrap: anywhere;
+  }
+  blockquote {
+    margin: 0.4rem 0 0.6rem 1rem;
+    padding-left: 0.8rem;
+    border-left: 2px solid var(--border);
+    font-size: 0.9em;
+  }
+  blockquote p {
+    margin: 0.2rem 0;
+  }
+</style>

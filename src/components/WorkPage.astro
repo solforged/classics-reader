@@ -55,15 +55,21 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 // opens nothing and the go-to box does not read it as a label.
 const cue = (u: SourceUnit | TextUnit): string => (u.speaker ? `<span class="speaker">${esc(u.speaker)}</span> ` : "");
 
-function pieces(line: Piece[]): string {
+// The break between the two hemistichs of a line of Arabic verse (SourceUnit.hemistichs) is " ... " in the pieces. It is
+// drawn as a gap: a space with wide word spacing, so a wrapped line does not start with a blank and a copy keeps a space.
+const HEMISTICH_BREAK = /\s*\.\.\.\s*/g;
+const HEMISTICH_GAP = '<span class="hem"> </span>';
+
+function pieceHtml(line: Piece[], text: (s: string) => string): string {
   return line
     .map((p) => {
-      if (typeof p === "string") return esc(p);
+      if (typeof p === "string") return text(p);
       const cls = p[2] ? "w sup" : "w";
       return `<span class="${cls}" data-a="${p[1].join(" ")}">${esc(p[0])}</span>`;
     })
     .join("");
 }
+const pieces = (line: Piece[]): string => pieceHtml(line, esc);
 
 function sourceUnit(u: SourceUnit): string {
   if (u.kind === "head") {
@@ -79,6 +85,11 @@ function sourceUnit(u: SourceUnit): string {
       const n = first + i;
       return `<div class="l" data-n="${n}">${n % 5 ? "" : `<span class="lnum" aria-hidden="true">${n}</span>`}${pieces(l)}</div>`;
     }).join("")}</div>`;
+  }
+  // Verse of two hemistichs (Arabic): lines are not alternately indented, and the halves of a line stand apart.
+  if (u.hemistichs) {
+    return `<div class="stanza stichic">${label}${u.lines.map((l) => `<div class="l">${
+      pieceHtml(l, (s) => esc(s).replace(HEMISTICH_BREAK, HEMISTICH_GAP))}</div>`).join("")}</div>`;
   }
   return `<div class="stanza">${label}${u.lines.map((l) => `<div class="l">${pieces(l)}</div>`).join("")}</div>`;
 }
@@ -110,7 +121,7 @@ const analyses = work.analyses.map(([lemma, morph, s, word]) => {
 // The outline: a listed level's divisions (a prose work's chapters, with their headings), or the paragraphs of
 // numbered verse (an epic's, by first line and opening words). Stanzaic poems have none; go-to reaches a stanza.
 const plain = (line: Piece[]) => line.map((p) => (typeof p === "string" ? p : p[0])).join("");
-const opening = (line: string) => line.split(/\s+/).slice(0, 3).join(" ").replace(/[\s,.;:!?"“”‘’—–-]+$/u, "");
+const opening = (line: string) => line.split(/\s+/).slice(0, 3).join(" ").replace(/[\s,.;:!?"“”‘’—–،؛؟-]+$/u, "");
 // A division without a heading (the listed level's opening) is listed by its first words, or its first twelve characters, marks
 // left out, in a script without word spaces (Chinese).
 const openingOf = (line: string) => (/\s/u.test(line.trim())
@@ -222,7 +233,7 @@ const ids = new Set(work.rows.map((r) => r.id));
       data-abbr={def.abbr} data-title={def.title} dir={lang.dir}>
       {
         work.rows.map((r) => (
-          <section class="row" id={r.id}>
+          <section class={site.paragraphMarks && !r.continues ? "row para" : "row"} id={r.id}>
             <a class="cite no-print" href={`#${r.id}`} title="Link to this passage">
               {r.id}
             </a>
@@ -583,6 +594,14 @@ const ids = new Set(work.rows.map((r) => r.id));
     text-align: justify;
     hyphens: auto;
   }
+  /* ReaderSite.paragraphMarks: a prose row that begins a paragraph of the edition opens with ¶ in each column; a row cut
+     from the paragraph before it (Row.continues) carries on without one. */
+  .row.para .prose::before {
+    content: "¶\00a0";
+    font-family: var(--sans);
+    font-size: 0.8em;
+    color: var(--faint);
+  }
   .rubric {
     font-weight: 500;
     font-size: 1.05rem;
@@ -612,6 +631,10 @@ const ids = new Set(work.rows.map((r) => r.id));
   .cz {
     display: inline-block;
     width: 1.6em;
+  }
+  /* The gap between the two hemistichs of a line of Arabic verse (SourceUnit.hemistichs). */
+  .hem {
+    word-spacing: 2.2em;
   }
   .w {
     cursor: pointer;

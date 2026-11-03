@@ -19,6 +19,11 @@ export interface SourceUnit {
    */
   firstLine?: number;
   /**
+   * Verse of lines of two hemistichs (Arabic poetry), without line numbers. The pieces divide the halves with " ... ",
+   * which the page draws as a gap; no line is indented more than another, as in a stichic TextUnit.
+   */
+  hemistichs?: true;
+  /**
    * A dialogue's speaker whose turn this prose unit opens ("Fabrizio"). The page prints it before the text as a small-caps
    * cue, outside the words: it has no analysis, and the search text and the concordance read only `lines`.
    */
@@ -62,6 +67,11 @@ export interface Row {
   id: string; // citation anchor, e.g. "12", "1.23" or "p-before-1"
   /** Units per side id (ReaderSite.sides); a side with nothing in this row has an empty list. */
   sides: Record<string, SideUnits>;
+  /**
+   * A row cut from a longer paragraph of the edition, which carries on the paragraph of the row before it
+   * (ReaderSite.paragraphMarks). Absent on a row that begins a paragraph.
+   */
+  continues?: true;
 }
 
 /** A row's units on a source side. */

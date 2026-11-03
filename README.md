@@ -1,8 +1,9 @@
 # Classics Reader
 
 Static parallel-text readers modelled on [The Aristotle Reader](https://aristotle.johnhboyer.com).
-Each reader is one site built from the same pages: the original language sits beside a
-public-domain English translation, one aligned stanza, verse, chapter or paragraph per row.
+Each reader is one site built from the same pages: the original language sits beside an English
+translation (in the public domain, except the Muqaddimah Reader's new one), one aligned stanza, verse,
+chapter or paragraph per row.
 
 - **The Edda Reader**: the Poetic and Prose Eddas in Old Norse.
 - **The Gītā Reader**: the Bhagavadgītā, all 18 chapters, in Sanskrit (IAST or Devanagari).
@@ -13,6 +14,7 @@ public-domain English translation, one aligned stanza, verse, chapter or paragra
 - **The Analects Reader**: the Analects of Confucius, all 20 books, in Classical Chinese.
 - **The Dante Reader**: the Divine Comedy, all 100 cantos, in Dante's Italian.
 - **The Machiavelli Reader**: *Il Principe*, the dedication and all 26 chapters, *Dell'arte della guerra*, the proemio and all seven books, and the *Discorsi sopra la prima deca di Tito Livio*, the dedication and all three books, in Italian.
+- **The Muqaddimah Reader**: Ibn Khaldūn's preface, the Introduction, and Book One's preface and six prefatory discussions, in Arabic.
 
 ## Navigation
 
@@ -257,6 +259,43 @@ Dante Reader. Citations read `Prin. 18.2` (chapter, paragraph; the dedication is
 dedication is `Disc. 0.1`). The reader shares the
 Medieval Italian shelf. Credits are in `corpora/machiavelli/Sources.astro`.
 
+## The Muqaddimah Reader
+
+The opening of Ibn Khaldūn's *Muqaddima* in nine works of one collection: the author's preface, the
+Introduction, the preface to Book One and the six prefatory discussions of its first chapter, 294 rows
+in all. The Arabic is Khaḷīl Shaḥāda's edition, revised by Suhayl Zakkār (Dar al-Fikr, Beirut, 1988),
+typed for al-Maktaba al-Shāmila and carried into OpenITI (file
+`0808IbnKhaldun.Tarikh.Shamela0012320-ara1`, lines 39–3204; release 2025.1.9), **CC BY-NC-SA 4.0**: the
+reader's Arabic data is for non-commercial use only. The text has no vowel marks and is shown without
+them. The build derives it from the pinned download (`lib/openiti.ts`) and stops unless it equals,
+character for character, the text of the CoNLL-U. The edition's paragraphs are long, so a row ends at
+a sentence end, about 150 words in, and none runs past about 250; ¶ marks the rows that begin a
+paragraph of the edition, and a verse row shows its hemistichs with a gap. Citations read `Muq. Pr. 3`
+(the author's preface), `Muq. In. 12` (the Introduction), `Muq. 1.0.4` (the preface to Book One) and
+`Muq. 1.2.14` (Book One, chapter 1, second discussion); `src/lib/cite.ts` accepts a dotted number
+after an abbreviation such as `Muq. 1.2`. The morphology is CAMeL Tools 1.6.0 (its BERT-unfactored MSA
+disambiguator over the calima-msa-r13 database, which is GPL-2: the reader keeps its lemmas, roots
+and features, derived from it, and not its English glosses). `tools/annotate.py` and its patch tables
+convert the output to UD CoNLL-U, with clitics as multiword tokens, and each unit was then reviewed
+word by word (one reviewer to each of 14 units) and given a consistency pass across the units. The
+CoNLL-U is vendored in `data/conllu/` and pinned by hash. A written word with clitics opens one card
+per word, and each card shows the vocalized form, the vocalized lemma and the root. The dictionaries
+are Lane's Lexicon and Wiktionary. Lane is the Perseus TEI as corrected by the Lane's Lexicon project,
+converted from Buckwalter to Arabic and looked up by root and vocalized headword; a long article is
+cut after a whole sense, and where Lane has no article for the lemma the root's first articles are
+shown and the panel says so (1,041 of 4,491 dictionary records). Wiktionary comes from a vendored
+kaikki.org extract (`data/wiktionary.json`), which `tools/extract.ts` can derive again from the pinned
+dump, though kaikki has deprecated that file. Names have no dictionary. The English is a new
+translation made for this reader with AI assistance: drafted unit by unit from the Arabic, checked
+against de Slane's French (1863–68, consulted in the Classiques des sciences sociales transcription
+and not reproduced), reviewed by a second reader against the Arabic and swept for consistency. It
+has 71 translator's notes, which mark emendations, uncertain readings and the edition's repetitions.
+It is not a published translation, and Rosenthal's, which is in copyright, was not used. Search
+ignores vowel marks and tatweel, treats the hamza seats (أ إ آ ٱ) as ا, ى as ي and ة as ه
+(`عصبيه` finds `العصبية`). The Arabic reads right to left, as in the Genesis Reader. There are no
+inflection tables. The library shelves the reader under Classical Arabic. Credits are in
+`corpora/muqaddimah/Sources.astro`.
+
 ## Building
 
 ```sh
@@ -280,6 +319,7 @@ READER=genesis bun run fetch     # OSHB, Open Scriptures lexicon, JPS 1917
 READER=analects bun run fetch    # Kyoto treebank, Legge, Unihan, Wiktionary
 READER=dante bun run fetch       # UD_Italian-Old, Gutenberg Italian and Longfellow, Toynbee, Wiktionary (streams 650 MB)
 READER=machiavelli bun run fetch # Ricci, Thomson, Liber Liber's Arte and Discorsi, Wiktionary (streams 650 MB); the CoNLL-U, Farneworth and the aligned English of the Discorsi are in the repo
+READER=muqaddimah bun run fetch  # OpenITI text, Lane's Lexicon; the CoNLL-U, English and Wiktionary extract are in the repo
 # then READER=<id> bun run data and bun run build:<id> for each
 
 bun run build:site     # every reader's data and site, and the library → dist/site/
@@ -329,7 +369,11 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   numbered stichic verse (an epic paragraph): its lines carry their numbers, every fifth shows one,
   the outline lists its paragraphs, and the go-to box, `#1.23` links and concordance citations reach
   a line inside its row. A translation unit marked `stichic` is continuous verse too, without the
-  alternate indent. Works belong to one of the site's `collections` by id; with more than one, each
+  alternate indent; a source unit marked `hemistichs` is Arabic verse (two hemistichs to a line,
+  divided by ` ... ` in its pieces), drawn without the alternate indent and with that break as a gap.
+  A site with `paragraphMarks` has rows cut from longer paragraphs of its edition: a row with
+  `continues` carries on the paragraph of the row before it, and the other prose rows open with ¶.
+  Works belong to one of the site's `collections` by id; with more than one, each
   collection gets a page at `/<id>/`, and `src/lib/site.ts` fails the build if an id is also a
   work slug.
 - `src/lib/cite.ts`: citations as printed (`formatCite`: `Vsp 45`, `BhG 12.47`, `Aen. 1.742`) and
@@ -337,7 +381,8 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
 - `src/lang/types.ts` is the pack contract the shared code uses (spelling fold, search key,
   morphology labels, dictionary list, optional inflection tables and scripts, and `dir` for a
   right-to-left script); `src/lang/index.ts` exposes the reader's pack as `lang`. A dictionary
-  record may carry a `reading` (Chinese pinyin), shown beside the lemma.
+  record may carry a `reading` (Chinese pinyin), shown beside the lemma, and `notes`, a line under
+  a dictionary's title (Arabic: Lane's articles shown are the word's root's).
 - `src/lib/morph.ts`: the analysis format. Word analyses carry Universal Dependencies morphology,
   e.g. `NOUN Case=Acc|Definite=Ind|Gender=Masc|Number=Sing`.
 - `src/lib/entry.ts`: renders dictionary articles for the word panel and the lemma pages. A section
@@ -368,6 +413,10 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
 - `packs/lzh/`: Classical Chinese. The build helpers read Kyoto CoNLL-U (`conllu.ts`), label its
   features (`morph.ts`) and build entries from Unihan and Wiktionary (`unihan.ts`,
   `wiktionary.ts`, `dictionary.ts`).
+- `packs/ara/`: Arabic. Lookup folds vowel marks, tatweel, hamza seats, ى and ة (`spelling.ts`), and
+  the pack labels UD morphology (`morph.ts`). The build helpers parse Lane's Lexicon from Perseus's
+  TEI with its Buckwalter transliteration converted to Arabic (`lane.ts`, `buckwalter.ts`), make
+  and read the Wiktionary extract (`wiktionary.ts`) and look a lemma up by lemma and root (`lexicon.ts`).
 - `corpora/edda/`: the Edda build (`build.ts`, `catalog.ts`) and its parsers (`lib/`: `eae.ts`,
   `bugge.ts`, `bellows.ts`, `snorra.ts`, Bellows's name index `names.ts`). It fails if an
   alignment misses or repeats a unit. `alignment/<slug>.json` is the curated row-by-row crosswalk
@@ -382,12 +431,16 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
   (`alignment.ts`). It fails if a line's word count differs from LASLA's, if Greenough's and
   Williams's paragraphs differ, or if a listed reading is no longer in the text.
 - `corpora/oldenglish/`, `corpora/homer/`, `corpora/genesis/`, `corpora/analects/`,
-  `corpora/machiavelli/`: the same shape as the Aeneid (pinned `sources.ts`, `fetch.ts`, parsers in
-  `lib/`, exception tables in `alignment.ts`, plus `names.ts` for Old English names and
-  `annotation.ts` for Homer's treebank repairs; Machiavelli's build is `build.ts`, which runs
-  `principe.ts`, `arte.ts` and `discorsi.ts`, the last for the *Discorsi*'s four works). Each build stops on an unexplained difference
-  between its texts, on a morphology value with no English label, and on an exception it does not
-  use.
+  `corpora/machiavelli/`, `corpora/muqaddimah/`: the same shape as the Aeneid (pinned `sources.ts`,
+  `fetch.ts`, parsers in `lib/`, exception tables in `alignment.ts`, plus `names.ts` for Old English
+  names and `annotation.ts` for Homer's treebank repairs; Machiavelli's build is `build.ts`, which runs
+  `principe.ts`, `arte.ts` and `discorsi.ts`, the last for the *Discorsi*'s four works). Each build
+  stops on an unexplained difference between its texts, on a morphology value with no English label,
+  and on an exception it does not use. The Muqaddimah's `tools/` hold the annotation pipeline
+  (`annotate.py`, `camel_run.py` and the patch tables), `check.ts` (the CoNLL-U against the OpenITI
+  paragraphs), `pins.ts` (rewrites the pin block of `sources.ts`) and `extract.ts` (the Wiktionary
+  extract); its English is `data/en/<unit>.tsv`, one line per row, with translator's notes in
+  `data/notes.tsv`.
 - `src/pages/`: home, works and collection pages (`[slug]`, rendering `src/components/WorkPage.astro`
   or `CollectionPage.astro`), search, lexicon, sources.
 

@@ -173,6 +173,26 @@ button { font: inherit; color: inherit; }
 }
 .col.source[lang="hbo"] { font-size: 1.3em; line-height: 2.1; }
 
+/* Classical Arabic (packs/ara). EB Garamond has no Arabic. Naskh faces that set the vowel signs and the shadda properly
+   come first (Amiri is the usual choice for classical text with vowels, Noto Naskh Arabic its common stand-in), then the
+   faces the systems ship; none is downloaded. Arabic is set larger than Latin, and the text taller still for the signs
+   above and below the line. Latin typography does not apply to it: no italic, small caps, case change, hyphenation, and
+   above all no letter-spacing, which would break the joins between letters. Matched by attribute like Hebrew, and
+   marked elements do not nest, so the sizes do not compound. */
+[lang="ar"] {
+  font-size: 1.2em;
+  font-family: "Amiri", "Noto Naskh Arabic", "Scheherazade New", "Geeza Pro", "Al Bayan", "Damascus", "Sakkal Majalla",
+    "Traditional Arabic", "Simplified Arabic", var(--serif);
+  font-style: normal;
+  font-variant: normal;
+  letter-spacing: 0;
+  text-transform: none;
+  hyphens: manual;
+}
+.col.source[lang="ar"] { font-size: 1.4em; line-height: 2.1; }
+/* A span of Lane's Arabic whose transliteration has a typing error in the source and could not be converted. */
+.lane-raw { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; color: var(--muted); }
+
 .page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
 .page.wide { max-width: 72rem; }
 

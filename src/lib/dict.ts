@@ -44,6 +44,8 @@ export interface DictHit {
   parts?: string[];
   /** How the lemma is read, shown beside it in the word panel and on its lemma page (Chinese: pinyin and Middle Chinese). */
   reading?: string;
+  /** A line of plain text under a dictionary's title, above its entries, by dictionary id (Arabic: Lane's entries are the word's root's). */
+  notes?: Record<string, string>;
 }
 
 /** A dictionary article as digitized: headword and definition chunks (sanitized HTML). Input to the parsers. */

@@ -92,6 +92,11 @@ export interface ReaderSite {
   works: readonly WorkInfo[];
   /** Badge (HTML) after the lemma of an analysis from each non-edition source (src/scripts/reader.ts). */
   sourceNotes: Readonly<Record<string, string>>;
+  /**
+   * The rows are cut from longer paragraphs of the edition, and a row with `Row.continues` carries on the paragraph of the
+   * row before it. The reader then opens each prose row that does not carry on with ¶, so the edition's paragraphs show.
+   */
+  paragraphMarks?: true;
   /** Translator's notes and introductions, when the translation has them. */
   notes?: { credit: string; introLabel: string };
 }

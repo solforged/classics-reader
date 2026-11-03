@@ -159,6 +159,8 @@ export function dictionaryHtml(hit: DictHit | undefined, options: DictionaryOpti
       blocks.push(`<${heading}>${title}</${heading}>${entriesHtml(dict, inWork.length ? inWork : all)}`);
       continue;
     }
+    const noteText = hit.notes?.[dict.id];
+    const note = noteText ? `<p class="dict-via">${esc(noteText)}</p>` : "";
     // For a proper noun, entries for the common word that shares its spelling go into a closed section.
     const own = proper ? all.filter(capitalized) : all;
     const others = proper ? all.filter((article) => !capitalized(article)) : [];
@@ -166,8 +168,8 @@ export function dictionaryHtml(hit: DictHit | undefined, options: DictionaryOpti
       if (!articles.length) continue;
       const html = entriesHtml(dict, articles, options.morph);
       target.push(dict.collapsed
-        ? `<details class="dict-collapsed"><summary>${title}</summary>${via}${html}</details>`
-        : `<${heading}>${title}</${heading}>${via}${html}`);
+        ? `<details class="dict-collapsed"><summary>${title}</summary>${via}${note}${html}</details>`
+        : `<${heading}>${title}</${heading}>${via}${note}${html}`);
     }
   }
   if (common.length) {
