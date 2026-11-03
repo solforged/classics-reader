@@ -13,6 +13,7 @@
     "all": "bun scripts/run.ts fetch && bun scripts/run.ts build && astro build",
     "build:site": "bun scripts/site.ts",
     "preview:site": "astro preview --config astro.library.mjs",
+    "deploy:pages": "bun scripts/deploy-pages.ts",
     "align": "bun corpora/edda/check-alignment.ts",
     "dev:gita": "READER=gita astro dev",
     "build:gita": "READER=gita astro build",

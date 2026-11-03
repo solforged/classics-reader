@@ -268,11 +268,18 @@ READER=machiavelli bun run fetch # Ricci, Liber Liber's Arte, Wiktionary (stream
 bun run build:site     # every reader's data and site, and the library → dist/site/
 bun run build:site -- --no-data   # the same without the data builds
 bun run preview:site   # serve dist/site/ (library at /, readers at /<id>/)
+bun run deploy:pages -- --no-data   # build for GitHub Pages and publish it
 ```
 
 `READER` picks the reader for every step and defaults to `edda`; `bun run all` runs the steps for
 the reader `READER` names. `build:site` needs every reader's sources fetched first.
 `bun test` runs the unit tests (`src/lib/cite.test.ts`: citation formatting and parsing).
+
+The site is published at <https://solforged.github.io/classics-reader/>. `deploy:pages` builds it
+under that path (`SITE_BASE=/classics-reader/`; set `SITE` and `SITE_BASE=/` for a custom domain),
+uploads `dist/site/` as `site.tar.gz` to the repository's `site` release, and starts
+`.github/workflows/pages.yml`, which deploys the archive unchanged. The sources are too large to
+fetch in CI, so the build runs locally. Run it from a clean, committed `main`.
 
 ## Layout
 

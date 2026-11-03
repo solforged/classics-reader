@@ -4,7 +4,9 @@ import { READERS, readerId } from "./src/sites/registry.ts";
 
 // READER picks the site (src/sites/registry.ts); its data build writes generated/<reader>/ first. BASE, set by
 // scripts/site.ts, builds the reader into the combined site instead: BASE=/edda/ serves it at /edda/ beside the
-// library, which lives at the base's parent (the library root, "/").
+// library, which lives at the base's parent (the library root, "/"). On a host that serves the site under a path,
+// BASE carries that prefix too (/classics-reader/edda/); the files still go to dist/site/<reader>/. SITE is the
+// origin for canonical URLs.
 const reader = readerId(process.env.READER);
 const file = (path) => fileURLToPath(new URL(path, import.meta.url));
 const base = process.env.BASE;
@@ -12,11 +14,11 @@ if (base !== undefined && !base.endsWith(`/${reader}/`)) throw new Error(`BASE m
 const library = base === undefined ? "" : base.slice(0, -reader.length - 1);
 
 export default defineConfig({
-  site: "https://classics-reader.solforged.io",
+  site: process.env.SITE ?? "https://classics-reader.solforged.io",
   base,
   trailingSlash: "always",
   publicDir: `generated/${reader}/public`,
-  outDir: base === undefined ? `dist/${reader}` : `dist/site${base}`,
+  outDir: base === undefined ? `dist/${reader}` : `dist/site/${reader}`,
   // Stylesheets are linked, not inlined: inlined, the shared page styles were repeated in every one of the lexicon's
   // thousands of pages (about 30–60% of each), while a linked file is fetched once and cached.
   build: { format: "directory", inlineStylesheets: "never" },
