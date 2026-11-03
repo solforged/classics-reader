@@ -1,6 +1,6 @@
 // Builds the Machiavelli Reader into generated/machiavelli/. Run `READER=machiavelli bun run fetch` first.
 //
-// Two works share one dictionary and one concordance: Il Principe (principe.ts) and Dell'arte della guerra (arte.ts).
+// The Prince, the Art of War and the three books of the Discorsi share one dictionary and one concordance.
 // Each builder turns its checked-in annotation and its English into rows; this file looks every lemma up in Wiktionary
 // (as the Dante Reader does), measures the coverage, refuses exception-table entries that nothing used, and writes the
 // work files, the dictionary shards, the search index and the lexicon.
@@ -12,6 +12,7 @@ import type { DictHit } from "../../src/lib/dict";
 import { parseMorph } from "../../src/lib/morph";
 import { ARTE_OMISSIONS, ARTE_SPANNING_BEADS, ARTE_TEXT_FIXES, LEMMA_FIXES, PRINCE_BEAD_OVERRIDES, PRINCE_OMISSIONS } from "./alignment";
 import { buildArte } from "./arte";
+import { buildDiscorsi } from "./discorsi";
 import { readCached } from "./fetch";
 import { Annotator, type Tally } from "./lib/annotate";
 import { buildPrince } from "./principe";
@@ -20,16 +21,17 @@ import { DERIVED } from "./sources";
 
 /**
  * Share of each work's words, names and foreign words apart, whose lemma must have a Wiktionary entry. Measured 99.76%
- * for the Prince and 99.68% for the Arte; what is missing is the period's own vocabulary (<i>deletto</i>, <i>triario</i>,
+ * for the Prince, 99.68% for the Arte and 99.36-99.65% for the Discorsi's four works; what is missing is the period's
+ * own vocabulary (<i>deletto</i>, <i>triario</i>,
  * <i>disavvantaggio</i>, numerals written as one word). The floor fails a build whose Wiktionary extract was made for other
  * lemmas, a stale cache: fetch again.
  */
 const MIN_COVERAGE = 0.99;
 
 const an = new Annotator(new Wiktionary(await readCached(DERIVED.wiktionary)));
-const works: Work[] = [await buildPrince(an), await buildArte(an)];
+const works: Work[] = [await buildPrince(an), await buildArte(an), ...await buildDiscorsi(an)];
 if (site.works.map((work) => work.slug).join() !== works.map((work) => work.slug).join()) {
-  throw new Error("The site lists other works than the two built");
+  throw new Error("The site lists other works than those built");
 }
 
 const records = new Map<string, DictHit>();

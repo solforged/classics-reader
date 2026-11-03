@@ -1,6 +1,7 @@
 ---
 // Sources and licences of the Machiavelli Reader (src/pages/sources.astro).
 import { ARTE_OMISSIONS, ARTE_TEXT_FIXES } from "./alignment";
+import { DISCORSI_FIXES, DISCORSI_SOURCE } from "./discorsi-sources";
 import {
   ARTE_WIKISOURCE, GUTENBERG, KAIKKI, LIBERLIBER, MODEL, MODEL_SERVICE, PRINCE_TEXT, PRINCE_UNITS, PRINCE_WIKISOURCE_OLDID,
   PRINCE_WIKISOURCE_URL,
@@ -10,6 +11,7 @@ const wikisource = (title: string, revid: number): string =>
   `https://en.wikisource.org/w/index.php?title=${encodeURIComponent(title.replaceAll(" ", "_"))}&oldid=${revid}`;
 const omitted = Object.keys(ARTE_OMISSIONS).length;
 const fixes = Object.values(ARTE_TEXT_FIXES);
+const { odt, thomson } = DISCORSI_SOURCE;
 ---
 <h2>Italian</h2>
 <dl>
@@ -44,11 +46,33 @@ const fixes = Object.values(ARTE_TEXT_FIXES);
       Each is a word that is not Italian, or one the sentence cannot bear, with the right word attested elsewhere in the file. Readings that are only doubtful (a numeral, <i>scudi</i> for <i>scudati</i>) are left as the file has them.
     </details>
   </dd>
-  <dt>Morphology: UDPipe 2, model <code>{MODEL}</code>, checked word by word</dt>
+  <dt>Niccolò Machiavelli, <i>Discorsi sopra la prima deca di Tito Livio</i> (Mario Martelli’s text, in Liber Liber’s transcription)</dt>
   <dd>
-    There is no gold treebank of either work. Every word’s lemma and morphology were tagged by <a href={MODEL_SERVICE}>UDPipe 2</a> with the Italian ISDT model <code>{MODEL}</code>, and then checked word by word.
+    Mario Martelli’s edition, in the same <i>Tutte le opere</i> (Florence: Sansoni, 1971), as keyed by <a href="https://www.liberliber.eu/">Liber Liber</a> (first electronic edition, 10 January 1998; the file rates its own reliability 1 on the same scale of 0 to 3), from the OpenDocument file <a href={odt.url}>{odt.url}</a> ({odt.bytes.toLocaleString("en")} bytes, SHA-256 <code>{odt.sha}</code>).
+    Its licence, credit and terms of reuse are the Art of War’s, <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>, and its colophon too says <i>DIRITTI D'AUTORE: no</i>.
+    The text is Martelli’s, in spelling (<i>sanza</i>, <i>republica</i>, <i>nimico</i>) and in paragraphs: a citation is the book, the chapter and the paragraph within the chapter, counted from 1 after the chapter’s rubric, so Disc. 1.11.3 is the third paragraph of Book I, chapter 11.
+    Each chapter’s heading is its rubric, with Martelli’s chapter number. The proemi of Books I and II are chapter 0 (Disc. 1.0.1, Disc. 2.0.1), headed by the book’s title; Book III has no proemio, and its title is not shown.
+    The dedication to Zanobi Buondelmonti and Cosimo Rucellai comes before Book I, and the whole work numbers it book 0, chapter 0. The reader shows it as a short work of its own, Disc. 0: its letter is one paragraph, Disc. 0.1, headed by its salutation.
+    The build reads the file’s <code>content.xml</code>, whose paragraphs and headings it numbers in order from 1 (colophon, licence notice and contents included): the work is blocks 208 to 719, from the dedication’s salutation to the end of Book III.
+    Each of Martelli’s paragraphs is one row. Liber Liber’s EPUB of the same text was compared with it paragraph by paragraph; it splits five paragraphs at Latin quotations, and is not used.
+    Runs of white space become one space; apart from the corrections below, nothing is changed.
+    The build derives the paragraphs from the download, and stops unless they are, character for character, the text the annotation tags.
+    <details>
+      <summary>{DISCORSI_FIXES.length} readings of the transcription corrected</summary>
+      <ul>
+        {DISCORSI_FIXES.map((fix) => <li>Block {fix.line}: <i>{fix.from}</i> → <i>{fix.to}</i> (“{fix.before}{fix.to}{fix.after}”)</li>)}
+      </ul>
+      Twelve are words that are not Italian (or, in Livy’s Latin, not Latin), or that the sentence cannot bear, as where <i>modo venga</i> drops the negation the next sentence restates. Each was read in the page images of Bettoni’s printing (Milan, 1824) and compared with Cambiagi’s (Florence, 1782).
+      The same twelve readings are in the Einaudi electronic text of Martelli, so they are not known to be slips of Liber Liber’s keying: some may be in Martelli’s printing itself.
+      The other four correct only spacing, such as <i>l' agguato</i> and a comma before its space in a rubric. Readings that are only doubtful are left as the file has them.
+    </details>
+  </dd>
+  <dt>Morphology: UDPipe 2, model <code>{MODEL}</code></dt>
+  <dd>
+    There is no gold treebank of any of the three works. Every word’s lemma and morphology were tagged by <a href={MODEL_SERVICE}>UDPipe 2</a> with the Italian ISDT model <code>{MODEL}</code>; in the Prince and the Art of War they were then checked word by word.
     The service states the model output is <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA</a>; this reader’s morphological data may be reused only on those terms.
     The Art of War was tagged one paragraph at a time, so that no sentence crosses a paragraph; its annotation was checked word by word, then given a consistency pass across its twenty-one units.
+    The Discourses were tagged the same way, one paragraph at a time, and checked word by word in thirty-seven units of about 4,000 words, then given a consistency pass. An independent second reading of 2,220 randomly sampled words found an error in lemma, part of speech, features or splitting in 9 of them (an estimated 0.4% of all words, 95% interval 0.2–0.8%); those nine and the same errors elsewhere were then corrected.
     The tagger’s own sentence breaks are finer than the paragraphs, and a written word that joins two words (<i>del</i> = <i>di</i> + <i>il</i>, <i>de'</i> = <i>di</i> + <i>i</i>, an enclitic such as <i>dilettarsi</i>) is one clickable word with an analysis of each part.
     The speaker’s name before a turn is not a word of the text and has no analysis, and the search does not read it.
     Dependency relations are in the annotation and are not shown.
@@ -92,6 +116,23 @@ const fixes = Object.values(ARTE_TEXT_FIXES);
     The speaker’s name before a turn is the Italian label’s, in Farneworth’s spelling on the English side (<i>Battista</i> for <i>Batista</i>): he prints no label before Cosimo’s first speech in Book I or on the first paragraph of Books III to VI, so the aligned Italian paragraph supplies it.
     His footnotes are shown as translator’s notes, at the clause they follow.
     A book’s English heading is the clause aligned to its heading, shown in title case with the numeral kept (“Book I.”).
+  </dd>
+  <dt>Ninian Hill Thomson, <i>Discourses on the First Decade of Titus Livius</i> (London: Kegan Paul, Trench &amp; Co., 1883)</dt>
+  <dd>
+    Public domain. <a href={thomson.url}>Project Gutenberg #{thomson.ebook}</a>, SHA-256 <code>{thomson.sha}</code>, an e-text by Ted Garvin, Jayam Subramanian and the PG Distributed Proofreaders.
+    Gutenberg regenerates this file, so a change upstream stops the fetch until the new copy is checked.
+    The text shown leaves out Gutenberg’s header and footer, Thomson’s title page, his dedication to Pasquale Villari and his table of contents, and the labels of the books. Lines are joined within a paragraph and the underscores that mark italics are dropped; the spelling, capitals and punctuation are as printed, misprints included.
+    Machiavelli’s two proemi are translated, each headed “PREFACE.”; a chapter’s English heading is Thomson’s, as printed (“CHAPTER XI.—Of the Religion of the Romans.”).
+    Every chapter is translated. Gutenberg heads Book III, chapter 22 “Chapter XXII.”, where the others have “CHAPTER”; the 1883 printing’s page 416 (Internet Archive <a href="https://archive.org/details/cu31924030435659">cu31924030435659</a>) was checked, and prints the chapter there.
+    Thomson does not translate Machiavelli’s dedication: its row has no English, and a note on the English side says so.
+    His paragraphs do not match Martelli’s, and he translates closely but not always word for word: in Book I’s proemio he has “the present methods of education” where the Italian blames <i>la presente religione</i>.
+    His clauses are cut at full stops, semicolons and colons, so that they pair with the Italian sentences. Within each chapter a length-based pass grouped his paragraphs with Martelli’s, by length and by the names and numbers they share, and then aligned the clauses to the Italian sentences inside each group; every pair was then read on both sides and corrected by hand, into 3,856 aligned groups.
+    A row shows the clauses aligned to its Italian sentences, in Thomson’s own paragraphs: where he splits a paragraph of Martelli’s, the row shows several.
+    Of the Italian sentences, 23 have no English: the dedication’s 22 (its salutation and 21 sentences), and in Disc. 3.10.2 Livy’s words quoted a second time, which Thomson translates only where Machiavelli first quotes them (Disc. 3.10.1); that paragraph has a note naming them.
+    One English clause has no Italian (“and this, again, arises from the different character of the religions then and now prevailing.”, Disc. 2.2.2), and is shown in that paragraph’s row.
+    Three of Thomson’s clauses each translate the end of one Italian paragraph and the beginning of the next (Disc. 2.30.1–2, Disc. 3.1.1–2, Disc. 3.6.4–5); each stands whole with the first of the two.
+    His 17 footnotes, most of them naming the source of a quotation, are shown as translator’s notes, at the end of the English paragraph in which they fall.
+    The stripped text, its clauses, the footnotes and the hand-checked alignment are checked into the repository and pinned by hash.
   </dd>
 </dl>
 

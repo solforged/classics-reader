@@ -1,6 +1,6 @@
-// What the two works share when their CoNLL-U becomes pieces and analyses: the Wiktionary lookup that measures each
-// lemma's coverage, the morphology conversion (lib/morph.ts), and the exception-table bookkeeping. The figures are
-// kept per work, and the lemma classes together, because one dictionary serves both.
+// What the Machiavelli works share when their CoNLL-U becomes pieces and analyses: the Wiktionary lookup that measures
+// each lemma's coverage, the morphology conversion (lib/morph.ts), and exception-table bookkeeping. Figures are kept
+// per work, and lemma classes together, because one dictionary serves the corpus.
 import type { Wiktionary } from "../../../packs/ita/build/wiktionary";
 import type { AnalysisTable } from "../../../scripts/core/analyses";
 import type { Analysis, Piece } from "../../../scripts/core/types";
@@ -27,7 +27,7 @@ export interface Tally {
 export class Annotator {
   /** The exception-table entries something used, as "<TABLE> <key>". */
   readonly used = new Set<string>();
-  /** Lemma → the word classes it is tagged with, over both works. */
+  /** Lemma → the word classes it is tagged with, over all works. */
   readonly lemmaClasses = new Map<string, Set<string>>();
   readonly stats: MorphStats = { gerund: 0, pastHistoric: 0, imperfect: 0, dropped: {}, labelled: 0 };
   readonly tallies = new Map<string, Tally>();

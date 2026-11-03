@@ -1,4 +1,4 @@
-// Reads one division of Il Principe or Dell'arte della guerra from the checked-in CoNLL-U. A written word is a surface:
+// Reads a review unit of the Prince, the Art of War or the Discorsi from the checked-in CoNLL-U. A written word is a surface:
 // a plain token, or a multiword token's range line ("del" = di + il, "de'" = di + i) with its syntactic words. Empty
 // nodes (ids like 2.1) are not words of the text. Strict: a line the format does not explain throws, and the surfaces
 // must reproduce the sentence's # text.
@@ -36,13 +36,15 @@ export interface Sentence {
   surfaces: Surface[];
   /** # book (the Arte): "p" for the proemio, "1" … "7". */
   book?: string;
+  /** # chapter (the Discorsi): paragraphs and sentence indices restart in each chapter. */
+  chapter?: number;
   /** # speaker (the Arte): the label of the turn this sentence's paragraph opens, as the edition prints it. */
   speaker?: string;
 }
 
 const COMMENT_KEYS: Record<string, true> = {
   generator: true, udpipe_model: true, udpipe_model_licence: true, unit: true, par: true, sent_id: true, text: true,
-  book: true, speaker: true,
+  book: true, speaker: true, chapter: true,
 };
 const MISC_KEYS: Record<string, true> = { SpaceAfter: true, SpacesAfter: true };
 
@@ -69,7 +71,7 @@ export function surfaceText(surfaces: readonly Surface[]): string {
   return out;
 }
 
-function parseSentence(block: string, unit: string, seen: Map<number, number>): Sentence {
+function parseSentence(block: string, unit: string, seen: Map<string, number>): Sentence {
   const comments: Record<string, string> = {};
   const rows: string[][] = [];
   for (const line of block.split("\n")) {
@@ -91,8 +93,9 @@ function parseSentence(block: string, unit: string, seen: Map<number, number>): 
   }
   const par = Number(comments.par);
   if (!Number.isInteger(par) || par < 0) throw new Error(`${unit}: bad paragraph ${comments.par}`);
-  const n = (seen.get(par) ?? 0) + 1;
-  seen.set(par, n);
+  const paragraphKey = `${comments.book ?? ""}.${comments.chapter ?? ""}.${par}`;
+  const n = (seen.get(paragraphKey) ?? 0) + 1;
+  seen.set(paragraphKey, n);
   const where = comments.sent_id;
 
   const surfaces: Surface[] = [];
@@ -136,13 +139,14 @@ function parseSentence(block: string, unit: string, seen: Map<number, number>): 
   return {
     unit, par, n, id: where, text: comments.text, surfaces,
     ...(comments.book === undefined ? {} : { book: comments.book }),
+    ...(comments.chapter === undefined ? {} : { chapter: Number(comments.chapter) }),
     ...(comments.speaker === undefined ? {} : { speaker: comments.speaker }),
   };
 }
 
 /** The sentences of one division, in reading order. */
 export function parseUnit(source: string, unit: string): Sentence[] {
-  const seen = new Map<number, number>();
+  const seen = new Map<string, number>();
   const sentences: Sentence[] = [];
   for (const block of source.split(/\n\n+/u)) {
     if (!block.includes("\t")) {

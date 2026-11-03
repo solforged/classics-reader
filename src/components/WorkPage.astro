@@ -35,8 +35,9 @@ const crumbs: Crumb[] = [
     siblings: siblings.map((w) => ({ href: `${base}${w.slug}/`, label: w.title, current: w.slug === def.slug })),
   },
 ];
-// A listed outermost level (chapters) numbers its heads and lists its divisions in the outline.
-const listed = levels[0]?.list ?? false;
+// The first listed level numbers its heads and lists divisions in the outline. A per-book work may list chapters.
+const listedDepth = levels.findIndex((level) => level.list);
+const listed = listedDepth >= 0;
 // Columns: the site's sides that have text in this work.
 const sides = site.sides.filter((side) => work.rows.some((r) => r.sides[side.id]?.length));
 const views = sides.length > 1
@@ -110,7 +111,7 @@ const analyses = work.analyses.map(([lemma, morph, s, word]) => {
 // numbered verse (an epic's, by first line and opening words). Stanzaic poems have none; go-to reaches a stanza.
 const plain = (line: Piece[]) => line.map((p) => (typeof p === "string" ? p : p[0])).join("");
 const opening = (line: string) => line.split(/\s+/).slice(0, 3).join(" ").replace(/[\s,.;:!?"“”‘’—–-]+$/u, "");
-// A division without a heading (levels[0].opening) is listed by its first words, or by its first twelve characters, marks
+// A division without a heading (the listed level's opening) is listed by its first words, or its first twelve characters, marks
 // left out, in a script without word spaces (Chinese).
 const openingOf = (line: string) => (/\s/u.test(line.trim())
   ? opening(line)
@@ -121,16 +122,20 @@ const outline: { id: string; num: string; text: string }[] = [];
 if (listed) {
   const seen = new Set<string>();
   for (const r of work.rows) {
-    const top = r.id.split(".")[0]!;
-    if (!citation.test(r.id) || seen.has(top)) continue;
-    seen.add(top);
+    const parts = r.id.split(".");
+    const division = parts.slice(0, listedDepth + 1).join(".");
+    if (!citation.test(r.id) || seen.has(division)) continue;
+    seen.add(division);
     const head = sourceSide ? sourceUnits(r, sourceSide).find((u) => u.kind === "head") : undefined;
     let text = head ? head.lines.map(plain).join(" ") : "";
-    if (!text && sourceSide && levels[0]?.opening) {
+    if (!text && sourceSide && levels[listedDepth]?.opening) {
       const first = sourceUnits(r, sourceSide).find((u) => u.kind !== "head" && u.lines.length);
       if (first) text = openingOf(plain(first.lines[0]!));
     }
-    outline.push({ id: r.id, num: top, text });
+    // The tagged rubric keeps its printed numeral in the reading view. Navigation already shows it as .onum.
+    const leadingNumber = /^(\d+[a-z]?)[.)]?\s+/u.exec(text);
+    if (leadingNumber?.[1] === parts[listedDepth]) text = text.slice(leadingNumber[0].length);
+    outline.push({ id: r.id, num: parts[listedDepth]!, text });
   }
 } else if (sourceSide) {
   for (const r of work.rows) {

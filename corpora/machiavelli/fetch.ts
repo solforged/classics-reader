@@ -1,14 +1,18 @@
-// Downloads the pinned sources (sources.ts), checks every download's SHA-256 and leaves what the build reads in
-// .cache/sources/machiavelli: Ricci's translation of the Prince, Liber Liber's text of the Arte della guerra decoded to
-// UTF-8, and the Wiktionary entries the annotation's lemmas need. The CoNLL-U and Farneworth's English are checked into
-// data/ and are not fetched.
+// Downloads the pinned sources (sources.ts, discorsi-sources.ts), checks every download's SHA-256 and leaves what the
+// build reads in .cache/sources/machiavelli: Ricci's translation of the Prince, Liber Liber's text of the Arte della
+// guerra decoded to UTF-8, Liber Liber's ODT of the Discorsi, and the Wiktionary entries the annotation's lemmas need.
+// Thomson's Discourses are downloaded and checked against their pin too, though the build reads the vendored English.
+// The CoNLL-U, Farneworth's English and the Discorsi's vendored files are checked into data/ and are not fetched;
+// the Discorsi's are checked against data/discorsi/pins.json here.
 import { exists, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { looseKey } from "../../packs/ita/spelling";
 import { redirects, type WiktEntry } from "../../packs/ita/build/wiktionary";
 import { ROOT } from "../../scripts/core/outputs";
+import { DISCORSI_CACHE, DISCORSI_SOURCE, DISCORSI_UNITS } from "./discorsi-sources";
 import { ARTE_UNITS, DERIVED, GUTENBERG, KAIKKI, LIBERLIBER, PRINCE_UNITS } from "./sources";
 import { ARTE_DATA, DATA } from "./lib/align";
+import { checkDiscorsiData, DISCORSI_DATA } from "./lib/discorsi-text";
 import { sha256 } from "./lib/pins";
 import { zipMember } from "./lib/zip";
 
@@ -46,6 +50,7 @@ async function lemmaKeys(): Promise<Set<string>> {
   const files = [
     ...PRINCE_UNITS.map((unit) => join(DATA, `${unit}.conllu`)),
     ...ARTE_UNITS.map((unit) => join(ARTE_DATA, "conllu", `${unit}.conllu`)),
+    ...DISCORSI_UNITS.map((unit) => join(DISCORSI_DATA, "conllu", `${unit}.conllu`)),
   ];
   for (const file of files) {
     for (const line of (await Bun.file(file).text()).split("\n")) {
@@ -153,6 +158,10 @@ if (import.meta.main) {
   const [url, sha] = GUTENBERG;
   if (force || !await cached("ricci.txt")) await save("ricci.txt", await download(url, sha));
   if (force || !await cached(DERIVED.arteText)) await save(DERIVED.arteText, await fetchLiberLiber());
+  const { odt, thomson } = DISCORSI_SOURCE;
+  if (force || !await cached(DISCORSI_CACHE.odt)) await save(DISCORSI_CACHE.odt, await download(odt.url, odt.sha));
+  if (force || !await cached(DISCORSI_CACHE.thomson)) await save(DISCORSI_CACHE.thomson, await download(thomson.url, thomson.sha));
+  console.log(`checked machiavelli/data/discorsi: ${await checkDiscorsiData()} files match pins.json`);
   const wanted = await lemmaKeys();
   const { fresh, keys } = await wiktionaryKeys(wanted);
   if (!force && fresh) console.log(`cached  machiavelli/${DERIVED.wiktionary}`);

@@ -77,12 +77,13 @@ function jumpToLine(el: HTMLElement, cite: string) {
 }
 
 /**
- * Goes to a row, a stanza label or a numbered line of this work ("12", "1.23"); false when there is none. In a work
- * whose rows are verses of listed chapters (Genesis 3.1), a bare number is the chapter: its first row.
+ * Goes to a row, a stanza label or a numbered line of this work ("12", "1.23"); false when there is none.
+ * A citation ending at a listed level opens that division's first row (Genesis 3 or Disc. 1.11).
  */
 function goLocal(want: string): boolean {
   if (rowIds.has(want) && jump(want)) return true;
-  if (work.levels.length > 1 && work.levels[0]!.list && /^\d+$/.test(want)) {
+  const parts = want.split(".");
+  if (parts.length < work.levels.length && work.levels[parts.length - 1]?.list && parts.every((part) => /^\d+$/.test(part))) {
     const first = [...rowIds].find((id) => id.startsWith(`${want}.`));
     if (first && jump(first)) return true;
   }
