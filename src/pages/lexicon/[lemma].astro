@@ -34,7 +34,7 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
   description={`${stat.lemma} (${pos}) in ${site.corpus}: ${stat.count} occurrences, dictionary entries and concordance.`}
   crumbs={[{ href: `${base}lexicon/`, label: "Lexicon" }, { label: stat.lemma }]}
 >
-  <main class="page">
+  <main class="page lemma-page">
     <p class="eyebrow">Lemma</p>
     <h1 lang={lang.code}>{stat.lemma}</h1>
     <p class="meta">
@@ -87,18 +87,19 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
   </main>
 </Base>
 
-<style>
-  h1 {
+<!-- Global rules under .lemma-page rather than scoped ones: scoping stamps an attribute on every element, and a
+     lexicon page is mostly concordance lines, so the attributes were about an eighth of the lexicon's bytes. -->
+<style is:global>
+  .lemma-page h1 {
     font-weight: 500;
     font-size: 2.4rem;
     margin: 0.2rem 0 0;
   }
-  .meta {
+  .lemma-page .meta {
     color: var(--muted);
     margin-top: 0.2rem;
   }
-  h2,
-  .dict :global(h2) {
+  .lemma-page h2 {
     font-family: var(--sans);
     font-size: 0.75rem;
     letter-spacing: 0.1em;
@@ -107,130 +108,130 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
     margin: 2rem 0 0.5rem;
     font-weight: 600;
   }
-  .dict :global(p) {
+  .lemma-page .dict p {
     margin: 0.3rem 0;
     line-height: 1.45;
   }
-  .dict :global(details > summary) {
+  .lemma-page .dict details > summary {
     cursor: pointer;
     font-family: var(--sans);
     font-size: 0.8rem;
     color: var(--accent);
     margin-top: 1rem;
   }
-  .dict :global(.dict-article) {
+  .lemma-page .dict .dict-article {
     margin: 0.6rem 0 1rem;
     overflow-wrap: anywhere;
   }
-  .dict :global(.entry-headword) {
+  .lemma-page .dict .entry-headword {
     font-size: 1.1rem;
   }
-  .dict :global(.entry-section) {
+  .lemma-page .dict .entry-section {
     margin-top: 0.5rem;
   }
-  .dict :global(.entry-grammar) {
+  .lemma-page .dict .entry-grammar {
     color: var(--muted);
     font-size: 0.85em;
     line-height: 1.45;
   }
-  .dict :global(.entry-grammar strong) {
+  .lemma-page .dict .entry-grammar strong {
     color: var(--fg);
     margin-right: 0.25rem;
   }
-  .dict :global(.entry-senses) {
+  .lemma-page .dict .entry-senses {
     list-style: none;
     padding: 0;
     margin: 0.4rem 0;
   }
-  .dict :global(.entry-senses li) {
+  .lemma-page .dict .entry-senses li {
     position: relative;
     padding-left: 1.8rem;
     margin: 0.6rem 0;
     line-height: 1.45;
   }
-  .dict :global(.sense-number) {
+  .lemma-page .dict .sense-number {
     position: absolute;
     left: 0;
     color: var(--faint);
     font-size: 0.85em;
     font-variant-numeric: tabular-nums;
   }
-  .dict :global(.sense-gloss i),
-  .dict :global(.homograph-gloss i) {
+  .lemma-page .dict .sense-gloss i,
+  .lemma-page .dict .homograph-gloss i {
     font-style: normal;
   }
-  .dict :global(.sense-examples) {
+  .lemma-page .dict .sense-examples {
     display: block;
     color: var(--muted);
     font-size: 0.88em;
     margin-top: 0.2rem;
   }
-  .dict :global(.headword-repeat) {
+  .lemma-page .dict .headword-repeat {
     color: color-mix(in srgb, var(--accent) 65%, var(--muted));
   }
-  .dict :global(abbr[title]) {
+  .lemma-page .dict abbr[title] {
     text-decoration: underline dotted var(--faint);
     text-underline-offset: 0.15em;
     cursor: help;
   }
-  .dict :global(.other-homograph) {
+  .lemma-page .dict .other-homograph {
     border-left: 2px solid var(--border);
     padding-left: 0.7rem;
   }
-  .dict :global(.other-homograph > summary) {
+  .lemma-page .dict .other-homograph > summary {
     color: var(--muted);
   }
-  .dict :global(.more-senses) {
+  .lemma-page .dict .more-senses {
     margin: 0.5rem 0 0.8rem 1.8rem;
   }
-  .dict :global(.more-senses > summary) {
+  .lemma-page .dict .more-senses > summary {
     margin-top: 0.4rem;
   }
-  .dict :global(.more-senses .entry-senses) {
+  .lemma-page .dict .more-senses .entry-senses {
     margin-left: -1.8rem;
   }
-  .dict :global(.dict-via) {
+  .lemma-page .dict .dict-via {
     color: var(--muted);
     font-size: 0.8em;
   }
-  .dict :global(.compound-part) {
+  .lemma-page .dict .compound-part {
     color: var(--muted);
     font-size: 0.9em;
     overflow-wrap: anywhere;
   }
-  .dict :global(.wp-empty) {
+  .lemma-page .dict .wp-empty {
     color: var(--muted);
     font-style: italic;
   }
-  .freq {
+  .lemma-page .freq {
     list-style: none;
     padding: 0;
     columns: 2;
     font-size: 0.95rem;
   }
-  .freq span {
+  .lemma-page .freq span {
     color: var(--muted);
     font-variant-numeric: tabular-nums;
   }
-  .freq a {
+  .lemma-page .freq a {
     text-decoration: none;
   }
-  .conc {
+  .lemma-page .conc {
     list-style: none;
     padding: 0;
   }
-  .conc li {
+  .lemma-page .conc li {
     padding: 0.2rem 0;
     border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   }
-  .conc .ref {
+  .lemma-page .conc .ref {
     display: inline-block;
     min-width: 5.5rem;
     font-family: var(--sans);
     font-size: 0.75rem;
     text-decoration: none;
   }
-  .conc .tag {
+  .lemma-page .conc .tag {
     font-family: var(--sans);
     font-size: 0.6rem;
     text-transform: uppercase;
@@ -239,7 +240,7 @@ const form = (line: string) => line.match(/⟦(.*?)⟧/)?.[1] ?? "";
     margin-left: 0.4rem;
   }
   @media (max-width: 600px) {
-    .freq {
+    .lemma-page .freq {
       columns: 1;
     }
   }
