@@ -32,7 +32,7 @@
 9	armi	arma	NOUN	S	Gender=Fem|Number=Plur	2	acl:relcl	_	_
 10	inutili	inutile	ADJ	A	Number=Plur	9	amod	_	SpaceAfter=No
 11	,	,	PUNCT	FF	_	2	punct	_	_
-12	sono	essere	AUX	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+12	sono	essere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
 13	quando	quando	SCONJ	CS	_	15	mark	_	_
 14	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	15	expl	_	_
 15	chiama	chiamare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	12	advcl	_	_
@@ -146,7 +146,7 @@
 6	vincendo	vincere	VERB	V	VerbForm=Ger	7	advcl	_	_
 7	resti	restare	VERB	V	Mood=Ind|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin	0	root	_	_
 8	loro	loro	DET	AP	Poss=Yes|PronType=Prs	9	det:poss	_	_
-9	prigione	prigioniero	NOUN	S	Gender=Masc|Number=Sing	7	obj	_	SpaceAfter=No
+9	prigione	prigione	NOUN	S	Gender=Masc|Number=Sing	7	obj	_	SpaceAfter=No
 10	.	.	PUNCT	FS	_	7	punct	_	_
 
 # unit = 13
@@ -166,7 +166,7 @@
 11	antiche	antico	ADJ	A	Gender=Fem|Number=Plur	12	amod	_	_
 12	istorie	storia	NOUN	S	Gender=Fem|Number=Plur	9	nsubj	_	SpaceAfter=No
 13	;	;	PUNCT	FC	_	19	punct	_	_
-14	nondimanco	nondimeno	ADV	B	_	19	advmod	_	_
+14	nondimanco	nondimanco	ADV	B	_	19	advmod	_	_
 15	io	io	PRON	PE	Number=Sing|Person=1|PronType=Prs	19	nsubj	_	_
 16	non	non	ADV	BN	PronType=Neg	19	advmod	_	_
 17	mi	mi	PRON	PC	Clitic=Yes|Number=Sing|Person=1|PronType=Prs	19	expl	_	_
@@ -194,7 +194,7 @@
 38	non	non	ADV	BN	PronType=Neg	42	advmod	_	_
 39	potè	potere	AUX	VM	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	42	aux	_	_
 40	essere	essere	AUX	VA	VerbForm=Inf	42	aux:pass	_	_
-41	manco	meno	ADV	B	_	42	advmod	_	_
+41	manco	manco	ADV	B	_	42	advmod	_	_
 42	considerato	considerare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	24	acl:relcl	_	SpaceAfter=No
 43	,	,	PUNCT	FF	_	42	punct	_	_
 44	per	per	ADP	E	_	45	mark	_	_
@@ -229,7 +229,7 @@
 9	terza	terzo	ADJ	NO	Gender=Fem|NumType=Ord|Number=Sing	10	amod	_	_
 10	causa	causa	NOUN	S	Gender=Fem|Number=Sing	7	obj	_	SpaceAfter=No
 11	,	,	PUNCT	FF	_	10	punct	_	_
-12	acciò	acciocché	SCONJ	CS	_	14	mark	_	_
+12	acciò	acciò	SCONJ	CS	_	14	mark	_	_
 13	non	non	ADV	BN	PronType=Neg	14	advmod	_	_
 14	cogliesse	cogliere	VERB	V	Mood=Sub|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	6	advcl	_	_
 15	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	16	det	_	_
@@ -279,7 +279,7 @@
 31	a	a	ADP	E	_	33	mark	_	_
 32	non	non	ADV	BN	PronType=Neg	33	advmod	_	_
 33	rimanere	rimanere	VERB	V	VerbForm=Inf	30	xcomp	_	_
-34	prigione	prigioniero	NOUN	S	Gender=Masc|Number=Sing	33	obj	_	_
+34	prigione	prigione	NOUN	S	Gender=Masc|Number=Sing	33	obj	_	_
 35-36	degli	_	_	_	_	_	_	_	_
 35	di	di	ADP	E	_	37	case	_	_
 36	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	37	det	_	_
@@ -304,7 +304,7 @@
 54	che	che	ADP	E	_	57	cc	_	_
 55	con	con	ADP	E	_	57	case	_	_
 56	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	57	det	_	_
-57	loro	loro	PRON	PE	Poss=Yes|PronType=Prs	52	conj	_	SpaceAfter=No
+57	loro	loro	PRON	PE	Number=Plur|Poss=Yes|PronType=Prs	52	conj	_	SpaceAfter=No
 58	.	.	PUNCT	FS	_	30	punct	_	SpacesAfter=\n\n
 
 # unit = 13
@@ -412,9 +412,9 @@
 # sent_id = 13-2-4
 # text = Colui adunque che vuole non poter vincere, si vaglia di queste armi, perchè sono molto più pericolose, che le mercenarie; perchè in queste è la rovina fatta, sono tutte unite, tutte volte all'obbedienza di altri;
 1	Colui	colui	PRON	PD	Gender=Masc|Number=Sing|PronType=Dem	10	nsubj	_	_
-2	adunque	dunque	ADV	B	_	1	advmod	_	_
+2	adunque	adunque	ADV	B	_	1	advmod	_	_
 3	che	che	PRON	PR	PronType=Rel	7	nsubj	_	_
-4	vuole	volere	VERB	VM	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	7	aux	_	_
+4	vuole	volere	AUX	VM	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	7	aux	_	_
 5	non	non	ADV	BN	PronType=Neg	7	advmod	_	_
 6	poter	potere	AUX	VM	VerbForm=Inf	7	aux	_	_
 7	vincere	vincere	VERB	V	VerbForm=Inf	1	acl:relcl	_	SpaceAfter=No
@@ -431,7 +431,7 @@
 18	più	più	ADV	B	_	19	advmod	_	_
 19	pericolose	pericoloso	ADJ	A	Gender=Fem|Number=Plur	10	advcl	_	SpaceAfter=No
 20	,	,	PUNCT	FF	_	19	punct	_	_
-21	che	che	SCONJ	CS	_	23	case	_	_
+21	che	che	ADP	CS	_	23	case	_	_
 22	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	23	det	_	_
 23	mercenarie	mercenario	ADJ	S	Gender=Fem|Number=Plur	19	obl	_	SpaceAfter=No
 24	;	;	PUNCT	FC	_	35	punct	_	_
@@ -487,7 +487,7 @@
 22	,	,	PUNCT	FF	_	21	punct	_	_
 23	non	non	ADV	BN	PronType=Neg	27	advmod	_	_
 24	essendo	essere	AUX	VA	VerbForm=Ger	27	cop	_	_
-25	tutte	tutto	PRON	PI	Gender=Fem|Number=Plur|PronType=Tot	27	nsubj	_	_
+25	tutte	tutto	PRON	PI	Gender=Fem|Number=Plur|PronType=Ind	27	nsubj	_	_
 26	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	27	det	_	_
 27	corpo	corpo	NOUN	S	Gender=Masc|Number=Sing	15	advcl	_	SpaceAfter=No
 28	,	,	PUNCT	FF	_	31	punct	_	_
@@ -576,7 +576,7 @@
 24	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	25	det	_	_
 25	sue	suo	PRON	PP	Gender=Fem|Number=Plur|Poss=Yes|PronType=Prs	22	obl	_	SpaceAfter=No
 26	,	,	PUNCT	FF	_	22	punct	_	_
-27	che	che	SCONJ	CS	_	28	mark	_	_
+27	che	che	ADP	CS	_	28	mark	_	_
 28	vincere	vincere	VERB	V	VerbForm=Inf	22	advcl	_	_
 29	con	con	ADP	E	_	31	case	_	_
 30	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	31	det	_	SpaceAfter=No
@@ -633,7 +633,7 @@
 11-12	conducendovi	_	_	_	_	_	_	_	_
 11	conducendo	condurre	VERB	V	VerbForm=Ger	3	advcl	_	_
 12	vi	vi	PRON	B	Clitic=Yes|PronType=Prs	11	advmod	_	_
-13	tutte	tutto	DET	DI	Gender=Fem|Number=Plur|PronType=Ind	14	det	_	_
+13	tutte	tutto	DET	DI	Gender=Fem|Number=Plur|PronType=Tot	14	det	_	_
 14	genti	gente	NOUN	S	Gender=Fem|Number=Plur	11	obj	_	_
 15	Francesi	francese	ADJ	SP	Number=Plur	14	amod	_	SpaceAfter=No
 16	,	,	PUNCT	FF	_	19	punct	_	_
@@ -665,7 +665,7 @@
 41	giudicando	giudicare	VERB	V	VerbForm=Ger	36	advcl	_	_
 42	in	in	ADP	E	_	45	case	_	_
 43	quelle	quello	DET	DD	Gender=Fem|Number=Plur|PronType=Dem	45	det	_	_
-44	manco	meno	ADV	A	_	45	amod	_	_
+44	manco	manco	ADV	A	_	45	amod	_	_
 45	pericolo	pericolo	NOUN	S	Gender=Masc|Number=Sing	41	obl	_	SpaceAfter=No
 46	,	,	PUNCT	FF	_	48	punct	_	_
 47	e	e	CCONJ	CC	_	48	cc	_	_
@@ -728,11 +728,11 @@
 19	considerato	considerare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	5	advcl	_	_
 20	che	che	SCONJ	CS	_	22	mark	_	_
 21	differenza	differenza	NOUN	S	Gender=Fem|Number=Sing	22	nsubj	_	_
-22	fu	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	19	ccomp	_	_
+22	fu	essere	VERB	VA	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	19	ccomp	_	_
 23-24	dalla	_	_	_	_	_	_	_	_
 23	da	da	ADP	E	_	25	case	_	_
 24	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	25	det	_	_
-25	riputazione	riputazione	NOUN	S	Gender=Fem|Number=Sing	19	obl:agent	_	_
+25	riputazione	reputazione	NOUN	S	Gender=Fem|Number=Sing	19	obl:agent	_	_
 26-27	del	_	_	_	_	_	_	_	_
 26	di	di	ADP	E	_	28	case	_	_
 27	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	28	det	_	_
@@ -896,7 +896,7 @@
 # par = 3
 # sent_id = 13-3-7
 # text = dipoi fece guerra con l'armi sue, e non con l'altrui.
-1	dipoi	poi	ADV	S	_	2	nsubj	_	_
+1	dipoi	dipoi	ADV	S	_	2	nsubj	_	_
 2	fece	fare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
 3	guerra	guerra	NOUN	S	Gender=Fem|Number=Sing	2	obj	_	_
 4	con	con	ADP	E	_	6	case	_	_
@@ -960,7 +960,7 @@
 19	gli	gli	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	18	iobj	_	_
 20	animo	animo	NOUN	S	Gender=Masc|Number=Sing	18	obj	_	SpaceAfter=No
 21	,	,	PUNCT	FF	_	18	punct	_	_
-22	l'	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	23	obj	_	SpaceAfter=No
+22	l'	lo	PRON	PC	Clitic=Yes|Number=Sing|Person=3|PronType=Prs	23	obj	_	SpaceAfter=No
 23	armò	armare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
 24-25	dell'	_	_	_	_	_	_	_	SpaceAfter=No
 24	di	di	ADP	E	_	26	case	_	_
@@ -1004,7 +1004,7 @@
 7	con	con	ADP	E	_	10	case	_	_
 8	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	10	det	_	_
 9	sua	suo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	10	det:poss	_	_
-10	fromba	fionda	NOUN	S	Gender=Fem|Number=Sing	4	obl	_	SpaceAfter=No
+10	fromba	frombola	NOUN	S	Gender=Fem|Number=Sing	4	obl	_	SpaceAfter=No
 11	,	,	PUNCT	FF	_	16	punct	_	_
 12	e	e	CCONJ	CC	_	16	cc	_	_
 13	con	con	ADP	E	_	16	case	_	_
@@ -1106,12 +1106,12 @@
 # par = 4
 # sent_id = 13-4-5
 # text = Dipoi il Re Luigi suo figliuolo spense quella de' fanti, e cominciò a soldare Svizzeri;
-1	Dipoi	poi	ADV	V	_	7	advcl	_	_
+1	Dipoi	dipoi	ADV	V	_	7	advcl	_	_
 2	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	3	det	_	_
 3	Re	re	NOUN	SP	Gender=Masc|Number=Sing	7	nsubj	_	_
 4	Luigi	Luigi	PROPN	SP	_	3	flat:name	_	_
 5	suo	suo	DET	AP	Gender=Masc|Number=Sing|Poss=Yes|PronType=Prs	6	det:poss	_	_
-6	figliuolo	figlio	NOUN	S	Gender=Masc|Number=Sing	3	nmod	_	_
+6	figliuolo	figliolo	NOUN	S	Gender=Masc|Number=Sing	3	nmod	_	_
 7	spense	spegnere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
 8	quella	quello	PRON	PD	Gender=Fem|Number=Sing|PronType=Dem	7	obj	_	_
 9-10	de'	_	_	_	_	_	_	_	_
@@ -1166,7 +1166,7 @@
 2	,	,	PUNCT	FF	_	11	punct	_	_
 3	avendo	avere	AUX	VA	VerbForm=Ger	4	aux	_	_
 4	dato	dare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	11	advcl	_	_
-5	riputazione	riputazione	NOUN	S	Gender=Fem|Number=Sing	4	obj	_	_
+5	riputazione	reputazione	NOUN	S	Gender=Fem|Number=Sing	4	obj	_	_
 6-7	a'	_	_	_	_	_	_	_	_
 6	a	a	ADP	_	_	8	case	_	_
 7	i	il	DET	_	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	8	det	_	_
@@ -1255,7 +1255,7 @@
 # sent_id = 13-5-2
 # text = Sono adunque stati gli eserciti di Francia misti, parte mercenari, e parte propri;
 1	Sono	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	5	aux	_	_
-2	adunque	dunque	ADV	B	_	5	advmod	_	_
+2	adunque	adunque	ADV	B	_	5	advmod	_	_
 3	stati	essere	AUX	VA	Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part	5	cop	_	_
 4	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	5	det	_	_
 5	eserciti	esercito	NOUN	S	Gender=Masc|Number=Plur	0	root	_	_
@@ -1285,7 +1285,7 @@
 8	molto	molto	ADV	B	_	9	advmod	_	_
 9	migliori	migliore	ADJ	A	Degree=Cmp|Number=Plur	0	root	_	SpaceAfter=No
 10	,	,	PUNCT	FF	_	23	punct	_	_
-11	che	che	SCONJ	CS	_	23	mark	_	_
+11	che	che	ADP	CS	_	23	mark	_	_
 12	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	14	det	_	_
 13	semplici	semplice	ADJ	A	Number=Plur	14	amod	_	_
 14	mercenarie	mercenario	ADJ	S	Gender=Fem|Number=Plur	9	nsubj	_	SpaceAfter=No
@@ -1340,7 +1340,7 @@
 # text = Ma la poca prudenza degli uomini comincia una cosa, che per sapere allora di buono non manifesta il veleno che v'è sotto, come io dissi di sopra delle febbri etiche.
 1	Ma	ma	CCONJ	CC	_	8	cc	_	_
 2	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	4	det	_	_
-3	poca	poco	ADJ	A	Gender=Fem|Number=Sing	4	amod	_	_
+3	poca	poco	DET	A	Gender=Fem|Number=Sing|PronType=Ind	4	amod	_	_
 4	prudenza	prudenza	NOUN	S	Gender=Fem|Number=Sing	8	nsubj	_	_
 5-6	degli	_	_	_	_	_	_	_	_
 5	di	di	ADP	E	_	7	case	_	_
@@ -1493,8 +1493,8 @@
 # par = 5
 # sent_id = 13-5-11
 # text = Conchiudo adunque, che, senza avere arme proprie, nessuno Principato è sicuro;
-1	Conchiudo	conchiudere	VERB	V	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	_
-2	adunque	dunque	ADV	B	_	1	advmod	_	SpaceAfter=No
+1	Conchiudo	concludere	VERB	V	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	_
+2	adunque	adunque	ADV	B	_	1	advmod	_	SpaceAfter=No
 3	,	,	PUNCT	FF	_	1	punct	_	_
 4	che	che	SCONJ	CS	_	14	mark	_	SpaceAfter=No
 5	,	,	PUNCT	FF	_	14	punct	_	_
@@ -1503,7 +1503,7 @@
 8	arme	arma	NOUN	S	Gender=Fem|Number=Plur	7	obj	_	_
 9	proprie	proprio	ADJ	AP	Gender=Fem|Number=Plur|Poss=Yes|PronType=Prs	8	det:poss	_	SpaceAfter=No
 10	,	,	PUNCT	FF	_	7	punct	_	_
-11	nessuno	nessuno	DET	DI	Gender=Masc|Number=Sing|PronType=Neg	12	det	_	_
+11	nessuno	nessuno	DET	DI	Gender=Masc|Number=Sing|PronType=Ind	12	det	_	_
 12	Principato	principato	NOUN	S	Gender=Masc|Number=Sing	14	nsubj	_	_
 13	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	14	cop	_	_
 14	sicuro	sicuro	ADJ	A	Gender=Masc|Number=Sing	1	ccomp	_	SpaceAfter=No
@@ -1550,7 +1550,7 @@
 10	savi	savio	ADJ	A	Gender=Masc|Number=Plur	9	amod	_	SpaceAfter=No
 11	,	,	PUNCT	FF	_	4	punct	_	_
 12	che	che	SCONJ	CS	_	16	mark	_	_
-13	niente	niente	PRON	PI	PronType=Neg	16	nsubj	_	_
+13	niente	niente	PRON	PI	Gender=Masc|Number=Sing|PronType=Ind	16	nsubj	_	_
 14	sia	essere	AUX	VA	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	16	cop	_	_
 15	così	così	ADV	B	_	16	advmod	_	_
 16	infermo	infermo	ADJ	A	Gender=Masc|Number=Sing	4	advcl	_	_
@@ -1604,7 +1604,7 @@
 # sent_id = 13-5-15
 # text = tutte l'altre sono o mercenarie, o ausiliari.
 1	tutte	tutto	DET	T	Gender=Fem|Number=Plur|PronType=Tot	3	det:predet	_	_
-2	l'	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	3	det	_	SpaceAfter=No
+2	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	3	det	_	SpaceAfter=No
 3	altre	altro	PRON	PI	Gender=Fem|Number=Plur|PronType=Ind	6	nsubj	_	_
 4	sono	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	6	cop	_	_
 5	o	o	CCONJ	CC	_	6	cc	_	_

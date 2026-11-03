@@ -8,7 +8,7 @@
 1-2	Della	_	_	_	_	_	_	_	_
 1	Di	di	ADP	E	_	3	case	_	_
 2	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	3	det	_	_
-3	crudeltà	crudeltà	NOUN	S	Gender=Fem|Number=Sing	0	root	_	_
+3	crudeltà	crudeltà	NOUN	S	Gender=Fem	0	root	_	_
 4	e	e	CCONJ	CC	_	5	cc	_	_
 5	clemenzia	clemenza	NOUN	S	Gender=Fem|Number=Sing	3	conj	_	SpaceAfter=No
 6	;	;	PUNCT	FC	_	11	punct	_	_
@@ -29,12 +29,12 @@
 # sent_id = 17-1-1
 # text = Discendendo appresso alle altre qualità preallegate, dico, che ciascuno Principe deve disiderare di essere tenuto pietoso, e non crudele.
 1	Discendendo	discendere	VERB	V	VerbForm=Ger	9	advcl	_	_
-2	appresso	appresso	ADV	B	_	1	advmod	_	_
+2	appresso	appresso	ADV	B	ExtPos=ADP	1	advmod	_	_
 3-4	alle	_	_	_	_	_	_	_	_
 3	a	a	ADP	E	_	6	case	_	_
 4	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	6	det	_	_
 5	altre	altro	ADJ	A	Gender=Fem|Number=Plur	6	amod	_	_
-6	qualità	qualità	NOUN	S	Gender=Fem|Number=Plur	1	obl	_	_
+6	qualità	qualità	NOUN	S	Gender=Fem	1	obl	_	_
 7	preallegate	preallegato	ADJ	A	Gender=Fem|Number=Plur	6	amod	_	SpaceAfter=No
 8	,	,	PUNCT	FF	_	1	punct	_	_
 9	dico	dire	VERB	V	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	SpaceAfter=No
@@ -58,7 +58,7 @@
 # par = 1
 # sent_id = 17-1-2
 # text = Nondimanco deve avvertire di non usar male questa pietà.
-1	Nondimanco	nondimeno	ADV	SP	_	3	nsubj	_	_
+1	Nondimanco	nondimanco	ADV	SP	_	3	nsubj	_	_
 2	deve	dovere	AUX	VM	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	3	aux	_	_
 3	avvertire	avvertire	VERB	V	VerbForm=Inf	0	root	_	_
 4	di	di	ADP	E	_	6	mark	_	_
@@ -66,7 +66,7 @@
 6	usar	usare	VERB	V	VerbForm=Inf	3	xcomp	_	_
 7	male	male	ADV	B	_	6	advmod	_	_
 8	questa	questo	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	9	det	_	_
-9	pietà	pietà	NOUN	S	Gender=Fem|Number=Sing	6	obj	_	SpaceAfter=No
+9	pietà	pietà	NOUN	S	Gender=Fem	6	obj	_	SpaceAfter=No
 10	.	.	PUNCT	FS	_	3	punct	_	_
 
 # unit = 17
@@ -79,10 +79,10 @@
 4	Borgia	Borgia	PROPN	SP	_	3	flat:name	_	_
 5	crudele	crudele	ADJ	A	Number=Sing	2	xcomp	_	SpaceAfter=No
 6	;	;	PUNCT	FC	_	2	punct	_	_
-7	nondimanco	nondimeno	ADV	B	_	12	advmod	_	_
+7	nondimanco	nondimanco	ADV	B	_	12	advmod	_	_
 8	quella	quello	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	10	det	_	_
 9	sua	suo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	10	det:poss	_	_
-10	crudeltà	crudeltà	NOUN	S	Gender=Fem|Number=Sing	12	nsubj	_	_
+10	crudeltà	crudeltà	NOUN	S	Gender=Fem	12	nsubj	_	_
 11	aveva	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	12	aux	_	_
 12	racconcia	racconciare	VERB	V	Gender=Fem|Number=Sing|Tense=Past|VerbForm=Part	2	parataxis	_	_
 13	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	14	det	_	_
@@ -129,7 +129,7 @@
 20	Fiorentino	fiorentino	ADJ	SP	Gender=Masc|Number=Sing	19	flat:name	_	SpaceAfter=No
 21	,	,	PUNCT	FF	_	19	punct	_	_
 22	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	23	det	_	_
-23	quale	quale	PRON	PR	Gender=Masc|Number=Sing|PronType=Rel	32	nsubj	_	SpaceAfter=No
+23	quale	quale	PRON	PR	Number=Sing|PronType=Rel	32	nsubj	_	SpaceAfter=No
 24	,	,	PUNCT	FF	_	23	punct	_	_
 25	per	per	ADP	E	_	26	mark	_	_
 26	fuggire	fuggire	VERB	V	VerbForm=Inf	32	advcl	_	_
@@ -189,10 +189,10 @@
 10	quelli	quello	PRON	PD	Gender=Masc|Number=Plur|PronType=Dem	7	obl	_	SpaceAfter=No
 11	,	,	PUNCT	FF	_	10	punct	_	_
 12	li	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	13	det	_	_
-13	quali	quale	PRON	PR	Gender=Masc|Number=Plur|PronType=Rel	17	nsubj	_	_
+13	quali	quale	PRON	PR	Number=Plur|PronType=Rel	17	nsubj	_	_
 14	per	per	ADP	E	_	16	case	_	_
 15	troppa	troppo	DET	DI	Gender=Fem|Number=Sing|PronType=Ind	16	det	_	_
-16	pietà	pietà	NOUN	S	Gender=Fem|Number=Sing	17	obl	_	_
+16	pietà	pietà	NOUN	S	Gender=Fem	17	obl	_	_
 17	lasciano	lasciare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	10	acl:relcl	_	_
 18	seguire	seguire	VERB	V	VerbForm=Inf	17	xcomp	_	_
 19	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	20	det	_	_
@@ -209,7 +209,7 @@
 30	sogliono	solere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	7	parataxis	_	_
 31	offendere	offendere	VERB	V	VerbForm=Inf	30	ccomp	_	_
 32	una	uno	DET	RI	Definite=Ind|Gender=Fem|Number=Sing|PronType=Art	33	det	_	_
-33	università	università	NOUN	S	Gender=Fem|Number=Sing	31	obj	_	_
+33	università	università	NOUN	S	Gender=Fem	31	obj	_	_
 34	intera	intero	ADJ	A	Gender=Fem|Number=Sing	33	amod	_	SpaceAfter=No
 35	;	;	PUNCT	FC	_	7	punct	_	_
 
@@ -280,7 +280,7 @@
 9	,	,	PUNCT	FF	_	6	punct	_	_
 10	escusa	scusare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
 11	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	12	det	_	SpaceAfter=No
-12	inumanità	inumanità	NOUN	S	Gender=Fem|Number=Sing	10	obj	_	_
+12	inumanità	inumanità	NOUN	S	Gender=Fem	10	obj	_	_
 13-14	del	_	_	_	_	_	_	_	_
 13	di	di	ADP	E	_	16	case	_	_
 14	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	16	det	_	_
@@ -357,11 +357,11 @@
 27	con	con	ADP	E	_	28	case	_	_
 28	prudenza	prudenza	NOUN	S	Gender=Fem|Number=Sing	23	obl	_	_
 29	ed	e	CCONJ	CC	_	30	cc	_	_
-30	umanità	umanità	NOUN	S	Gender=Fem|Number=Sing	28	conj	_	SpaceAfter=No
+30	umanità	umanità	NOUN	S	Gender=Fem	28	conj	_	SpaceAfter=No
 31	,	,	PUNCT	FF	_	23	punct	_	_
 32	che	che	SCONJ	CS	_	38	mark	_	_
 33	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	35	det	_	_
-34	troppa	troppo	ADJ	A	Gender=Fem|Number=Sing	35	amod	_	_
+34	troppa	troppo	DET	A	Gender=Fem|Number=Sing|PronType=Ind	35	amod	_	_
 35	confidenza	confidenza	NOUN	S	Gender=Fem|Number=Sing	38	nsubj	_	_
 36	non	non	ADV	BN	PronType=Neg	38	advmod	_	_
 37	lo	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	38	obj	_	_
@@ -370,7 +370,7 @@
 40	,	,	PUNCT	FF	_	47	punct	_	_
 41	e	e	CCONJ	CC	_	47	cc	_	_
 42	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	44	det	_	_
-43	troppa	troppo	ADJ	A	Gender=Fem|Number=Sing	44	amod	_	_
+43	troppa	troppo	DET	A	Gender=Fem|Number=Sing|PronType=Ind	44	amod	_	_
 44	diffidanza	diffidenza	NOUN	S	Gender=Fem|Number=Sing	47	nsubj	_	_
 45	non	non	ADV	BN	PronType=Neg	47	advmod	_	_
 46	lo	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	47	obj	_	_
@@ -438,7 +438,7 @@
 5	difficile	difficile	ADJ	A	Number=Sing	15	advcl	_	SpaceAfter=No
 6	,	,	PUNCT	FF	_	9	punct	_	_
 7	che	che	SCONJ	CS	_	9	mark	_	_
-8	e'	egli	PRON	_	Gender=Masc|Number=Plur|Person=3|PronType=Prs	9	nsubj	_	_
+8	e'	esso	PRON	_	Gender=Masc|Number=Plur|Person=3|PronType=Prs	9	nsubj	_	_
 9	stiano	stare	VERB	V	Mood=Sub|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	5	conj	_	_
 10	insieme	insieme	ADV	B	_	9	advmod	_	SpaceAfter=No
 11	,	,	PUNCT	FF	_	5	punct	_	_
@@ -454,7 +454,7 @@
 21	,	,	PUNCT	FF	_	18	punct	_	_
 22	quando	quando	SCONJ	CS	_	24	mark	_	_
 23	s'	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	24	expl	_	SpaceAfter=No
-24	abbi	avere	AUX	V	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	18	advcl	_	_
+24	abbi	avere	VERB	V	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	18	advcl	_	_
 25	a	a	ADP	E	_	26	mark	_	_
 26	mancare	mancare	VERB	V	VerbForm=Inf	24	xcomp	_	_
 27-28	dell'	_	_	_	_	_	_	_	SpaceAfter=No
@@ -511,7 +511,7 @@
 4	loro	loro	PRON	PE	Number=Plur|Person=3|PronType=Prs	3	iobj	_	_
 5	bene	bene	ADV	B	_	3	advmod	_	_
 6	sono	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	8	cop	_	_
-7	tutti	tutto	PRON	PI	Gender=Masc|Number=Plur|PronType=Tot	8	nsubj	_	_
+7	tutti	tutto	PRON	PI	Gender=Masc|Number=Plur|PronType=Ind	8	nsubj	_	_
 8	tuoi	tuo	PRON	PP	Gender=Masc|Number=Plur|Poss=Yes|PronType=Prs	0	root	_	SpaceAfter=No
 9	,	,	PUNCT	FF	_	11	punct	_	_
 10	ti	ti	PRON	PC	Clitic=Yes|Number=Sing|Person=2|PronType=Prs	11	iobj	_	_
@@ -591,7 +591,7 @@
 # sent_id = 17-4-10
 # text = perchè l'amicizie che si acquistano con il prezzo, e non con grandezza e nobiltà d'animo, si meritano, ma non le si hanno, e a' tempi non si possono spendere.
 1	perchè	perché	SCONJ	CS	_	21	mark	_	_
-2	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	3	det	_	SpaceAfter=No
+2	l'	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	3	det	_	SpaceAfter=No
 3	amicizie	amicizia	NOUN	S	Gender=Fem|Number=Plur	21	nsubj:pass	_	_
 4	che	che	PRON	PR	PronType=Rel	6	obj	_	_
 5	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	6	expl:pass	_	_
@@ -605,7 +605,7 @@
 13	con	con	ADP	E	_	14	case	_	_
 14	grandezza	grandezza	NOUN	S	Gender=Fem|Number=Sing	9	conj	_	_
 15	e	e	CCONJ	CC	_	16	cc	_	_
-16	nobiltà	nobiltà	NOUN	S	Gender=Fem|Number=Sing	14	conj	_	_
+16	nobiltà	nobiltà	NOUN	S	Gender=Fem	14	conj	_	_
 17	d'	di	ADP	E	_	18	case	_	SpaceAfter=No
 18	animo	animo	NOUN	S	Gender=Masc|Number=Sing	16	nmod	_	SpaceAfter=No
 19	,	,	PUNCT	FF	_	3	punct	_	_
@@ -666,7 +666,7 @@
 31	obbligo	obbligo	NOUN	S	Gender=Masc|Number=Sing	29	nmod	_	SpaceAfter=No
 32	,	,	PUNCT	FF	_	29	punct	_	_
 33	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	34	det	_	_
-34	quale	quale	PRON	PR	Gender=Masc|Number=Sing|PronType=Rel	49	nsubj:pass	_	SpaceAfter=No
+34	quale	quale	PRON	PR	Number=Sing|PronType=Rel	49	nsubj:pass	_	SpaceAfter=No
 35	,	,	PUNCT	FF	_	34	punct	_	_
 36	per	per	ADP	E	_	39	mark	_	_
 37	essere	essere	AUX	VA	VerbForm=Inf	39	cop	_	_
@@ -679,7 +679,7 @@
 44	occasione	occasione	NOUN	S	Gender=Fem|Number=Sing	49	obl	_	_
 45	di	di	ADP	E	_	47	case	_	_
 46	propria	proprio	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	47	det:poss	_	_
-47	utilità	utilità	NOUN	S	Gender=Fem|Number=Sing	44	nmod	_	_
+47	utilità	utilità	NOUN	S	Gender=Fem	44	nmod	_	_
 48	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	49	aux:pass	_	_
 49	rotto	rompere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	29	acl:relcl	_	SpaceAfter=No
 50	;	;	PUNCT	FC	_	4	punct	_	_
@@ -806,7 +806,7 @@
 15	lo	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	14	obj	_	_
 16	quando	quando	SCONJ	CS	_	18	mark	_	_
 17	vi	vi	PRON	PC	Clitic=Yes|PronType=Prs	18	expl	_	_
-18	sia	essere	AUX	V	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	14	advcl	_	_
+18	sia	essere	VERB	V	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	14	advcl	_	_
 19	giustificazione	giustificazione	NOUN	S	Gender=Fem|Number=Sing	18	nsubj	_	_
 20	conveniente	conveniente	ADJ	A	Number=Sing	19	amod	_	_
 21	e	e	CCONJ	CC	_	22	cc	_	_
@@ -860,7 +860,7 @@
 # par = 5
 # sent_id = 17-5-1
 # text = Dipoi le cagioni del torre la roba non mancano mai;
-1	Dipoi	poi	ADV	V	_	10	advcl	_	_
+1	Dipoi	dipoi	ADV	V	_	10	advcl	_	_
 2	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	3	det	_	_
 3	cagioni	cagione	NOUN	S	Gender=Fem|Number=Plur	1	obj	_	_
 4-5	del	_	_	_	_	_	_	_	_
@@ -985,7 +985,7 @@
 5	di	di	ADP	E	_	6	case	_	_
 6	Annibale	Annibale	PROPN	SP	_	4	nmod	_	_
 7	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	8	expl:pass	_	_
-8	connumera	annoverare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+8	connumera	connumerare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
 9	questa	questo	PRON	PD	Gender=Fem|Number=Sing|PronType=Dem	8	nsubj:pass	_	SpaceAfter=No
 10	,	,	PUNCT	FF	_	9	punct	_	_
 11	che	che	SCONJ	PR	_	34	nsubj	_	_
@@ -1030,7 +1030,7 @@
 49	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	50	det	_	_
 50	trista	tristo	ADJ	A	Gender=Fem|Number=Sing	34	obl	_	SpaceAfter=No
 51	,	,	PUNCT	FF	_	57	punct	_	_
-52	come	come	ADV	B	_	57	case	_	_
+52	come	come	ADV	B	ExtPos=ADP	57	case	_	_
 53-54	nella	_	_	_	_	_	_	_	_
 53	in	in	ADP	E	_	57	case	_	_
 54	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	57	det	_	_
@@ -1056,15 +1056,15 @@
 11	quella	quello	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	14	det	_	_
 12	sua	suo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	14	det:poss	_	_
 13	inumana	inumano	ADJ	A	Gender=Fem|Number=Sing	14	amod	_	_
-14	crudeltà	crudeltà	NOUN	S	Gender=Fem|Number=Sing	7	conj	_	SpaceAfter=No
+14	crudeltà	crudeltà	NOUN	S	Gender=Fem	7	conj	_	SpaceAfter=No
 15	,	,	PUNCT	FF	_	14	punct	_	_
 16	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	17	det	_	_
-17	quale	quale	PRON	PR	Gender=Fem|Number=Sing|PronType=Rel	24	nsubj	_	_
+17	quale	quale	PRON	PR	Number=Sing|PronType=Rel	24	nsubj	_	_
 18	insieme	insieme	ADV	B	ExtPos=ADP	22	case	_	_
 19	con	con	ADP	E	_	18	fixed	_	_
 20	infinite	infinito	ADJ	A	Gender=Fem|Number=Plur	22	amod	_	_
 21	sue	suo	DET	AP	Gender=Fem|Number=Plur|Poss=Yes|PronType=Prs	22	det:poss	_	_
-22	virtù	virtù	NOUN	S	Gender=Fem|Number=Plur	24	obl	_	_
+22	virtù	virtù	NOUN	S	Gender=Fem	24	obl	_	_
 23	lo	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	24	obj	_	_
 24	fece	fare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	14	acl:relcl	_	_
 25	sempre	sempre	ADV	B	_	24	advmod	_	_
@@ -1086,10 +1086,10 @@
 39	senza	senza	ADP	E	_	40	case	_	_
 40	quella	quello	PRON	PD	Gender=Fem|Number=Sing|PronType=Dem	52	obl	_	SpaceAfter=No
 41	,	,	PUNCT	FF	_	40	punct	_	_
-42	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	45	det	_	SpaceAfter=No
+42	l'	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	45	det	_	SpaceAfter=No
 43	altre	altro	ADJ	A	Gender=Fem|Number=Plur	45	amod	_	_
 44	sue	suo	DET	AP	Gender=Fem|Number=Plur|Poss=Yes|PronType=Prs	45	det:poss	_	_
-45	virtù	virtù	NOUN	S	Gender=Fem|Number=Plur	52	nsubj	_	_
+45	virtù	virtù	NOUN	S	Gender=Fem	52	nsubj	_	_
 46	a	a	ADP	E	_	47	mark	_	_
 47	far	fare	VERB	V	VerbForm=Inf	45	acl	_	_
 48	quello	quello	DET	DD	Gender=Masc|Number=Sing|PronType=Dem	49	det	_	_
@@ -1140,10 +1140,10 @@
 3	sia	essere	AUX	VA	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	4	cop	_	_
 4	vero	vero	ADJ	A	Gender=Masc|Number=Sing	17	advcl	_	_
 5	che	che	SCONJ	CS	_	13	mark	_	_
-6	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	9	det	_	SpaceAfter=No
+6	l'	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	9	det	_	SpaceAfter=No
 7	altre	altro	ADJ	A	Gender=Fem|Number=Plur	9	amod	_	_
 8	sue	suo	DET	AP	Gender=Fem|Number=Plur|Poss=Yes|PronType=Prs	9	det:poss	_	_
-9	virtù	virtù	NOUN	S	Gender=Fem|Number=Plur	13	nsubj	_	_
+9	virtù	virtù	NOUN	S	Gender=Fem	13	nsubj	_	_
 10	non	non	ADV	BN	PronType=Neg	13	advmod	_	_
 11	gli	gli	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	13	iobj	_	_
 12	sarieno	essere	AUX	VA	Mood=Cnd|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	13	aux	_	_
@@ -1180,7 +1180,7 @@
 41-42	dal	_	_	_	_	_	_	_	_
 41	da	da	ADP	E	_	43	case	_	_
 42	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	43	det	_	_
-43	quale	quale	PRON	PR	Gender=Masc|Number=Sing|PronType=Rel	50	obl	_	_
+43	quale	quale	PRON	PR	Number=Sing|PronType=Rel	50	obl	_	_
 44	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	45	det	_	_
 45	eserciti	esercito	NOUN	S	Gender=Masc|Number=Plur	50	nsubj	_	_
 46	suoi	suo	DET	AP	Gender=Masc|Number=Plur|Poss=Yes|PronType=Prs	45	det:poss	_	_
@@ -1202,10 +1202,10 @@
 61	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	64	det	_	_
 62	sua	suo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	64	det:poss	_	_
 63	troppa	troppo	DET	DI	Gender=Fem|Number=Sing|PronType=Ind	64	det	_	_
-64	pietà	pietà	NOUN	S	Gender=Fem|Number=Sing	57	conj	_	SpaceAfter=No
+64	pietà	pietà	NOUN	S	Gender=Fem	57	conj	_	SpaceAfter=No
 65	,	,	PUNCT	FF	_	64	punct	_	_
 66	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	67	det	_	_
-67	quale	quale	PRON	PR	Gender=Fem|Number=Sing|PronType=Rel	69	nsubj	_	_
+67	quale	quale	PRON	PR	Number=Sing|PronType=Rel	69	nsubj	_	_
 68	aveva	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	69	aux	_	_
 69	dato	dare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	64	acl:relcl	_	_
 70-71	a'	_	_	_	_	_	_	_	_
@@ -1232,7 +1232,7 @@
 # sent_id = 17-5-9
 # text = La qual cosa gli fu da Fabio Massimo nel Senato rimproverata, chiamandolo corruttore della Romana milizia.
 1	La	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	3	det	_	_
-2	qual	quale	DET	DQ	Gender=Fem|Number=Sing|PronType=Rel	3	det	_	_
+2	qual	quale	DET	DQ	Number=Sing|PronType=Rel	3	det	_	_
 3	cosa	cosa	NOUN	S	Gender=Fem|Number=Sing	12	nsubj:pass	_	_
 4	gli	gli	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	12	iobj	_	_
 5	fu	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	12	aux:pass	_	_
@@ -1261,7 +1261,7 @@
 # sent_id = 17-5-10
 # text = I Locrensi essendo stati da un legato di Scipione distrutti, non furono da lui vindicati, nè l'insolenza di quel legato corretta, nascendo tutto da quella sua natura facile.
 1	I	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	2	det	_	_
-2	Locrensi	locrese	NOUN	SP	Gender=Masc|Number=Plur	16	nsubj:pass	_	_
+2	Locrensi	locrese	NOUN	SP	Number=Plur	16	nsubj:pass	_	_
 3	essendo	essere	AUX	VA	VerbForm=Ger	7	aux	_	_
 4	stati	essere	AUX	VA	Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part	7	cop	_	_
 5	da	da	ADP	E	_	7	case	_	_
@@ -1298,7 +1298,7 @@
 # par = 5
 # sent_id = 17-5-11
 # text = Talmentechè volendolo alcuno in Senato scusare, disse come egli erano molti uomini, che sapevano meglio non errare, che correggere gli errori d'altri.
-1	Talmentechè	talché	SCONJ	CS	_	2	mark	_	_
+1	Talmentechè	talmenteché	SCONJ	CS	_	2	mark	_	_
 2-3	volendolo	_	_	_	_	_	_	_	_
 2	volendo	volere	VERB	_	VerbForm=Ger	9	advcl	_	_
 3	lo	lo	PRON	_	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	2	obj	_	_
@@ -1309,7 +1309,7 @@
 8	,	,	PUNCT	FF	_	2	punct	_	_
 9	disse	dire	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
 10	come	come	SCONJ	CS	_	14	mark	_	_
-11	egli	egli	PRON	PE	Gender=Masc|Number=Plur|Person=3|PronType=Prs	14	nsubj	_	_
+11	egli	esso	PRON	PE	Gender=Masc|Number=Plur|Person=3|PronType=Prs	14	nsubj	_	_
 12	erano	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin	14	cop	_	_
 13	molti	molto	DET	DI	Gender=Masc|Number=Plur|PronType=Ind	14	det	_	_
 14	uomini	uomo	NOUN	S	Gender=Masc|Number=Plur	9	ccomp	_	SpaceAfter=No
@@ -1333,7 +1333,7 @@
 # sent_id = 17-5-12
 # text = La qual natura arebbe con il tempo violato la fama e la gloria di Scipione, se egli avesse con essa perseverato nell'imperio;
 1	La	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	3	det	_	_
-2	qual	quale	DET	DQ	Gender=Fem|Number=Sing|PronType=Rel	3	det	_	_
+2	qual	quale	DET	DQ	Number=Sing|PronType=Rel	3	det	_	_
 3	natura	natura	NOUN	S	Gender=Fem|Number=Sing	8	nsubj	_	_
 4	arebbe	avere	AUX	VA	Mood=Cnd|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	8	aux	_	_
 5	con	con	ADP	E	_	7	case	_	_
@@ -1376,7 +1376,7 @@
 9	,	,	PUNCT	FF	_	2	punct	_	_
 10	questa	questo	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	12	det	_	_
 11	sua	suo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	12	det:poss	_	_
-12	qualità	qualità	NOUN	S	Gender=Fem|Number=Sing	17	nsubj	_	_
+12	qualità	qualità	NOUN	S	Gender=Fem	17	nsubj	_	_
 13	dannosa	dannoso	ADJ	A	Gender=Fem|Number=Sing	12	amod	_	_
 14	non	non	ADV	BN	PronType=Neg	15	advmod	_	_
 15	solamente	solamente	ADV	B	_	17	advmod	_	_
@@ -1394,8 +1394,8 @@
 # par = 5
 # sent_id = 17-5-14
 # text = Conchiudo adunque, tornando all'esser temuto ed amato, che amando gli uomini a posta loro, e temendo a posta del Principe, deve un Principe savio fondarsi in su quello che è suo, non in su quello che è d'altri;
-1	Conchiudo	conchiudere	VERB	V	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	_
-2	adunque	dunque	ADV	B	_	1	advmod	_	SpaceAfter=No
+1	Conchiudo	concludere	VERB	V	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	_
+2	adunque	adunque	ADV	B	_	1	advmod	_	SpaceAfter=No
 3	,	,	PUNCT	FF	_	1	punct	_	_
 4	tornando	tornare	VERB	V	VerbForm=Ger	1	advcl	_	_
 5-6	all'	_	_	_	_	_	_	_	SpaceAfter=No

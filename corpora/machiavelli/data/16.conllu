@@ -8,7 +8,7 @@
 1-2	Della	_	_	_	_	_	_	_	_
 1	Di	di	ADP	E	_	3	case	_	_
 2	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	3	det	_	_
-3	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	0	root	_	_
+3	liberalità	liberalità	NOUN	S	Gender=Fem	0	root	_	_
 4	e	e	CCONJ	CC	_	5	cc	_	_
 5	miseria	miseria	NOUN	S	Gender=Fem|Number=Sing	3	conj	_	SpaceAfter=No
 6	.	.	PUNCT	FS	_	3	punct	_	SpacesAfter=\n\n
@@ -18,13 +18,13 @@
 # sent_id = 16-1-1
 # text = Cominciando adunque dalle prime soprascritte qualità, dico come sarebbe bene esser tenuto liberale.
 1	Cominciando	cominciare	VERB	V	VerbForm=Ger	9	advcl	_	_
-2	adunque	dunque	ADV	B	_	1	advmod	_	_
+2	adunque	adunque	ADV	B	_	1	advmod	_	_
 3-4	dalle	_	_	_	_	_	_	_	_
 3	da	da	ADP	E	_	7	case	_	_
 4	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	7	det	_	_
 5	prime	primo	ADJ	NO	Gender=Fem|NumType=Ord|Number=Plur	7	amod	_	_
 6	soprascritte	soprascritto	ADJ	A	Gender=Fem|Number=Plur	7	amod	_	_
-7	qualità	qualità	NOUN	S	Gender=Fem|Number=Plur	1	obl	_	SpaceAfter=No
+7	qualità	qualità	NOUN	S	Gender=Fem	1	obl	_	SpaceAfter=No
 8	,	,	PUNCT	FF	_	1	punct	_	_
 9	dico	dire	VERB	V	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	_
 10	come	come	SCONJ	CS	_	12	mark	_	_
@@ -39,9 +39,9 @@
 # par = 1
 # sent_id = 16-1-2
 # text = Nondimanco la liberalità usata in modo che tu non sia temuto, ti offende;
-1	Nondimanco	nondimeno	ADV	B	_	3	advmod	_	_
+1	Nondimanco	nondimanco	ADV	B	_	3	advmod	_	_
 2	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	3	det	_	_
-3	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	0	root	_	_
+3	liberalità	liberalità	NOUN	S	Gender=Fem	0	root	_	_
 4	usata	usare	VERB	V	Gender=Fem|Number=Sing|Tense=Past|VerbForm=Part	3	acl	_	_
 5	in	in	ADP	E	_	6	case	_	_
 6	modo	modo	NOUN	S	Gender=Masc|Number=Sing	4	obl	_	_
@@ -117,16 +117,16 @@
 19	lasciare	lasciare	VERB	V	VerbForm=Inf	17	csubj	_	_
 20	indietro	indietro	ADV	B	_	19	advmod	_	_
 21	alcuna	alcuno	DET	DI	Gender=Fem|Number=Sing|PronType=Ind	22	det	_	_
-22	qualità	qualità	NOUN	S	Gender=Fem|Number=Sing	19	obj	_	_
+22	qualità	qualità	NOUN	S	Gender=Fem	19	obj	_	_
 23	di	di	ADP	E	_	24	case	_	_
-24	sontuosità	sontuosità	NOUN	S	Gender=Fem|Number=Sing	22	nmod	_	SpaceAfter=No
+24	sontuosità	sontuosità	NOUN	S	Gender=Fem	22	nmod	_	SpaceAfter=No
 25	;	;	PUNCT	FC	_	17	punct	_	_
 
 # unit = 16
 # par = 1
 # sent_id = 16-1-5
 # text = talmentechè sempre un Principe così fatto consumerà in simili opere tutte le sue facultà, e sarà necessitato alla fine, se egli si vorrà mantenere nome del liberale, gravare i popoli straordinariamente, ed esser fiscale, e fare tutte quelle cose che si possono fare per avere danari.
-1	talmentechè	talché	SCONJ	CS	_	7	mark	_	_
+1	talmentechè	talmenteché	SCONJ	CS	_	7	mark	_	_
 2	sempre	sempre	ADV	B	_	7	advmod	_	_
 3	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	4	det	_	_
 4	Principe	principe	NOUN	S	Gender=Masc|Number=Sing	7	nsubj	_	_
@@ -139,7 +139,7 @@
 11	tutte	tutto	DET	T	Gender=Fem|Number=Plur|PronType=Tot	14	det:predet	_	_
 12	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	14	det	_	_
 13	sue	suo	DET	AP	Gender=Fem|Number=Plur|Poss=Yes|PronType=Prs	14	det:poss	_	_
-14	facultà	facoltà	NOUN	S	Gender=Fem|Number=Plur	7	obj	_	SpaceAfter=No
+14	facultà	facoltà	NOUN	S	Gender=Fem	7	obj	_	SpaceAfter=No
 15	,	,	PUNCT	FF	_	18	punct	_	_
 16	e	e	CCONJ	CC	_	18	cc	_	_
 17	sarà	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	18	aux:pass	_	_
@@ -221,7 +221,7 @@
 6	con	con	ADP	E	_	9	case	_	_
 7	questa	questo	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	9	det	_	_
 8	sua	suo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	9	det:poss	_	_
-9	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	10	obl	_	_
+9	liberalità	liberalità	NOUN	S	Gender=Fem	10	obl	_	_
 10	offeso	offendere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	17	advcl	_	_
 11	molti	molto	PRON	PI	Gender=Masc|Number=Plur|PronType=Ind	10	obj	_	SpaceAfter=No
 12	,	,	PUNCT	FF	_	14	punct	_	_
@@ -254,7 +254,7 @@
 6	e	e	CCONJ	CC	_	10	cc	_	_
 7-9	volendosene	_	_	_	_	_	_	_	_
 7	volendo	volere	AUX	VM	VerbForm=Ger	10	aux	_	_
-8	se	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	10	expl	_	_
+8	se	se	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	10	expl	_	_
 9	ne	ne	PRON	PC	Clitic=Yes|PronType=Prs	10	iobj	_	_
 10	ritrarre	ritrarre	VERB	V	VerbForm=Inf	3	conj	_	SpaceAfter=No
 11	,	,	PUNCT	FF	_	3	punct	_	_
@@ -276,13 +276,13 @@
 # text = Un Principe adunque, non potendo usare questa virtù del liberale senza suo danno, in modo che la sia cognosciuta, deve, se egli è prudente, non si curare del nome del misero;
 1	Un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	2	det	_	_
 2	Principe	principe	NOUN	S	Gender=Masc|Number=Sing	33	nsubj	_	_
-3	adunque	dunque	ADV	B	_	33	advmod	_	SpaceAfter=No
+3	adunque	adunque	ADV	B	_	33	advmod	_	SpaceAfter=No
 4	,	,	PUNCT	FF	_	2	punct	_	_
 5	non	non	ADV	BN	PronType=Neg	7	advmod	_	_
 6	potendo	potere	AUX	VM	VerbForm=Ger	7	aux	_	_
 7	usare	usare	VERB	V	VerbForm=Inf	33	advcl	_	_
 8	questa	questo	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	9	det	_	_
-9	virtù	virtù	NOUN	S	Gender=Fem|Number=Sing	7	obj	_	_
+9	virtù	virtù	NOUN	S	Gender=Fem	7	obj	_	_
 10-11	del	_	_	_	_	_	_	_	_
 10	di	di	ADP	E	_	12	case	_	_
 11	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	12	det	_	_
@@ -372,12 +372,12 @@
 # par = 2
 # sent_id = 16-2-4
 # text = talmentechè viene a usare la liberalità a tutti quelli, a chi non toglie, che sono infiniti, e miseria a tutti coloro, a chi non dà, che sono pochi.
-1	talmentechè	talché	SCONJ	CS	_	2	advmod	_	_
+1	talmentechè	talmenteché	SCONJ	CS	_	2	advmod	_	_
 2	viene	venire	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
 3	a	a	ADP	E	_	4	mark	_	_
 4	usare	usare	VERB	V	VerbForm=Inf	2	xcomp	_	_
 5	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	6	det	_	_
-6	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	4	obj	_	_
+6	liberalità	liberalità	NOUN	S	Gender=Fem	4	obj	_	_
 7	a	a	ADP	E	_	9	case	_	_
 8	tutti	tutto	DET	DI	Gender=Masc|Number=Plur|PronType=Tot	9	det	_	_
 9	quelli	quello	PRON	PD	Gender=Masc|Number=Plur|PronType=Dem	4	obl	_	SpaceAfter=No
@@ -421,7 +421,7 @@
 7	abbiamo	avere	AUX	VA	Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin	8	aux	_	_
 8	veduto	vedere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	0	root	_	_
 9	fare	fare	VERB	V	VerbForm=Inf	8	xcomp	_	_
-10	gran	grande	ADJ	A	Gender=Fem|Number=Plur	11	amod	_	_
+10	gran	grande	ADJ	A	Number=Plur	11	amod	_	_
 11	cose	cosa	NOUN	S	Gender=Fem|Number=Plur	9	obj	_	SpaceAfter=No
 12	,	,	PUNCT	FF	_	9	punct	_	_
 13	se	se	SCONJ	CS	_	16	mark	_	_
@@ -446,7 +446,7 @@
 # text = Papa Iulio II come si fu servito del nome di liberale per aggiugnere al Papato, non pensò più a mantenerselo per potere far guerra al Re di Francia; e ha fatto tante guerre senza porre un dazio strasordinario, perchè alle superflue spese ha somministrato la lunga sua parsimonia.
 1	Papa	papa	NOUN	S	Gender=Masc|Number=Sing	20	nsubj	_	_
 2	Iulio	Giulio	PROPN	SP	_	1	nmod	_	_
-3	II	II	NUM	NO	NumType=Ord|Number=Sing	2	amod	_	_
+3	II	II	ADJ	NO	NumType=Ord|Number=Sing	2	amod	_	_
 4	come	come	SCONJ	CS	_	7	mark	_	_
 5	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	7	expl	_	_
 6	fu	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	7	aux	_	_
@@ -470,7 +470,7 @@
 22	a	a	ADP	E	_	23	mark	_	_
 23-25	mantenerselo	_	_	_	_	_	_	_	_
 23	mantener	mantenere	VERB	V	VerbForm=Inf	20	xcomp	_	_
-24	se	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	23	expl	_	_
+24	se	se	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	23	expl	_	_
 25	lo	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	23	obj	_	_
 26	per	per	ADP	E	_	28	mark	_	_
 27	potere	potere	AUX	VM	VerbForm=Inf	28	aux	_	_
@@ -612,7 +612,7 @@
 1	Cesare	Cesare	PROPN	SP	_	5	nsubj	_	_
 2	con	con	ADP	E	_	4	case	_	_
 3	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	4	det	_	_
-4	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	5	obl	_	_
+4	liberalità	liberalità	NOUN	S	Gender=Fem	5	obl	_	_
 5	pervenne	pervenire	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
 6-7	all'	_	_	_	_	_	_	_	SpaceAfter=No
 6	a	a	ADP	E	_	8	case	_	_
@@ -671,7 +671,7 @@
 3	primo	primo	ADJ	NO	Gender=Masc|NumType=Ord|Number=Sing	4	amod	_	_
 4	caso	caso	NOUN	S	Gender=Masc|Number=Sing	8	obl	_	_
 5	questa	questo	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	6	det	_	_
-6	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	8	nsubj	_	_
+6	liberalità	liberalità	NOUN	S	Gender=Fem	8	nsubj	_	_
 7	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	8	cop	_	_
 8	dannosa	dannoso	ADJ	A	Gender=Fem|Number=Sing	0	root	_	SpaceAfter=No
 9	;	;	PUNCT	FC	_	15	punct	_	_
@@ -753,7 +753,7 @@
 9	eserciti	esercito	NOUN	S	Gender=Masc|Number=Plur	11	obl	_	_
 10	hanno	avere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	11	aux	_	_
 11	fatto	fare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	4	conj	_	_
-12	gran	grande	ADJ	A	Gender=Fem|Number=Plur	13	amod	_	_
+12	gran	grande	ADJ	A	Number=Plur	13	amod	_	_
 13	cose	cosa	NOUN	S	Gender=Fem|Number=Plur	11	obj	_	SpaceAfter=No
 14	,	,	PUNCT	FF	_	18	punct	_	_
 15	che	che	PRON	CS	PronType=Rel	18	mark	_	_
@@ -816,7 +816,7 @@
 16	parte	parte	NOUN	S	Gender=Fem|Number=Sing	14	obj	_	_
 17	alcuna	alcuno	DET	DI	Gender=Fem|Number=Sing|PronType=Ind	16	det	_	_
 18	di	di	ADP	E	_	19	case	_	_
-19	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	16	nmod	_	SpaceAfter=No
+19	liberalità	liberalità	NOUN	S	Gender=Fem	16	nmod	_	SpaceAfter=No
 20	.	.	PUNCT	FS	_	7	punct	_	_
 
 # unit = 16
@@ -855,7 +855,7 @@
 30	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	31	cop	_	_
 31	necessaria	necessario	ADJ	A	Gender=Fem|Number=Sing	0	root	_	_
 32	questa	questo	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	33	det	_	_
-33	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	31	nsubj	_	SpaceAfter=No
+33	liberalità	liberalità	NOUN	S	Gender=Fem	31	nsubj	_	SpaceAfter=No
 34	;	;	PUNCT	FC	_	31	punct	_	_
 
 # unit = 16
@@ -958,10 +958,10 @@
 9	stessa	stesso	ADJ	A	Gender=Fem|Number=Sing	8	amod	_	_
 10	quanto	quanto	ADV	E	_	12	case	_	_
 11	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	12	det	_	_
-12	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	7	obl	_	SpaceAfter=No
+12	liberalità	liberalità	NOUN	S	Gender=Fem	7	obl	_	SpaceAfter=No
 13	,	,	PUNCT	FF	_	12	punct	_	_
 14	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	15	det	_	_
-15	quale	quale	PRON	PR	Gender=Fem|Number=Sing|PronType=Rel	21	nsubj	_	_
+15	quale	quale	PRON	PR	Number=Sing|PronType=Rel	21	nsubj	_	_
 16	mentre	mentre	ADV	B	ExtPos=SCONJ	19	mark	_	_
 17	che	che	SCONJ	CS	_	19	mark	_	_
 18	tu	tu	PRON	PE	Number=Sing|Person=2|PronType=Prs	19	nsubj	_	_
@@ -969,7 +969,7 @@
 20	,	,	PUNCT	FF	_	19	punct	_	_
 21	perdi	perdere	VERB	V	Mood=Ind|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin	12	acl:relcl	_	_
 22	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	23	det	_	_
-23	facultà	facoltà	NOUN	S	Gender=Fem|Number=Sing	21	obj	_	_
+23	facultà	facoltà	NOUN	S	Gender=Fem	21	obj	_	_
 24	di	di	ADP	E	_	25	mark	_	_
 25-26	usarla	_	_	_	_	_	_	_	SpaceAfter=No
 25	usar	usare	VERB	V	VerbForm=Inf	23	acl	_	_
@@ -980,14 +980,14 @@
 30	o	o	CCONJ	CC	_	31	cc	_	_
 31	povero	povero	ADJ	A	Gender=Masc|Number=Sing	29	conj	_	_
 32	o	o	CCONJ	CC	_	33	cc	_	_
-33	vile	vile	ADJ	A	Gender=Masc|Number=Sing	31	conj	_	SpaceAfter=No
+33	vile	vile	ADJ	A	Number=Sing	31	conj	_	SpaceAfter=No
 34	,	,	PUNCT	FF	_	42	punct	_	_
 35	o	o	CCONJ	CC	_	42	cc	_	SpaceAfter=No
 36	,	,	PUNCT	FF	_	42	punct	_	_
 37	per	per	ADP	E	_	38	mark	_	_
 38	fuggire	fuggire	VERB	V	VerbForm=Inf	42	advcl	_	_
 39	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	40	det	_	_
-40	povertà	povertà	NOUN	S	Gender=Fem|Number=Sing	38	obj	_	SpaceAfter=No
+40	povertà	povertà	NOUN	S	Gender=Fem	38	obj	_	SpaceAfter=No
 41	,	,	PUNCT	FF	_	38	punct	_	_
 42	rapace	rapace	ADJ	A	Number=Sing	29	conj	_	_
 43	e	e	CCONJ	CC	_	44	cc	_	_
@@ -1026,7 +1026,7 @@
 # text = e la liberalità all'una e l'altra di queste cose ti conduce.
 1	e	e	CCONJ	CC	_	14	cc	_	_
 2	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	3	det	_	_
-3	liberalità	liberalità	NOUN	S	Gender=Fem|Number=Sing	14	nsubj	_	_
+3	liberalità	liberalità	NOUN	S	Gender=Fem	14	nsubj	_	_
 4-5	all'	_	_	_	_	_	_	_	SpaceAfter=No
 4	a	a	ADP	E	_	6	case	_	_
 5	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	6	det	_	_
@@ -1075,7 +1075,7 @@
 27	,	,	PUNCT	FF	_	22	punct	_	_
 28	incorrere	incorrere	VERB	V	VerbForm=Inf	15	acl:relcl	_	_
 29	per	per	ADP	E	_	30	case	_	_
-30	necessità	necessità	NOUN	S	Gender=Fem|Number=Sing	28	obl	_	_
+30	necessità	necessità	NOUN	S	Gender=Fem	28	obl	_	_
 31-32	nel	_	_	_	_	_	_	_	_
 31	in	in	ADP	E	_	33	case	_	_
 32	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	33	det	_	_

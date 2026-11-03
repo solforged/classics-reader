@@ -12,7 +12,7 @@
 5	da	da	ADP	E	_	6	mark	_	_
 6	governare	governare	VERB	V	VerbForm=Inf	4	ccomp	_	_
 7	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	8	det	_	_
-8	città	città	NOUN	S	Gender=Fem|Number=Plur	6	nsubj	_	_
+8	città	città	NOUN	S	Gender=Fem	6	nsubj	_	_
 9	o	o	CCONJ	CC	_	10	cc	_	_
 10	Principati	principato	NOUN	S	Gender=Masc|Number=Plur	8	conj	_	SpaceAfter=No
 11	,	,	PUNCT	FF	_	8	punct	_	_
@@ -55,7 +55,7 @@
 19	leggi	legge	NOUN	S	Gender=Fem|Number=Plur	15	obl	_	_
 20	e	e	CCONJ	CC	_	22	cc	_	_
 21	in	in	ADP	E	_	22	case	_	_
-22	libertà	libertà	NOUN	S	Gender=Fem|Number=Sing	19	conj	_	SpaceAfter=No
+22	libertà	libertà	NOUN	S	Gender=Fem	19	conj	_	SpaceAfter=No
 23	,	,	PUNCT	FF	_	13	punct	_	_
 24	a	a	ADP	E	_	27	mark	_	_
 25-26	volergli	_	_	_	_	_	_	_	_
@@ -74,7 +74,7 @@
 # text = Il primo è rovinargli.
 1	Il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	2	det	_	_
 2	primo	primo	ADJ	NO	Gender=Masc|NumType=Ord|Number=Sing	3	nsubj	_	_
-3	è	essere	AUX	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+3	è	essere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
 4-5	rovinargli	_	_	_	_	_	_	_	SpaceAfter=No
 4	rovinar	rovinare	VERB	V	VerbForm=Inf	3	ccomp	_	_
 5	gli	li	PRON	PC	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	4	iobj	_	_
@@ -179,7 +179,7 @@
 4	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	5	expl:impers	_	_
 5	tiene	tenere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
 6	una	uno	DET	RI	Definite=Ind|Gender=Fem|Number=Sing|PronType=Art	7	det	_	_
-7	città	città	NOUN	S	Gender=Fem|Number=Sing	5	nsubj	_	_
+7	città	città	NOUN	S	Gender=Fem	5	nsubj	_	_
 8	usa	uso	ADJ	A	Gender=Fem|Number=Sing	7	amod	_	_
 9	a	a	ADP	E	_	10	mark	_	_
 10	vivere	vivere	VERB	V	VerbForm=Inf	8	advcl	_	_
@@ -239,7 +239,7 @@
 8	creando	creare	VERB	V	VerbForm=Ger	3	advcl	_	_
 9	vi	vi	PRON	B	Clitic=Yes|PronType=Prs	8	advmod	_	_
 10	uno	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	11	det	_	_
-11	Stato	Stato	NOUN	S	Gender=Masc|Number=Sing	8	obj	_	_
+11	Stato	stato	NOUN	S	Gender=Masc|Number=Sing	8	obj	_	_
 12	di	di	ADP	E	_	13	case	_	_
 13	pochi	poco	PRON	PI	Gender=Masc|Number=Plur|PronType=Ind	11	nmod	_	SpaceAfter=No
 14	:	:	PUNCT	FC	_	3	punct	_	_
@@ -248,7 +248,7 @@
 # par = 2
 # sent_id = 05-2-3
 # text = nientedimeno le perderono.
-1	nientedimeno	nondimeno	ADV	BN	_	3	advmod	_	_
+1	nientedimeno	nientedimeno	ADV	BN	_	3	advmod	_	_
 2	le	le	PRON	PC	Clitic=Yes|Gender=Fem|Number=Plur|Person=3|PronType=Prs	3	obj	_	_
 3	perderono	perdere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	0	root	_	SpaceAfter=No
 4	.	.	PUNCT	FS	_	3	punct	_	_
@@ -322,7 +322,7 @@
 5	costretti	costringere	VERB	V	Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part	2	acl	_	_
 6	disfare	disfare	VERB	V	VerbForm=Inf	5	xcomp	_	_
 7	molte	molto	DET	DI	Gender=Fem|Number=Plur|PronType=Ind	8	det	_	_
-8	città	città	NOUN	S	Gender=Fem|Number=Plur	6	obj	_	_
+8	città	città	NOUN	S	Gender=Fem	6	obj	_	_
 9	di	di	ADP	E	_	11	case	_	_
 10	quella	quello	DET	DD	Gender=Fem|Number=Sing|PronType=Dem	11	det	_	_
 11	provincia	provincia	NOUN	S	Gender=Fem|Number=Sing	8	nmod	_	_
@@ -333,7 +333,7 @@
 15	,	,	PUNCT	FF	_	13	punct	_	_
 16	perchè	perché	SCONJ	CS	_	21	mark	_	_
 17	in	in	ADP	E	_	18	case	_	_
-18	verità	verità	NOUN	S	Gender=Fem|Number=Sing	21	obl	_	_
+18	verità	verità	NOUN	S	Gender=Fem	21	obl	_	_
 19	non	non	ADV	BN	PronType=Neg	21	advmod	_	_
 20	ci	ci	PRON	PC	Clitic=Yes|PronType=Prs	21	expl	_	_
 21	è	essere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	13	advcl	_	_
@@ -360,7 +360,7 @@
 4	padrone	padrone	NOUN	S	Gender=Masc|Number=Sing	3	xcomp	_	_
 5	di	di	ADP	E	_	7	case	_	_
 6	una	uno	DET	RI	Definite=Ind|Gender=Fem|Number=Sing|PronType=Art	7	det	_	_
-7	città	città	NOUN	S	Gender=Fem|Number=Sing	4	nmod	_	_
+7	città	città	NOUN	S	Gender=Fem	4	nmod	_	_
 8	consueta	consueto	ADJ	A	Gender=Fem|Number=Sing	7	amod	_	_
 9	a	a	ADP	E	_	10	mark	_	_
 10	vivere	vivere	VERB	V	VerbForm=Inf	3	xcomp	_	_
@@ -397,7 +397,7 @@
 11-12	della	_	_	_	_	_	_	_	_
 11	di	di	ADP	E	_	13	case	_	_
 12	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	13	det	_	_
-13	libertà	libertà	NOUN	S	Gender=Fem|Number=Sing	10	nmod	_	SpaceAfter=No
+13	libertà	libertà	NOUN	S	Gender=Fem	10	nmod	_	SpaceAfter=No
 14	,	,	PUNCT	FF	_	17	punct	_	_
 15	e	e	CCONJ	CC	_	17	cc	_	_
 16	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	17	det	_	_
@@ -475,7 +475,7 @@
 48	stata	essere	AUX	VA	Gender=Fem|Number=Sing|Tense=Past|VerbForm=Part	49	aux:pass	_	_
 49	posta	porre	VERB	V	Gender=Fem|Number=Sing|Tense=Past|VerbForm=Part	40	ccomp	_	_
 50	in	in	ADP	E	_	51	case	_	_
-51	servitù	servitù	NOUN	S	Gender=Fem|Number=Sing	49	obl	_	_
+51	servitù	servitù	NOUN	S	Gender=Fem	49	obl	_	_
 52-53	da'	_	_	_	_	_	_	_	_
 52	da	da	ADP	_	_	54	case	_	_
 53	i	il	DET	_	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	54	det	_	_
@@ -489,7 +489,7 @@
 1	Ma	ma	CCONJ	CC	_	46	cc	_	_
 2	quando	quando	SCONJ	CS	_	9	mark	_	_
 3	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	4	det	_	_
-4	città	città	NOUN	S	Gender=Fem|Number=Plur	9	nsubj	_	_
+4	città	città	NOUN	S	Gender=Fem	9	nsubj	_	_
 5	o	o	CCONJ	CC	_	7	cc	_	_
 6	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	7	det	_	_
 7	provincie	provincia	NOUN	S	Gender=Fem|Number=Plur	4	conj	_	_
@@ -557,7 +557,7 @@
 10	e	e	CCONJ	CC	_	19	cc	_	_
 11	con	con	ADP	E	_	13	case	_	_
 12	più	più	DET	DI	PronType=Ind	13	det	_	_
-13	facilità	facilità	NOUN	S	Gender=Fem|Number=Sing	19	obl	_	_
+13	facilità	facilità	NOUN	S	Gender=Fem	19	obl	_	_
 14	se	se	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	19	expl	_	_
 15	li	li	PRON	PC	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	19	obj	_	_
 16	può	potere	AUX	VM	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	19	aux	_	_
@@ -604,14 +604,14 @@
 23	di	di	ADP	E	_	26	case	_	_
 24	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	26	det	_	_
 25	antica	antico	ADJ	A	Gender=Fem|Number=Sing	26	amod	_	_
-26	libertà	libertà	NOUN	S	Gender=Fem|Number=Sing	22	nmod	_	SpaceAfter=No
+26	libertà	libertà	NOUN	S	Gender=Fem	22	nmod	_	SpaceAfter=No
 27	;	;	PUNCT	FC	_	7	punct	_	_
 28	talchè	talché	SCONJ	CS	_	32	mark	_	_
 29	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	32	det	_	_
 30	più	più	ADV	B	_	31	advmod	_	_
 31	sicura	sicuro	ADJ	A	Gender=Fem|Number=Sing	32	amod	_	_
 32	via	via	NOUN	S	Gender=Fem|Number=Sing	33	nsubj	_	_
-33	è	essere	AUX	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	7	parataxis	_	_
+33	è	essere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	7	parataxis	_	_
 34-35	spegnerle	_	_	_	_	_	_	_	SpaceAfter=No
 34	spegner	spegnere	VERB	V	VerbForm=Inf	32	csubj	_	_
 35	le	le	PRON	PC	Clitic=Yes|Gender=Fem|Number=Plur|Person=3|PronType=Prs	34	obj	_	_

@@ -185,7 +185,7 @@
 # sent_id = 11-1-7
 # text = Solo adunque questi Principati sono sicuri e felici.
 1	Solo	solo	ADV	B	_	2	advmod	_	_
-2	adunque	dunque	ADV	B	_	6	advmod	_	_
+2	adunque	adunque	ADV	B	_	6	advmod	_	_
 3	questi	questo	DET	DD	Gender=Masc|Number=Plur|PronType=Dem	4	det	_	_
 4	Principati	principato	NOUN	S	Gender=Masc|Number=Plur	6	nsubj	_	_
 5	sono	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	6	cop	_	_
@@ -228,7 +228,7 @@
 26	e	e	CCONJ	CC	_	27	cc	_	_
 27	mantenuti	mantenere	VERB	V	Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part	25	conj	_	_
 28	da	da	ADP	E	_	29	case	_	_
-29	Dio	Dio	PROPN	SP	_	27	obl:agent	_	SpaceAfter=No
+29	Dio	dio	NOUN	SP	Gender=Masc|Number=Sing	27	obl:agent	_	SpaceAfter=No
 30	,	,	PUNCT	FF	_	25	punct	_	_
 31	sarebbe	essere	AUX	VA	Mood=Cnd|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	32	cop	_	_
 32	ufficio	ufficio	NOUN	S	Gender=Masc|Number=Sing	18	advcl	_	_
@@ -247,7 +247,7 @@
 # par = 1
 # sent_id = 11-1-9
 # text = Nondimanco se alcuno mi ricerca donde viene che la Chiesa nel temporale sia venuta a tanta grandezza, conciossiachè da Alessandro indietro i potentati Italiani, e non solamente quelli che si chiamano potentati, ma ogni Barone e Signore, benchè minimo, quanto al temporale, la stimava poco;
-1	Nondimanco	nondimeno	ADV	B	_	5	advmod	_	_
+1	Nondimanco	nondimanco	ADV	B	_	5	advmod	_	_
 2	se	se	SCONJ	CS	_	5	mark	_	_
 3	alcuno	alcuno	PRON	PI	Gender=Masc|Number=Sing|PronType=Ind	5	nsubj	_	_
 4	mi	mi	PRON	PC	Clitic=Yes|Number=Sing|Person=1|PronType=Prs	5	iobj	_	_
@@ -293,7 +293,7 @@
 43	benchè	benché	SCONJ	CS	_	44	mark	_	_
 44	minimo	minimo	ADJ	A	Gender=Masc|Number=Sing	52	advcl	_	SpaceAfter=No
 45	,	,	PUNCT	FF	_	44	punct	_	_
-46	quanto	quanto	ADV	B	ExtPos=ADP	49	case	_	_
+46	quanto	quanto	ADV	B	_	49	case	_	_
 47-48	al	_	_	_	_	_	_	_	_
 47	a	a	ADP	E	_	46	fixed	_	_
 48	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	49	det	_	_
@@ -318,7 +318,7 @@
 8	trema	tremare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	SpaceAfter=No
 9	,	,	PUNCT	FF	_	14	punct	_	_
 10	e	e	CCONJ	CC	_	14	cc	_	_
-11	l'	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	14	obj	_	SpaceAfter=No
+11	l'	lo	PRON	PC	Clitic=Yes|Number=Sing|Person=3|PronType=Prs	14	obj	_	SpaceAfter=No
 12	ha	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	14	aux	_	_
 13	potuto	potere	AUX	VM	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	14	aux	_	_
 14	cavare	cavare	VERB	V	VerbForm=Inf	8	conj	_	_
@@ -461,7 +461,7 @@
 1	Ed	e	CCONJ	CC	_	8	cc	_	_
 2	a	a	ADP	E	_	3	mark	_	_
 3	tenere	tenere	VERB	V	VerbForm=Inf	8	advcl	_	_
-4	addietro	indietro	ADV	B	_	3	advmod	_	_
+4	addietro	addietro	ADV	B	_	3	advmod	_	_
 5	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	6	det	_	_
 6	Viniziani	veneziano	NOUN	SP	Gender=Masc|Number=Plur	3	obj	_	SpaceAfter=No
 7	,	,	PUNCT	FF	_	3	punct	_	_
@@ -591,7 +591,7 @@
 4	di	di	ADP	E	_	6	case	_	_
 5	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	6	det	_	_
 6	vita	vita	NOUN	S	Gender=Fem|Number=Sing	3	nmod	_	_
-7	loro	loro	PRON	AP	Poss=Yes|PronType=Prs	6	det:poss	_	_
+7	loro	loro	DET	AP	Poss=Yes|PronType=Prs	6	det:poss	_	_
 8	ne	ne	PRON	PC	Clitic=Yes|PronType=Prs	10	iobj	_	_
 9	era	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	10	cop	_	_
 10	cagione	cagione	NOUN	S	Gender=Fem|Number=Sing	0	root	_	SpaceAfter=No
@@ -651,7 +651,7 @@
 25	che	che	PRON	PR	PronType=Rel	27	nsubj	_	_
 26	gli	li	PRON	PC	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	27	iobj	_	_
 27	faceva	fare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	23	acl:relcl	_	_
-28	risurgere	risurgere	VERB	V	VerbForm=Inf	27	xcomp	_	SpaceAfter=No
+28	risurgere	risorgere	VERB	V	VerbForm=Inf	27	xcomp	_	SpaceAfter=No
 29	,	,	PUNCT	FF	_	32	punct	_	_
 30	e	e	CCONJ	CC	_	32	cc	_	_
 31	non	non	ADV	BN	PronType=Neg	32	advmod	_	_
@@ -689,8 +689,8 @@
 # par = 2
 # sent_id = 11-2-10
 # text = Surse dipoi Alessandro VI, il quale di tutti li Pontefici che sono stati mai, mostrò quanto un Papa e con il danaio, e con le forze si poteva prevalere; e fece con l'istrumento del Duca Valentino, e con la occasione della passata de' Francesi tutte quelle cose, che io ho discorso di sopra nelle azioni del Duca.
-1	Surse	surgere	VERB	A	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	amod	_	_
-2	dipoi	poi	ADV	S	_	0	root	_	_
+1	Surse	sorgere	VERB	A	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	amod	_	_
+2	dipoi	dipoi	ADV	S	_	0	root	_	_
 3	Alessandro	Alessandro	PROPN	SP	_	2	nsubj	_	_
 4	VI	VI	ADJ	NO	NumType=Ord|Number=Sing	3	flat:name	_	SpaceAfter=No
 5	,	,	PUNCT	FF	_	3	punct	_	_
@@ -829,7 +829,7 @@
 # sent_id = 11-3-1
 # text = Venne dipoi Papa Iulio, e trovò la Chiesa grande, avendo tutta la Romagna, ed essendo spenti tutti li Baroni di Roma, e per le battiture d'Alessandro annullate quelle fazioni;
 1	Venne	venire	VERB	VA	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	aux:pass	_	_
-2	dipoi	poi	ADV	V	_	0	root	_	_
+2	dipoi	dipoi	ADV	V	_	0	root	_	_
 3	Papa	papa	NOUN	SP	Gender=Masc|Number=Sing	2	nsubj:pass	_	_
 4	Iulio	Giulio	PROPN	SP	_	3	flat:name	_	SpaceAfter=No
 5	,	,	PUNCT	FF	_	7	punct	_	_
@@ -939,7 +939,7 @@
 39	tanta	tanto	DET	DI	Gender=Fem|Number=Sing|PronType=Ind	42	det	_	_
 40	più	più	ADV	B	_	42	advmod	_	_
 41	sua	suo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	42	det:poss	_	_
-42	laude	lode	NOUN	S	Gender=Fem|Number=Sing	35	conj	_	SpaceAfter=No
+42	laude	laude	NOUN	S	Gender=Fem|Number=Sing	35	conj	_	SpaceAfter=No
 43	,	,	PUNCT	FF	_	35	punct	_	_
 44	quanto	quanto	ADV	B	_	45	mark	_	_
 45	fece	fare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	35	advcl	_	_
@@ -985,7 +985,7 @@
 23	fare	fare	VERB	V	VerbForm=Inf	21	acl	_	_
 24	alterazione	alterazione	NOUN	S	Gender=Fem|Number=Sing	23	obj	_	SpaceAfter=No
 25	,	,	PUNCT	FF	_	19	punct	_	_
-26	nientedimeno	nondimeno	ADV	B	_	31	advmod	_	_
+26	nientedimeno	nientedimeno	ADV	B	_	31	advmod	_	_
 27	due	due	NUM	N	NumType=Card	28	nummod	_	_
 28	cose	cosa	NOUN	S	Gender=Fem|Number=Plur	31	nsubj	_	_
 29	gli	li	PRON	PC	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	31	iobj	_	_
@@ -1091,7 +1091,7 @@
 # text = Ha trovato adunque la Santità di Papa Leone questo Pontificato potentissimo, del quale si spera che se quelli lo fecero grande con l'armi, esso con la bontà ed infinite altre sue virtù lo farà grandissimo e venerando.
 1	Ha	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	2	aux	_	_
 2	trovato	trovare	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	0	root	_	_
-3	adunque	dunque	ADV	B	_	2	advmod	_	_
+3	adunque	adunque	ADV	B	_	2	advmod	_	_
 4	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	5	det	_	_
 5	Santità	santità	NOUN	S	Gender=Fem	2	obj	_	_
 6	di	di	ADP	E	_	7	case	_	_

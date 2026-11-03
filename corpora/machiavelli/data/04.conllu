@@ -34,7 +34,7 @@
 # text = Considerate le difficultà, le quali si hanno in tenere uno Stato acquistato di nuovo, potrebbe alcuno maravigliarsi, donde nacque che Alessandro Magno diventò Signore dell'Asia in pochi anni, e, non l'avendo appena occupata, morì, donde pareva ragionevole che tutto quello Stato si ribellasse;
 1	Considerate	considerare	VERB	V	Gender=Fem|Number=Plur|Tense=Past|VerbForm=Part	19	advcl	_	_
 2	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	3	det	_	_
-3	difficultà	difficoltà	NOUN	S	Gender=Fem|Number=Plur	1	obj	_	SpaceAfter=No
+3	difficultà	difficoltà	NOUN	S	Gender=Fem	1	obj	_	SpaceAfter=No
 4	,	,	PUNCT	FF	_	3	punct	_	_
 5	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	6	det	_	_
 6	quali	quale	PRON	PR	Number=Plur|PronType=Rel	8	nsubj	_	_
@@ -111,7 +111,7 @@
 14	se	se	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	13	expl	_	_
 15	lo	lo	PRON	RD	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	17	det	_	_
 16	altra	altro	ADJ	A	Gender=Fem|Number=Sing	17	amod	_	_
-17	difficultà	difficoltà	NOUN	S	Gender=Fem|Number=Sing	13	obj	_	SpaceAfter=No
+17	difficultà	difficoltà	NOUN	S	Gender=Fem	13	obj	_	SpaceAfter=No
 18	,	,	PUNCT	FF	_	17	punct	_	_
 19	che	che	ADP	E	_	20	case	_	_
 20	quella	quello	PRON	PD	Gender=Fem|Number=Sing|PronType=Dem	17	nmod	_	_
@@ -195,7 +195,7 @@
 62	,	,	PUNCT	FF	_	65	punct	_	_
 63	ma	ma	CCONJ	CC	_	65	cc	_	_
 64	per	per	ADP	E	_	65	case	_	_
-65	antichità	antichità	NOUN	S	Gender=Fem|Number=Sing	58	conj	_	_
+65	antichità	antichità	NOUN	S	Gender=Fem	58	conj	_	_
 66	di	di	ADP	E	_	67	case	_	_
 67	sangue	sangue	NOUN	S	Gender=Masc|Number=Sing	65	nmod	_	_
 68	tengono	tenere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	52	acl:relcl	_	_
@@ -253,7 +253,7 @@
 16	Principe	principe	NOUN	S	Gender=Masc|Number=Sing	13	obj	_	_
 17	con	con	ADP	E	_	19	case	_	_
 18	più	più	DET	DI	PronType=Ind	19	det	_	_
-19	autorità	autorità	NOUN	S	Gender=Fem|Number=Sing	13	obl	_	SpaceAfter=No
+19	autorità	autorità	NOUN	S	Gender=Fem	13	obl	_	SpaceAfter=No
 20	;	;	PUNCT	FC	_	13	punct	_	_
 
 # unit = 04
@@ -312,7 +312,7 @@
 3	di	di	ADP	E	_	6	case	_	_
 4	queste	questo	DET	DD	Gender=Fem|Number=Plur|PronType=Dem	6	det	_	_
 5	due	due	NUM	N	NumType=Card	6	nummod	_	_
-6	diversità	diversità	NOUN	S	Gender=Fem|Number=Plur	2	nmod	_	_
+6	diversità	diversità	NOUN	S	Gender=Fem	2	nmod	_	_
 7	di	di	ADP	E	_	8	case	_	_
 8	governi	governo	NOUN	S	Gender=Masc|Number=Plur	6	nmod	_	_
 9	sono	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	17	cop	_	SpaceAfter=No
@@ -434,7 +434,7 @@
 # text = Chi considera adunque l'uno e l'altro di questi Stati, troverà difficultà nell'acquistare lo Stato del Turco;
 1	Chi	chi	PRON	PR	Number=Sing|PronType=Rel	13	nsubj	_	_
 2	considera	considerare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	1	acl:relcl	_	_
-3	adunque	dunque	ADV	B	_	2	advmod	_	_
+3	adunque	adunque	ADV	B	_	2	advmod	_	_
 4	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	5	det	_	SpaceAfter=No
 5	uno	uno	PRON	PI	Gender=Masc|Number=Sing|PronType=Ind	2	obj	_	_
 6	e	e	CCONJ	CC	_	8	cc	_	_
@@ -445,7 +445,7 @@
 11	Stati	stato	NOUN	S	Gender=Masc|Number=Plur	8	nmod	_	SpaceAfter=No
 12	,	,	PUNCT	FF	_	1	punct	_	_
 13	troverà	trovare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	0	root	_	_
-14	difficultà	difficoltà	NOUN	S	Gender=Fem|Number=Sing	13	obj	_	_
+14	difficultà	difficoltà	NOUN	S	Gender=Fem	13	obj	_	_
 15-16	nell'	_	_	_	_	_	_	_	SpaceAfter=No
 15	in	in	ADP	E	_	17	case	_	_
 16	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	17	det	_	_
@@ -468,7 +468,7 @@
 4	sia	essere	AUX	V	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	2	ccomp	_	SpaceAfter=No
 5	,	,	PUNCT	FF	_	2	punct	_	_
 6	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	7	cop	_	_
-7	facilità	facilità	NOUN	S	Gender=Fem|Number=Sing	0	root	_	_
+7	facilità	facilità	NOUN	S	Gender=Fem	0	root	_	_
 8	grande	grande	ADJ	A	Number=Sing	7	amod	_	_
 9	a	a	ADP	E	_	10	mark	_	_
 10-11	tenerlo	_	_	_	_	_	_	_	SpaceAfter=No
@@ -485,7 +485,7 @@
 3-4	della	_	_	_	_	_	_	_	_
 3	di	di	ADP	E	_	5	case	_	_
 4	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	5	det	_	_
-5	difficultà	difficoltà	NOUN	S	Gender=Fem|Number=Sing	2	nmod	_	_
+5	difficultà	difficoltà	NOUN	S	Gender=Fem	2	nmod	_	_
 6	in	in	ADP	E	_	8	mark	_	_
 7	potere	potere	AUX	VM	VerbForm=Inf	8	aux	_	_
 8	occupare	occupare	VERB	V	VerbForm=Inf	2	acl	_	_
@@ -562,7 +562,7 @@
 10	possono	potere	AUX	VM	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	14	aux	_	_
 11	con	con	ADP	E	_	13	case	_	_
 12	più	più	DET	DI	PronType=Ind	13	det	_	_
-13	difficultà	difficoltà	NOUN	S	Gender=Fem|Number=Sing	14	obl	_	_
+13	difficultà	difficoltà	NOUN	S	Gender=Fem	14	obl	_	_
 14	corrompere	corrompere	VERB	V	VerbForm=Inf	0	root	_	SpaceAfter=No
 15	;	;	PUNCT	FC	_	25	punct	_	_
 16	e	e	CCONJ	CC	_	25	cc	_	_
@@ -747,7 +747,7 @@
 13	,	,	PUNCT	FF	_	3	punct	_	_
 14	perchè	perché	SCONJ	CS	_	18	mark	_	_
 15	con	con	ADP	E	_	16	case	_	_
-16	facilità	facilità	NOUN	S	Gender=Fem|Number=Sing	18	obl	_	_
+16	facilità	facilità	NOUN	S	Gender=Fem	18	obl	_	_
 17	puoi	potere	AUX	VM	Mood=Ind|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin	18	aux	_	_
 18-19	entrarvi	_	_	_	_	_	_	_	SpaceAfter=No
 18	entrar	entrare	VERB	V	VerbForm=Inf	3	advcl	_	_
@@ -814,7 +814,7 @@
 22	;	;	PUNCT	FC	_	10	punct	_	_
 23	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	24	det	_	_
 24	quale	quale	PRON	PR	Number=Sing|PronType=Rel	25	nsubj	_	_
-25	dipoi	poi	ADV	V	_	32	advcl	_	_
+25	dipoi	dipoi	ADV	V	_	32	advcl	_	_
 26	a	a	ADP	E	_	29	mark	_	_
 27-28	volerti	_	_	_	_	_	_	_	_
 27	voler	volere	AUX	_	VerbForm=Inf	29	aux	_	_
@@ -825,7 +825,7 @@
 32	tira	tirare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	10	conj	_	_
 33	dietro	dietro	ADV	B	_	35	case	_	_
 34	infinite	infinito	ADJ	A	Gender=Fem|Number=Plur	35	amod	_	_
-35	difficultà	difficoltà	NOUN	S	Gender=Fem|Number=Plur	32	obl	_	_
+35	difficultà	difficoltà	NOUN	S	Gender=Fem	32	obl	_	_
 36	e	e	CCONJ	CC	_	38	cc	_	_
 37	con	con	ADP	E	_	38	case	_	_
 38	quelli	quello	PRON	PD	Gender=Masc|Number=Plur|PronType=Dem	35	conj	_	_
@@ -1114,7 +1114,7 @@
 9	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	10	det	_	_
 10	potenza	potenza	NOUN	S	Gender=Fem|Number=Sing	18	obl	_	_
 11	e	e	CCONJ	CC	_	12	cc	_	_
-12	diuturnità	diuturnità	NOUN	S	Gender=Fem|Number=Sing	10	conj	_	_
+12	diuturnità	diuturnità	NOUN	S	Gender=Fem	10	conj	_	_
 13-14	dell'	_	_	_	_	_	_	_	SpaceAfter=No
 13	di	di	ADP	E	_	15	case	_	_
 14	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	15	det	_	_
@@ -1132,7 +1132,7 @@
 # text = E poterono dipoi anche quelli, combattendo tra loro, ciascuno tirarsi dietro parte di quelle provincie, secondo l'autorità vi aveva preso dentro;
 1	E	e	CCONJ	CC	_	2	cc	_	_
 2	poterono	potere	AUX	V	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
-3	dipoi	poi	ADV	S	_	2	obj	_	_
+3	dipoi	dipoi	ADV	S	_	2	obj	_	_
 4	anche	anche	ADV	B	_	5	advmod	_	_
 5	quelli	quello	PRON	PD	Gender=Masc|Number=Plur|PronType=Dem	2	nsubj	_	SpaceAfter=No
 6	,	,	PUNCT	FF	_	5	punct	_	_
@@ -1152,7 +1152,7 @@
 19	,	,	PUNCT	FF	_	12	punct	_	_
 20	secondo	secondo	ADP	E	_	22	case	_	_
 21	l'	il	DET	RD	Definite=Def|Number=Sing|PronType=Art	22	det	_	SpaceAfter=No
-22	autorità	autorità	NOUN	S	Gender=Fem|Number=Sing	25	obl	_	_
+22	autorità	autorità	NOUN	S	Gender=Fem	25	obl	_	_
 23	vi	vi	PRON	PC	Clitic=Yes|PronType=Prs	25	iobj	_	_
 24	aveva	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	25	aux	_	_
 25	preso	prendere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	2	advcl	_	_
@@ -1192,7 +1192,7 @@
 # sent_id = 04-3-16
 # text = Considerando adunque queste cose, non si maraviglierà alcuno della facilità che ebbe Alessandro a tenere lo Stato d'Asia, e delle difficultà che hanno avuto gli altri a conservare l'acquistato, come Pirro, e molti altri;
 1	Considerando	considerare	VERB	V	VerbForm=Ger	8	advcl	_	_
-2	adunque	dunque	ADV	B	_	1	advmod	_	_
+2	adunque	adunque	ADV	B	_	1	advmod	_	_
 3	queste	questo	DET	DD	Gender=Fem|Number=Plur|PronType=Dem	4	det	_	_
 4	cose	cosa	NOUN	S	Gender=Fem|Number=Plur	1	obj	_	SpaceAfter=No
 5	,	,	PUNCT	FF	_	1	punct	_	_
@@ -1203,7 +1203,7 @@
 10-11	della	_	_	_	_	_	_	_	_
 10	di	di	ADP	E	_	12	case	_	_
 11	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	12	det	_	_
-12	facilità	facilità	NOUN	S	Gender=Fem|Number=Sing	9	nmod	_	_
+12	facilità	facilità	NOUN	S	Gender=Fem	9	nmod	_	_
 13	che	che	PRON	PR	PronType=Rel	14	obj	_	_
 14	ebbe	avere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	12	acl:relcl	_	_
 15	Alessandro	Alessandro	PROPN	SP	_	14	nsubj	_	_
@@ -1218,7 +1218,7 @@
 24-25	delle	_	_	_	_	_	_	_	_
 24	di	di	ADP	E	_	26	case	_	_
 25	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	26	det	_	_
-26	difficultà	difficoltà	NOUN	S	Gender=Fem|Number=Plur	12	conj	_	_
+26	difficultà	difficoltà	NOUN	S	Gender=Fem	12	conj	_	_
 27	che	che	PRON	PR	PronType=Rel	29	obj	_	_
 28	hanno	avere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	29	aux	_	_
 29	avuto	avere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	26	acl:relcl	_	_
@@ -1249,10 +1249,10 @@
 6-7	dalla	_	_	_	_	_	_	_	_
 6	da	da	ADP	E	_	11	case	_	_
 7	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	11	det	_	_
-8	poca	poco	ADJ	A	Gender=Fem|Number=Sing	11	amod	_	_
+8	poca	poco	DET	A	Gender=Fem|Number=Sing|PronType=Ind	11	amod	_	_
 9	o	o	CCONJ	CC	_	10	cc	_	_
-10	molta	molto	ADJ	DI	Gender=Fem|Number=Sing	8	conj	_	_
-11	virtù	virtù	NOUN	S	Gender=Fem|Number=Sing	5	obl	_	_
+10	molta	molto	DET	DI	Gender=Fem|Number=Sing|PronType=Ind	8	conj	_	_
+11	virtù	virtù	NOUN	S	Gender=Fem	5	obl	_	_
 12-13	del	_	_	_	_	_	_	_	_
 12	di	di	ADP	E	_	14	case	_	_
 13	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	14	det	_	_
@@ -1262,7 +1262,7 @@
 17-18	dalla	_	_	_	_	_	_	_	_
 17	da	da	ADP	E	_	19	case	_	_
 18	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	19	det	_	_
-19	disformità	difformità	NOUN	S	Gender=Fem|Number=Sing	11	conj	_	_
+19	disformità	disformità	NOUN	S	Gender=Fem	11	conj	_	_
 20-21	del	_	_	_	_	_	_	_	_
 20	di	di	ADP	E	_	22	case	_	_
 21	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	22	det	_	_

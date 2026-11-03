@@ -72,7 +72,7 @@
 15	cervel	cervello	NOUN	S	Gender=Masc|Number=Sing	10	conj	_	_
 16	suo	suo	DET	AP	Gender=Masc|Number=Sing|Poss=Yes|PronType=Prs	15	det:poss	_	SpaceAfter=No
 17	,	,	PUNCT	FF	_	4	punct	_	_
-18	è	essere	AUX	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+18	è	essere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
 19	vedere	vedere	VERB	V	VerbForm=Inf	18	ccomp	_	_
 20	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	21	det	_	_
 21	uomini	uomo	NOUN	S	Gender=Masc|Number=Plur	19	obj	_	_
@@ -104,7 +104,7 @@
 14	,	,	PUNCT	FF	_	11	punct	_	_
 15	perchè	perché	SCONJ	CS	_	17	mark	_	_
 16	ha	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	17	aux	_	_
-17	saputo	sapere	AUX	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	11	advcl	_	_
+17	saputo	sapere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	11	advcl	_	_
 18-19	cognoscergli	_	_	_	_	_	_	_	_
 18	cognoscer	conoscere	VERB	V	VerbForm=Inf	17	xcomp	_	_
 19	gli	li	PRON	RD	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	20	det	_	_
@@ -165,7 +165,7 @@
 3	alcuno	alcuno	PRON	PI	Gender=Masc|Number=Sing|PronType=Ind	0	root	_	_
 4	che	che	PRON	PR	PronType=Rel	5	nsubj	_	_
 5	cognoscesse	conoscere	VERB	V	Mood=Sub|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	3	acl:relcl	_	_
-6	Messer	messere	NOUN	SP	Gender=Masc|Number=Sing	5	obj	_	_
+6	Messer	messer	NOUN	SP	Gender=Masc|Number=Sing	5	obj	_	_
 7	Antonio	Antonio	PROPN	SP	_	6	flat:name	_	_
 8	da	da	ADP	E	_	9	case	_	_
 9	Venafro	Venafro	PROPN	SP	_	6	nmod	_	_
@@ -226,7 +226,7 @@
 27	non	non	ADV	BN	PronType=Neg	28	advmod	_	_
 28	intende	intendere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	11	conj	_	_
 29	nè	né	CCONJ	CC	_	30	cc	_	_
-30	sè	sé	PRON	PC	Number=Sing|Person=3|PronType=Prs	28	obj	_	_
+30	sè	sé	PRON	PC	Person=3|PronType=Prs	28	obj	_	_
 31	stesso	stesso	ADJ	A	Gender=Masc|Number=Sing	30	amod	_	_
 32	nè	né	CCONJ	CC	_	34	cc	_	_
 33	per	per	ADP	E	_	34	case	_	_
@@ -260,7 +260,7 @@
 1	Conveniva	convenire	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	0	root	_	_
 2	pertanto	pertanto	ADV	B	_	1	advmod	_	_
 3	di	di	ADP	E	_	4	case	_	_
-4	necessità	necessità	NOUN	S	Gender=Fem|Number=Sing	1	obl	_	SpaceAfter=No
+4	necessità	necessità	NOUN	S	Gender=Fem	1	obl	_	SpaceAfter=No
 5	,	,	PUNCT	FF	_	1	punct	_	_
 6	che	che	SCONJ	CS	_	16	mark	_	_
 7	se	se	SCONJ	CS	_	14	mark	_	_
@@ -507,7 +507,7 @@
 24	,	,	PUNCT	FF	_	21	punct	_	_
 25-27	obbligandoselo	_	_	_	_	_	_	_	SpaceAfter=No
 25	obbligando	obbligare	VERB	V	VerbForm=Ger	18	conj	_	_
-26	se	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	25	expl	_	_
+26	se	se	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	25	expl	_	_
 27	lo	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	25	obj	_	_
 28	,	,	PUNCT	FF	_	25	punct	_	_
 29-30	partecipandogli	_	_	_	_	_	_	_	_
@@ -571,7 +571,7 @@
 # sent_id = 22-2-10
 # text = Quando adunque i Principi e li ministri sono così fatti, possono confidare l'uno dell'altro;
 1	Quando	quando	SCONJ	CS	_	10	mark	_	_
-2	adunque	dunque	ADV	CS	_	10	mark	_	_
+2	adunque	adunque	ADV	CS	_	10	mark	_	_
 3	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	4	det	_	_
 4	Principi	principe	NOUN	S	Gender=Masc|Number=Plur	10	nsubj:pass	_	_
 5	e	e	CCONJ	CC	_	7	cc	_	_

@@ -23,7 +23,7 @@ import { toPackMorph, type MorphStats } from "./lib/morph";
 import { site } from "./site";
 import { CONLLU_SHA, DERIVED, TEXT, UNITS, chapterOf, type UnitId } from "./sources";
 
-/** Share of the words that are not names or foreign whose lemma must have a Wiktionary entry. 99.72% measured, rounded down. */
+/** Share of the words that are not names or foreign whose lemma must have a Wiktionary entry. 99.76% measured, rounded down. */
 const MIN_COVERAGE = 0.99;
 
 const sha256 = (text: string): string => createHash("sha256").update(text).digest("hex");

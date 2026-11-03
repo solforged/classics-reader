@@ -76,7 +76,7 @@
 # sent_id = 02-1-3
 # text = Dico adunque, che nelli Stati ereditari, ed assuefatti al sangue del loro Principe, sono assai minori difficultà a mantenergli, che ne' nuovi; perchè basta solo non trapassare l'ordine de' suoi antenati, e dipoi temporeggiare con gli accidenti, in modo che se tal Principe è di ordinaria industria, sempre si manterrà nel suo Stato, se non è una straordinaria ed eccessiva forza che ne lo priva; e privato che ne sia, quantunque di sinistro abbia lo occupatore, lo racquista.
 1	Dico	dire	VERB	V	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	_
-2	adunque	dunque	ADV	B	_	1	advmod	_	SpaceAfter=No
+2	adunque	adunque	ADV	B	_	1	advmod	_	SpaceAfter=No
 3	,	,	PUNCT	FF	_	1	punct	_	_
 4	che	che	SCONJ	CS	_	23	mark	_	_
 5-6	nelli	_	_	_	_	_	_	_	_
@@ -100,13 +100,13 @@
 20	sono	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	23	cop	_	_
 21	assai	assai	ADV	B	_	22	advmod	_	_
 22	minori	minore	ADJ	A	Degree=Cmp|Number=Plur	23	amod	_	_
-23	difficultà	difficoltà	NOUN	S	Gender=Fem|Number=Plur	1	ccomp	_	_
+23	difficultà	difficoltà	NOUN	S	Gender=Fem	1	ccomp	_	_
 24	a	a	ADP	E	_	25	mark	_	_
 25-26	mantenergli	_	_	_	_	_	_	_	SpaceAfter=No
 25	mantener	mantenere	VERB	V	VerbForm=Inf	23	acl	_	_
 26	gli	li	PRON	PC	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	25	iobj	_	_
 27	,	,	PUNCT	FF	_	31	punct	_	_
-28	che	che	SCONJ	CS	_	31	mark	_	_
+28	che	che	ADP	CS	_	31	mark	_	_
 29-30	ne'	_	_	_	_	_	_	_	_
 29	in	in	ADP	_	_	31	case	_	_
 30	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	31	det	_	_
@@ -126,7 +126,7 @@
 43	antenati	antenato	NOUN	S	Gender=Masc|Number=Plur	39	nmod	_	SpaceAfter=No
 44	,	,	PUNCT	FF	_	46	punct	_	_
 45	e	e	CCONJ	CC	_	46	cc	_	_
-46	dipoi	poi	ADV	V	_	34	conj	_	_
+46	dipoi	dipoi	ADV	V	_	34	conj	_	_
 47	temporeggiare	temporeggiare	VERB	V	VerbForm=Inf	46	xcomp	_	_
 48	con	con	ADP	E	_	50	case	_	_
 49	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	50	det	_	_
@@ -230,7 +230,7 @@
 38	per	per	ADP	E	_	40	case	_	_
 39	altre	altro	ADJ	A	Gender=Fem|Number=Plur	40	amod	_	_
 40	cagioni	cagione	NOUN	S	Gender=Fem|Number=Plur	18	obl	_	_
-41	che	che	SCONJ	B	_	44	mark	_	_
+41	che	che	ADP	B	_	44	mark	_	_
 42	per	per	ADP	E	_	44	mark	_	_
 43	essere	essere	AUX	VA	VerbForm=Inf	44	aux:pass	_	_
 44	antiquato	antiquato	ADJ	V	Gender=Masc|Number=Sing	18	advcl	_	_

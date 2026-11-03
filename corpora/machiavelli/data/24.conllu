@@ -142,7 +142,7 @@
 20	in	in	ADP	E	_	22	case	_	_
 21	le	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	22	det	_	_
 22	presenti	presente	ADJ	S	Number=Plur	24	obl	_	_
-23	ei	essi	PRON	PE	Gender=Masc|Number=Plur|Person=3|PronType=Prs	24	nsubj	_	_
+23	ei	esso	PRON	PE	Gender=Masc|Number=Plur|Person=3|PronType=Prs	24	nsubj	_	_
 24	trovano	trovare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	30	advcl	_	_
 25	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	26	det	_	_
 26	bene	bene	NOUN	S	Gender=Masc|Number=Sing	24	obj	_	SpaceAfter=No
@@ -162,7 +162,7 @@
 # sent_id = 24-1-6
 # text = anzi pigliano ogni difesa di lui, quando il Principe non manchi nelle altre cose a sè medesimo.
 1	anzi	anzi	ADV	B	_	2	advmod	_	_
-2	pigliano	prendere	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+2	pigliano	pigliare	VERB	V	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
 3	ogni	ogni	DET	DI	Number=Sing|PronType=Ind	4	det	_	_
 4	difesa	difesa	NOUN	S	Gender=Fem|Number=Sing	2	obj	_	_
 5	di	di	ADP	E	_	6	case	_	_
@@ -179,7 +179,7 @@
 15	altre	altro	ADJ	A	Gender=Fem|Number=Plur	16	amod	_	_
 16	cose	cosa	NOUN	S	Gender=Fem|Number=Plur	12	obl	_	_
 17	a	a	ADP	E	_	18	case	_	_
-18	sè	sé	PRON	PE	Number=Sing|Person=3|PronType=Prs	12	obl	_	_
+18	sè	sé	PRON	PE	Person=3|PronType=Prs	12	obl	_	_
 19	medesimo	medesimo	ADJ	A	Gender=Masc|Number=Sing	18	amod	_	SpaceAfter=No
 20	.	.	PUNCT	FS	_	2	punct	_	_
 
@@ -246,9 +246,9 @@
 12	e	e	CCONJ	CC	_	19	cc	_	_
 13	per	per	ADP	E	_	16	case	_	_
 14	sua	suo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	16	det:poss	_	_
-15	poca	poco	ADJ	A	Gender=Fem|Number=Sing	16	amod	_	_
+15	poca	poco	DET	A	Gender=Fem|Number=Sing|PronType=Ind	16	amod	_	_
 16	prudenza	prudenza	NOUN	S	Gender=Fem|Number=Sing	19	obl	_	_
-17	l'	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	19	obj	_	SpaceAfter=No
+17	l'	lo	PRON	PC	Clitic=Yes|Number=Sing|Person=3|PronType=Prs	19	obj	_	SpaceAfter=No
 18	ha	avere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	19	aux	_	_
 19	perduto	perdere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	9	conj	_	SpaceAfter=No
 20	.	.	PUNCT	FS	_	5	punct	_	_
@@ -297,7 +297,7 @@
 37	un	uno	DET	RI	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	39	det	_	_
 38	comune	comune	ADJ	A	Number=Sing	39	amod	_	_
 39	difetto	difetto	NOUN	S	Gender=Masc|Number=Sing	33	obj	_	_
-40	quanto	quanto	ADV	B	ExtPos=ADP	43	case	_	_
+40	quanto	quanto	ADV	B	_	43	case	_	_
 41-42	all'	_	_	_	_	_	_	_	SpaceAfter=No
 41	a	a	ADP	E	_	43	case	_	_
 42	l'	il	DET	RD	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	43	det	_	_
@@ -320,7 +320,7 @@
 # par = 1
 # sent_id = 24-1-10
 # text = dipoi si vedrà alcun di loro o che arà avuto nimici i popoli, o se arà avuto amico il popolo, non si sarà saputo assicurare de' grandi;
-1	dipoi	poi	ADV	S	_	3	nsubj	_	_
+1	dipoi	dipoi	ADV	S	_	3	nsubj	_	_
 2	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	3	expl:impers	_	_
 3	vedrà	vedere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	0	root	_	_
 4	alcun	alcuno	PRON	PI	Gender=Masc|Number=Sing|PronType=Ind	3	obj	_	_
@@ -345,7 +345,7 @@
 23	non	non	ADV	BN	PronType=Neg	26	advmod	_	_
 24	si	si	PRON	PC	Clitic=Yes|Person=3|PronType=Prs	26	expl:impers	_	_
 25	sarà	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin	26	aux	_	_
-26	saputo	sapere	AUX	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	3	conj	_	_
+26	saputo	sapere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	3	conj	_	_
 27	assicurare	assicurare	VERB	V	VerbForm=Inf	26	xcomp	_	_
 28-29	de'	_	_	_	_	_	_	_	_
 28	di	di	ADP	E	_	30	case	_	_
@@ -433,7 +433,7 @@
 # par = 2
 # sent_id = 24-2-2
 # text = nientedimeno, per essere uomo militare, e che sapeva intrattenere i popoli, ed assicurarsi de' grandi, sostenne più anni la guerra contro di quelli;
-1	nientedimeno	nondimeno	ADV	B	_	22	advmod	_	SpaceAfter=No
+1	nientedimeno	nientedimeno	ADV	B	_	22	advmod	_	SpaceAfter=No
 2	,	,	PUNCT	FF	_	1	punct	_	_
 3	per	per	ADP	E	_	5	mark	_	_
 4	essere	essere	AUX	VA	VerbForm=Inf	5	cop	_	_
@@ -442,7 +442,7 @@
 7	,	,	PUNCT	FF	_	10	punct	_	_
 8	e	e	CCONJ	CC	_	10	cc	_	_
 9	che	che	PRON	PR	PronType=Rel	10	nsubj	_	_
-10	sapeva	sapere	AUX	V	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	5	conj	_	_
+10	sapeva	sapere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	5	conj	_	_
 11	intrattenere	intrattenere	VERB	V	VerbForm=Inf	10	xcomp	_	_
 12	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	13	det	_	_
 13	popoli	popolo	NOUN	S	Gender=Masc|Number=Plur	11	obj	_	SpaceAfter=No
@@ -481,11 +481,11 @@
 8	dominio	dominio	NOUN	S	Gender=Masc|Number=Sing	6	obj	_	_
 9	di	di	ADP	E	_	11	case	_	_
 10	qualche	qualche	DET	DI	Number=Sing|PronType=Ind	11	det	_	_
-11	città	città	NOUN	S	Gender=Fem|Number=Sing	8	nmod	_	SpaceAfter=No
+11	città	città	NOUN	S	Gender=Fem	8	nmod	_	SpaceAfter=No
 12	,	,	PUNCT	FF	_	6	punct	_	_
 13	gli	gli	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	14	iobj	_	_
 14	rimase	rimanere	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
-15	nondimanco	nondimeno	ADV	A	_	14	xcomp	_	_
+15	nondimanco	nondimanco	ADV	A	_	14	xcomp	_	_
 16	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	17	det	_	_
 17	Regno	regno	NOUN	SP	Gender=Masc|Number=Sing	14	nsubj	_	SpaceAfter=No
 18	.	.	PUNCT	FS	_	14	punct	_	_
@@ -504,7 +504,7 @@
 8	molti	molto	DET	DI	Gender=Masc|Number=Plur|PronType=Ind	9	det	_	_
 9	anni	anno	NOUN	S	Gender=Masc|Number=Plur	11	obl	_	_
 10	erano	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin	11	aux	_	_
-11	stati	essere	VERB	V	Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part	4	acl:relcl	_	_
+11	stati	essere	AUX	V	Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part	4	acl:relcl	_	_
 12-13	nel	_	_	_	_	_	_	_	_
 12	in	in	ADP	E	_	15	case	_	_
 13	il	il	DET	RD	Definite=Def|Gender=Masc|Number=Sing|PronType=Art	15	det	_	_
@@ -515,7 +515,7 @@
 18-19	averlo	_	_	_	_	_	_	_	_
 18	aver	avere	AUX	VA	VerbForm=Inf	20	aux	_	_
 19	lo	lo	PRON	PC	Clitic=Yes|Gender=Masc|Number=Sing|Person=3|PronType=Prs	20	obj	_	_
-20	dipoi	poi	ADV	V	_	11	advcl	_	_
+20	dipoi	dipoi	ADV	V	_	11	advcl	_	_
 21	perso	perdere	VERB	V	Gender=Masc|Number=Sing|Tense=Past|VerbForm=Part	20	advcl	_	SpaceAfter=No
 22	,	,	PUNCT	FF	_	4	punct	_	_
 23	non	non	ADV	BN	PronType=Neg	24	advmod	_	_
@@ -524,9 +524,9 @@
 26	fortuna	fortuna	NOUN	S	Gender=Fem|Number=Sing	24	obj	_	SpaceAfter=No
 27	,	,	PUNCT	FF	_	30	punct	_	_
 28	ma	ma	CCONJ	CC	_	30	cc	_	_
-29	l'	il	DET	PC	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	30	obj	_	SpaceAfter=No
+29	l'	il	DET	PC	Definite=Def|Number=Sing|PronType=Art	30	obj	_	SpaceAfter=No
 30	ignavia	ignavia	NOUN	V	Gender=Fem|Number=Sing	24	conj	_	_
-31	loro	loro	PRON	PE	Number=Plur|Person=3|PronType=Prs	30	iobj	_	SpaceAfter=No
+31	loro	loro	DET	PE	Poss=Yes|PronType=Prs	30	iobj	_	SpaceAfter=No
 32	;	;	PUNCT	FC	_	24	punct	_	_
 
 # unit = 24
@@ -562,7 +562,7 @@
 6	difetto	difetto	NOUN	S	Gender=Masc|Number=Sing	11	nsubj	_	_
 7-8	degli	_	_	_	_	_	_	_	_
 7	di	di	ADP	E	_	9	case	_	_
-8	gli	li	DET	RD	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	9	det	_	_
+8	gli	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	9	det	_	_
 9	uomini	uomo	NOUN	S	Gender=Masc|Number=Plur	6	nmod	_	_
 10	non	non	ADV	BN	PronType=Neg	11	advmod	_	_
 11	far	fare	VERB	V	VerbForm=Inf	27	xcomp	_	_
@@ -665,7 +665,7 @@
 11	trovare	trovare	VERB	V	VerbForm=Inf	8	xcomp	_	_
 12	chi	chi	PRON	PR	Number=Sing|PronType=Rel	11	obj	_	_
 13	ti	ti	PRON	PC	Clitic=Yes|Number=Sing|Person=2|PronType=Prs	14	obj	_	_
-14	ricolga	raccogliere	VERB	V	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	12	acl:relcl	_	SpaceAfter=No
+14	ricolga	ricogliere	VERB	V	Mood=Sub|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	12	acl:relcl	_	SpaceAfter=No
 15	.	.	PUNCT	FS	_	6	punct	_	_
 
 # unit = 24
@@ -688,7 +688,7 @@
 14	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	17	cop	_	_
 15	con	con	ADP	E	_	17	case	_	_
 16	tua	tuo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	17	det:poss	_	_
-17	sicurtà	sicurezza	NOUN	S	Gender=Fem|Number=Sing	0	root	_	SpaceAfter=No
+17	sicurtà	sicurtà	NOUN	S	Gender=Fem|Number=Sing	0	root	_	SpaceAfter=No
 18	,	,	PUNCT	FF	_	17	punct	_	_
 19	per	per	ADP	E	_	22	mark	_	_
 20	essere	essere	AUX	VA	VerbForm=Inf	22	cop	_	_
@@ -729,6 +729,6 @@
 20-21	dalla	_	_	_	_	_	_	_	_
 20	da	da	ADP	E	_	22	case	_	_
 21	la	il	DET	RD	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	22	det	_	_
-22	virtù	virtù	NOUN	S	Gender=Fem|Number=Sing	16	conj	_	_
+22	virtù	virtù	NOUN	S	Gender=Fem	16	conj	_	_
 23	tua	tuo	DET	AP	Gender=Fem|Number=Sing|Poss=Yes|PronType=Prs	22	det:poss	_	SpaceAfter=No
 24	.	.	PUNCT	FS	_	6	punct	_	SpaceAfter=No
