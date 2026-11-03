@@ -50,6 +50,10 @@ const translations = labels("translation");
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+// A dialogue's speaker opens the turn's first paragraph as a run-in cue. It sits outside the words (no .w), so a click on it
+// opens nothing and the go-to box does not read it as a label.
+const cue = (u: SourceUnit | TextUnit): string => (u.speaker ? `<span class="speaker">${esc(u.speaker)}</span> ` : "");
+
 function pieces(line: Piece[]): string {
   return line
     .map((p) => {
@@ -65,7 +69,7 @@ function sourceUnit(u: SourceUnit): string {
     const label = u.label && listed ? `<span class="chap">${esc(u.label)}</span> ` : "";
     return `<h3 class="rubric">${label}${u.lines.map(pieces).join(" ")}</h3>`;
   }
-  if (u.kind === "prose") return `<p class="prose">${u.lines.map(pieces).join(" ")}</p>`;
+  if (u.kind === "prose") return `<p class="prose">${cue(u)}${u.lines.map(pieces).join(" ")}</p>`;
   const label = u.label ? `<span class="slabel">${esc(u.label)}</span>` : "";
   // Numbered stichic verse (an epic): every line carries its number for the go-to box, and every fifth shows it.
   const first = u.firstLine;
@@ -91,7 +95,7 @@ function textUnit(u: TextUnit): string {
     const text = u.lines.map(plainText).join(" ");
     return `<h3 class="rubric">${label}${label && text ? " " : ""}${text}${notes}</h3>`;
   }
-  if (u.kind === "prose") return `<p class="prose">${u.lines.map(plainText).join(" ")}${notes}</p>`;
+  if (u.kind === "prose") return `<p class="prose">${cue(u)}${u.lines.map(plainText).join(" ")}${notes}</p>`;
   const label = u.label ? `<span class="slabel">${esc(u.label)}</span>` : "";
   return `<div class="${u.stichic ? "stanza stichic" : "stanza"}">${label}${u.lines.map((l) => `<div class="l">${plainText(l)}</div>`).join("")}${notes}</div>`;
 }
@@ -591,6 +595,14 @@ const ids = new Set(work.rows.map((r) => r.id));
     border-radius: 4px;
     padding: 0 0.35rem;
     color: var(--muted);
+  }
+  .speaker {
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .speaker::after {
+    content: ".";
   }
   .cz {
     display: inline-block;

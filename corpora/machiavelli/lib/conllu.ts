@@ -1,11 +1,12 @@
-// Reads one division of Il Principe from the checked-in CoNLL-U. A written word is a surface: a plain token, or a
-// multiword token's range line ("del" = di + il, "de'" = di + i) with its syntactic words. Empty nodes (ids like
-// 2.1) are not words of the text. Strict: a line the format does not explain throws, and the surfaces must
-// reproduce the sentence's # text.
+// Reads one division of Il Principe or Dell'arte della guerra from the checked-in CoNLL-U. A written word is a surface:
+// a plain token, or a multiword token's range line ("del" = di + il, "de'" = di + i) with its syntactic words. Empty
+// nodes (ids like 2.1) are not words of the text. Strict: a line the format does not explain throws, and the surfaces
+// must reproduce the sentence's # text.
 //
-// The paragraph text the manifest hashes is the # text lines of one # par joined by a space, paragraphs in order
-// joined by newlines. The dedication's file starts with a blank line (it has no rubric). paragraphFile() rebuilds
-// those bytes.
+// The Prince's paragraph text the manifest hashes is the # text lines of one # par joined by a space, paragraphs in
+// order joined by newlines. The dedication's file starts with a blank line (it has no rubric). paragraphFile()
+// rebuilds those bytes. The Arte's files add # book (the proemio is "p") and, for a paragraph that opens a speaker's
+// turn, # speaker on each of its sentences; its paragraphs are checked against the Liber Liber text (arte.ts).
 
 export interface Token {
   form: string;
@@ -26,17 +27,22 @@ export interface Surface {
 
 export interface Sentence {
   unit: string;
-  /** Paragraph in the edition. 0 is a chapter rubric; the dedication starts at 1. */
+  /** Paragraph in the edition. 0 is a chapter rubric; the dedication starts at 1. In the Arte, the paragraph's number within its book. */
   par: number;
   /** 1-based index within the paragraph, in file order. */
   n: number;
   id: string;
   text: string;
   surfaces: Surface[];
+  /** # book (the Arte): "p" for the proemio, "1" … "7". */
+  book?: string;
+  /** # speaker (the Arte): the label of the turn this sentence's paragraph opens, as the edition prints it. */
+  speaker?: string;
 }
 
 const COMMENT_KEYS: Record<string, true> = {
   generator: true, udpipe_model: true, udpipe_model_licence: true, unit: true, par: true, sent_id: true, text: true,
+  book: true, speaker: true,
 };
 const MISC_KEYS: Record<string, true> = { SpaceAfter: true, SpacesAfter: true };
 
@@ -127,7 +133,11 @@ function parseSentence(block: string, unit: string, seen: Map<number, number>): 
   }
   const rebuilt = surfaceText(surfaces);
   if (rebuilt !== comments.text) throw new Error(`${where}: tokens rebuild ${JSON.stringify(rebuilt)}, not ${JSON.stringify(comments.text)}`);
-  return { unit, par, n, id: where, text: comments.text, surfaces };
+  return {
+    unit, par, n, id: where, text: comments.text, surfaces,
+    ...(comments.book === undefined ? {} : { book: comments.book }),
+    ...(comments.speaker === undefined ? {} : { speaker: comments.speaker }),
+  };
 }
 
 /** The sentences of one division, in reading order. */

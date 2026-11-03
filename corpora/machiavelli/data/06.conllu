@@ -265,7 +265,7 @@
 25	mantener	mantenere	VERB	V	VerbForm=Inf	19	xcomp	_	_
 26	gli	li	PRON	PC	Clitic=Yes|Gender=Masc|Number=Plur|Person=3|PronType=Prs	25	iobj	_	_
 27	,	,	PUNCT	FF	_	25	punct	_	_
-28	secondo	secondo	ADV	E	ExtPos=SCONJ	33	mark	_	_
+28	secondo	secondo	ADP	E	ExtPos=SCONJ	33	mark	_	_
 29	che	che	SCONJ	CS	_	28	fixed	_	_
 30	più	più	ADV	B	_	33	advmod	_	_
 31	o	o	CCONJ	CC	_	32	cc	_	_

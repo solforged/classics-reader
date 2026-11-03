@@ -1,27 +1,56 @@
 ---
 // Sources and licences of the Machiavelli Reader (src/pages/sources.astro).
-import { GUTENBERG, KAIKKI, MODEL, MODEL_SERVICE, TEXT, UNITS, WIKISOURCE_OLDID, WIKISOURCE_URL } from "./sources";
+import { ARTE_OMISSIONS, ARTE_TEXT_FIXES } from "./alignment";
+import {
+  ARTE_WIKISOURCE, GUTENBERG, KAIKKI, LIBERLIBER, MODEL, MODEL_SERVICE, PRINCE_TEXT, PRINCE_UNITS, PRINCE_WIKISOURCE_OLDID,
+  PRINCE_WIKISOURCE_URL,
+} from "./sources";
+
+const wikisource = (title: string, revid: number): string =>
+  `https://en.wikisource.org/w/index.php?title=${encodeURIComponent(title.replaceAll(" ", "_"))}&oldid=${revid}`;
+const omitted = Object.keys(ARTE_OMISSIONS).length;
+const fixes = Object.values(ARTE_TEXT_FIXES);
 ---
 <h2>Italian</h2>
 <dl>
   <dt>Niccolò Machiavelli, <i>Il Principe</i> (“Italia”, 1814)</dt>
   <dd>
-    The anonymous imprint of 1814, no named editor and no publisher, as proofread on <a href={WIKISOURCE_URL}>Italian Wikisource</a> (page oldid {WIKISOURCE_OLDID}) against the scan <a href="https://archive.org/details/ilprincipedinic00machgoog">ilprincipedinic00machgoog</a>.
+    The anonymous imprint of 1814, no named editor and no publisher, as proofread on <a href={PRINCE_WIKISOURCE_URL}>Italian Wikisource</a> (page oldid {PRINCE_WIKISOURCE_OLDID}) against the scan <a href="https://archive.org/details/ilprincipedinic00machgoog">ilprincipedinic00machgoog</a>.
     The transcription is <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a> and the <a href="https://www.gnu.org/licenses/fdl-1.3.html">GNU Free Documentation License</a>.
     Spelling is the edition’s (<i>debbe</i>, <i>sperienza</i>, <i>de'</i>), not a modernised text and not Machiavelli’s autograph.
     Each chapter’s heading is its rubric; the dedication has none, and its address is the first paragraph.
     <details>
       <summary>Wikisource revisions of the twenty-seven pages</summary>
       <ul>
-        {UNITS.map((unit) => <li><a href={TEXT[unit]!.url}>{TEXT[unit]!.title}</a>, oldid {TEXT[unit]!.oldid}</li>)}
+        {PRINCE_UNITS.map((unit) => <li><a href={PRINCE_TEXT[unit]!.url}>{PRINCE_TEXT[unit]!.title}</a>, oldid {PRINCE_TEXT[unit]!.oldid}</li>)}
       </ul>
+    </details>
+  </dd>
+  <dt>Niccolò Machiavelli, <i>Dell’arte della guerra</i> (Mario Martelli’s text, in Liber Liber’s transcription)</dt>
+  <dd>
+    Mario Martelli’s edition, in Niccolò Machiavelli, <i>Tutte le opere</i> (Florence: Sansoni, 1971), as keyed by <a href="https://www.liberliber.eu/">Liber Liber</a>’s <i>progetto Manuzio</i> (first electronic edition, 13 December 1997; the file rates its own reliability 1 on a scale of 0 to 3), from <a href={LIBERLIBER.url}>{LIBERLIBER.url}</a> (ZIP SHA-256 <code>{LIBERLIBER.zipSha}</code>).
+    Liber Liber’s transcription is licensed <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>, and is credited so; this reader’s Italian text of the work may be reused only on those terms.
+    The file’s colophon says <i>DIRITTI D'AUTORE: no</i>. Martelli’s edition is a critical edition, whose right lasts twenty years under article 85-quater of Italian law 633/1941, and has lapsed.
+    The text is Martelli’s, in spelling (<i>sanza</i>, <i>fussi</i>, <i>cavagli</i>, <i>dua</i>) and in paragraphs: a citation is the book and Martelli’s paragraph number within it, and the 27 maxims of Book VII are one paragraph each.
+    The proemio, addressed to Lorenzo di Filippo Strozzi, is book 0, and its heading is its own; each book’s heading is its rubric.
+    The download’s text file is Windows-1252 and is decoded to UTF-8 (<code>{LIBERLIBER.textSha}</code>); its colophon and licence block are not part of the text, and the speaker labels (<i>COSIMO</i>, <i>FABRIZIO</i>, <i>ZANOBI</i>, <i>BATISTA</i>, <i>LUIGI</i>) are removed from the paragraphs and printed instead as the speaker’s name before the turn.
+    A paragraph with no label continues the speaker before it, or is the narrator’s (the proemio and the frame of Book I).
+    The build derives the paragraphs from the download, and stops unless they are, character for character, the text the annotation tags.
+    <details>
+      <summary>Eight slips of the keying corrected</summary>
+      <ul>
+        {fixes.map((fix) => <li>Line {fix.line}: <i>{fix.from}</i> → <i>{fix.to}</i> (“{fix.before}{fix.to}{fix.after}”)</li>)}
+      </ul>
+      Each is a word that is not Italian, or one the sentence cannot bear, with the right word attested elsewhere in the file. Readings that are only doubtful (a numeral, <i>scudi</i> for <i>scudati</i>) are left as the file has them.
     </details>
   </dd>
   <dt>Morphology: UDPipe 2, model <code>{MODEL}</code>, checked word by word</dt>
   <dd>
-    There is no gold treebank of the <i>Principe</i>. Every word’s lemma and morphology were tagged by <a href={MODEL_SERVICE}>UDPipe 2</a> with the Italian ISDT model <code>{MODEL}</code>, and then checked word by word.
+    There is no gold treebank of either work. Every word’s lemma and morphology were tagged by <a href={MODEL_SERVICE}>UDPipe 2</a> with the Italian ISDT model <code>{MODEL}</code>, and then checked word by word.
     The service states the model output is <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA</a>; this reader’s morphological data may be reused only on those terms.
+    The Art of War was tagged one paragraph at a time, so that no sentence crosses a paragraph; its annotation was checked word by word, then given a consistency pass across its twenty-one units.
     The tagger’s own sentence breaks are finer than the paragraphs, and a written word that joins two words (<i>del</i> = <i>di</i> + <i>il</i>, <i>de'</i> = <i>di</i> + <i>i</i>, an enclitic such as <i>dilettarsi</i>) is one clickable word with an analysis of each part.
+    The speaker’s name before a turn is not a word of the text and has no analysis, and the search does not read it.
     Dependency relations are in the annotation and are not shown.
   </dd>
   <dt>How the grammar is named</dt>
@@ -38,6 +67,31 @@ import { GUTENBERG, KAIKKI, MODEL, MODEL_SERVICE, TEXT, UNITS, WIKISOURCE_OLDID,
     Gutenberg regenerates this file, so a change upstream stops the fetch until the new copy is checked.
     Ricci’s preface and his footnotes are not included. His paragraphs do not match the Italian ones (some chapters he runs together, some he splits), so the columns are aligned by sentence: each Italian paragraph is shown with the English sentences aligned to it, and an English sentence with no Italian sentence is shown with the paragraph before it. Chapter 13 of this translation, and of the 1921 reprint of the same text, ends at “much inferior to national forces.” The close of the chapter is not in Ricci’s 1909 wording. A 1935 revision by E. R. P. Vincent includes it, in his own wording, and is not used. The Italian of that close is shown with a note and no English.
     A chapter’s English heading is the sentence aligned to its rubric, shown in title case with the chapter number set off (“Chapter I. The Various Kinds of Government…”).
+  </dd>
+  <dt>Ellis Farneworth, <i>The Art of War</i> (1762), in <i>The Works of Nicholas Machiavel</i>, vol. 4 (London, 1775)</dt>
+  <dd>
+    Public domain, as transcribed and proofread once (not validated) on <a href="https://en.wikisource.org/wiki/The_Works_of_Nicholas_Machiavel/Volume_4/The_Art_of_War">English Wikisource</a> from the scan <a href="https://archive.org/details/worksofnicholasm04mach">worksofnicholasm04mach</a>.
+    The transcription’s own contributions are <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+    Farneworth translated an earlier Italian text than Martelli’s and paraphrases freely, so a clause sometimes glosses, condenses or reorders the Italian it sits beside.
+    <details>
+      <summary>The Wikisource revisions of the text</summary>
+      <ul>
+        {ARTE_WIKISOURCE.parents.map((parent) => <li><a href={wikisource(parent.title, parent.revid)}>{parent.title.replace("The Works of Nicholas Machiavel/Volume 4/", "")}</a>, oldid {parent.revid}{parent.pages && <>, scan pages {parent.pages[0]}–{parent.pages[1]}</>}</li>)}
+      </ul>
+      The 239 <i>Page:</i> revisions (scan pages 11 to 249) that the books transclude are pinned by revision and SHA-256 in <code>corpora/machiavelli/data/arte/wikisource.json</code>, as are the pages above.
+    </details>
+    The text shown is what those pages give once the apparatus is stripped: running heads, catchwords, page numbers, the title block and contents summary of each book, and the French translator’s advertisement and Whitehorne’s dedication of 1588 that come before the text.
+    Page breaks are joined, and the spelling, capitals and punctuation are as printed.
+    Two transcription slips were corrected (a word fragment repeated across a page break, and a speaker’s label followed by a comma); others, such as a garbled clause in the first book, are shown as transcribed.
+    The extract and its clause-by-clause alignment are checked into the repository and pinned by hash, not fetched.
+    Farneworth’s clauses are cut at full stops, semicolons and colons, so that they pair one to one with the Italian sentences, which the tagger ends at semicolons and colons as well.
+    A length-based pass aligned them to the Italian sentences, and every pair was then read on both sides and corrected by hand.
+    A row shows the clauses aligned to its Italian sentences, in Farneworth’s own paragraphs: where he splits a long paragraph of Martelli’s the row shows several, and where he prints Book VII’s 27 maxims as one paragraph, each introduced by a dash, each row shows its own.
+    He runs the end of the narrator’s paragraph 2 in Book I into Cosimo’s first speech, with no break; the English of that clause stands with Cosimo’s turn.
+    Of the Italian sentences, {omitted} have no English at all; each is shown in its paragraph, with a note naming it on the English side. One English clause (“The signal is given.”, Book III) has no Italian, and is shown with the paragraph before it.
+    The speaker’s name before a turn is the Italian label’s, in Farneworth’s spelling on the English side (<i>Battista</i> for <i>Batista</i>): he prints no label before Cosimo’s first speech in Book I or on the first paragraph of Books III to VI, so the aligned Italian paragraph supplies it.
+    His footnotes are shown as translator’s notes, at the clause they follow.
+    A book’s English heading is the clause aligned to its heading, shown in title case with the numeral kept (“Book I.”).
   </dd>
 </dl>
 

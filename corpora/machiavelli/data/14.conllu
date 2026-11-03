@@ -678,7 +678,7 @@
 # par = 2
 # sent_id = 14-2-9
 # text = tale che dalla cognizione del sito di una provincia, si può facilmente venire alla cognizione dell'altre.
-1	tale	tale	PRON	PD	Number=Sing|PronType=Dem	0	root	_	_
+1	tale	tale	DET	PD	Number=Sing|PronType=Dem	0	root	_	_
 2	che	che	SCONJ	CS	_	16	mark	_	_
 3-4	dalla	_	_	_	_	_	_	_	_
 3	da	da	ADP	E	_	5	case	_	_

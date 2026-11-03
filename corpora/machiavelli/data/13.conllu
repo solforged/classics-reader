@@ -54,7 +54,7 @@
 31	come	come	SCONJ	CS	_	32	mark	_	_
 32	fece	fare	VERB	V	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	25	advcl	_	_
 33-34	ne'	_	_	_	_	_	_	_	_
-33	ni	in	ADP	PC	_	36	case	_	_
+33	in	in	ADP	PC	_	36	case	_	_
 34	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	36	det	_	_
 35	prossimi	prossimo	ADJ	A	Gender=Masc|Number=Plur	36	amod	_	_
 36	tempi	tempo	NOUN	S	Gender=Masc|Number=Plur	32	obj	_	_

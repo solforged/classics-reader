@@ -18,6 +18,11 @@ export interface SourceUnit {
    * epic: the reader numbers every fifth line and does not indent alternate lines.
    */
   firstLine?: number;
+  /**
+   * A dialogue's speaker whose turn this prose unit opens ("Fabrizio"). The page prints it before the text as a small-caps
+   * cue, outside the words: it has no analysis, and the search text and the concordance read only `lines`.
+   */
+  speaker?: string;
   lines: Piece[][];
 }
 
@@ -30,6 +35,8 @@ export interface TextUnit {
   lines: string[];
   /** Continuous (stichic) verse, as a verse translation of an epic: alternate lines are not indented. */
   stichic?: true;
+  /** The speaker whose turn this prose unit opens, as for a source unit (SourceUnit.speaker). */
+  speaker?: string;
   /** Translator's note keys attached to this unit. */
   notes?: string[];
 }

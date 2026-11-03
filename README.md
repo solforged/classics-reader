@@ -12,7 +12,7 @@ public-domain English translation, one aligned stanza, verse, chapter or paragra
 - **The Genesis Reader**: Genesis 1–11 in Hebrew.
 - **The Analects Reader**: the Analects of Confucius, all 20 books, in Classical Chinese.
 - **The Dante Reader**: the Divine Comedy, all 100 cantos, in Dante's Italian.
-- **The Machiavelli Reader**: *Il Principe*, the dedication and all 26 chapters, in Italian.
+- **The Machiavelli Reader**: *Il Principe*, the dedication and all 26 chapters, and *Dell'arte della guerra*, the proemio and all seven books, in Italian.
 
 ## Navigation
 
@@ -209,20 +209,36 @@ under Medieval Italian. Credits are in `corpora/dante/Sources.astro`.
 
 ## The Machiavelli Reader
 
-*Il Principe* in the Italian Wikisource transcription of the anonymous "Italia, 1814" printing
-(CC BY-SA 3.0 and GFDL, proofread against the scan), one row per Italian paragraph, beside Luigi
-Ricci's translation (Oxford, 1909; Project Gutenberg #57037). No hand-annotated text of Machiavelli
-exists, so the morphology is machine-tagged: UDPipe 2 with the UD_Italian-ISDT model
+Two works, one collection. *Il Principe* is the Italian Wikisource transcription of the anonymous
+"Italia, 1814" printing (CC BY-SA 3.0 and GFDL, proofread against the scan), one row per Italian
+paragraph, beside Luigi Ricci's translation (Oxford, 1909; Project Gutenberg #57037).
+*Dell'arte della guerra* is Mario Martelli's text (Sansoni, 1971) in Liber Liber's transcription
+(CC BY-NC-SA 4.0; the file says *DIRITTI D'AUTORE: no*, and a critical edition's right lasts twenty
+years under art. 85-quater of law 633/1941), one row per Martelli paragraph, beside Ellis
+Farneworth's translation (1762) as English Wikisource transcribes the 1775 *Works* (PD-old; the
+transcription is CC BY-SA 4.0 and proofread once, not validated). No hand-annotated text of
+Machiavelli exists, so the morphology is machine-tagged: UDPipe 2 with the UD_Italian-ISDT model
 (`italian-isdt-ud-2.17-251125`; the service marks its output CC BY-NC-SA), then checked by hand
-word by word (lemma, part of speech, features, splitting of *del*, *de'* and enclitic clusters). The
-tagger is a web service, so the reviewed CoNLL-U is checked into `corpora/machiavelli/data/` and
-pinned by hash. `lib/morph.ts` rewrites ISDT's conventions into those `packs/ita/morph.ts` labels
-(the gerund, the past historic). Ricci's sentences are aligned to the Italian sentences by a
-length-based pass corrected by hand (`data/alignment/`), which places his English at the Italian
-paragraph breaks; Ricci leaves out the close of chapter 13, and the reader says so there. Lemmas
-are looked up in Wiktionary as in the Dante Reader. Citations read `Prin. 18.2` (chapter,
-paragraph); the dedication is `Prin. 0`. The reader shares the Medieval Italian shelf. Credits are in
-`corpora/machiavelli/Sources.astro`.
+word by word (lemma, part of speech, features, splitting of *del*, *de'* and enclitic clusters); the Art of
+War's annotation then got a consistency pass across its units. The tagger is a web service, so the
+hand-checked CoNLL-U is vendored in `corpora/machiavelli/data/` (the Prince's) and `data/arte/conllu/` and
+pinned by hash. `lib/morph.ts` rewrites ISDT's conventions into
+those `packs/ita/morph.ts` labels (the gerund, the past historic). Each English translation is
+aligned to the Italian sentences by a length-based pass corrected by hand (`data/alignment/`,
+`data/arte/alignment/`), which places the English at the Italian paragraph breaks; Ricci leaves out
+the close of chapter 13, and the reader says so there, and Farneworth leaves out 17 Italian sentences,
+each noted. The Arte's Italian is derived at build time from the pinned Liber Liber download
+(`fetch.ts` decodes its Windows-1252 text; `lib/liberliber.ts` strips the colophon, reads the
+headings and speaker labels, and applies the eight corrections of `ARTE_TEXT_FIXES`) and must equal,
+character for character, the text of the CoNLL-U. Farneworth's English (`data/arte/en*/`) is the
+Wikisource extract with its apparatus stripped, pinned by hash with the Wikisource revisions it was
+taken from; his clause ids are what the alignment names. A paragraph that opens a speaker's turn in
+the dialogue shows the speaker (*Fabrizio*, *Cosimo*, *Zanobi*, *Batista*, *Luigi*) as a small-caps
+cue on both sides (`SourceUnit.speaker`, drawn by `WorkPage.astro`, outside the words and the search
+text); Farneworth's footnotes are translator's notes. Lemmas are looked up in Wiktionary as in the
+Dante Reader. Citations read `Prin. 18.2` (chapter, paragraph; the dedication is `Prin. 0`) and
+`AdG. 3.12` (book, Martelli's paragraph within it; the proemio is `AdG. 0`). The reader shares the
+Medieval Italian shelf. Credits are in `corpora/machiavelli/Sources.astro`.
 
 ## Building
 
@@ -246,7 +262,7 @@ READER=homer bun run fetch       # AGDT, Perseus Greek and English, Autenrieth, 
 READER=genesis bun run fetch     # OSHB, Open Scriptures lexicon, JPS 1917
 READER=analects bun run fetch    # Kyoto treebank, Legge, Unihan, Wiktionary
 READER=dante bun run fetch       # UD_Italian-Old, Gutenberg Italian and Longfellow, Toynbee, Wiktionary (streams 650 MB)
-READER=machiavelli bun run fetch # Ricci, Wiktionary (streams 650 MB); the CoNLL-U is in the repo
+READER=machiavelli bun run fetch # Ricci, Liber Liber's Arte, Wiktionary (streams 650 MB); the CoNLL-U and Farneworth are in the repo
 # then READER=<id> bun run data and bun run build:<id> for each
 
 bun run build:site     # every reader's data and site, and the library → dist/site/
@@ -344,7 +360,8 @@ scripts/core/        what every build shares: outputs, data types, analysis tabl
 - `corpora/oldenglish/`, `corpora/homer/`, `corpora/genesis/`, `corpora/analects/`,
   `corpora/machiavelli/`: the same shape as the Aeneid (pinned `sources.ts`, `fetch.ts`, parsers in
   `lib/`, exception tables in `alignment.ts`, plus `names.ts` for Old English names and
-  `annotation.ts` for Homer's treebank repairs). Each build stops on an unexplained difference
+  `annotation.ts` for Homer's treebank repairs; Machiavelli's build is `build.ts`, which runs
+  `principe.ts` and `arte.ts`, one per work). Each build stops on an unexplained difference
   between its texts, on a morphology value with no English label, and on an exception it does not
   use.
 - `src/pages/`: home, works and collection pages (`[slug]`, rendering `src/components/WorkPage.astro`

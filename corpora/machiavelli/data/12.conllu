@@ -1949,7 +1949,7 @@
 15	,	,	PUNCT	FF	_	14	punct	_	_
 16	che	che	PRON	PR	PronType=Rel	22	nsubj	_	_
 17-18	ne'	_	_	_	_	_	_	_	_
-17	ni	in	ADP	E	_	20	case	_	_
+17	in	in	ADP	E	_	20	case	_	_
 18	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	20	det	_	_
 19	loro	loro	DET	AP	Poss=Yes|PronType=Prs	20	det:poss	_	_
 20	tempi	tempo	NOUN	S	Gender=Masc|Number=Plur	22	obl	_	_
@@ -2237,7 +2237,7 @@
 5	erano	essere	AUX	VA	Mood=Ind|Number=Plur|Person=3|Tense=Imp|VerbForm=Fin	6	aux:pass	_	_
 6	permesse	permettere	VERB	V	Gender=Fem|Number=Plur|Tense=Past|VerbForm=Part	0	root	_	_
 7-8	ne'	_	_	_	_	_	_	_	_
-7	ni	in	ADP	PC	_	10	case	_	_
+7	in	in	ADP	PC	_	10	case	_	_
 8	i	il	DET	RD	Definite=Def|Gender=Masc|Number=Plur|PronType=Art	10	det	_	_
 9	loro	loro	DET	AP	Poss=Yes|PronType=Prs	10	det:poss	_	_
 10	ordini	ordine	NOUN	S	Gender=Masc|Number=Plur	6	nsubj:pass	_	_

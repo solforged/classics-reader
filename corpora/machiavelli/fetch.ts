@@ -1,18 +1,23 @@
-// Downloads the pinned Prince sources (sources.ts), checks every download's SHA-256 and leaves what the build reads
-// in .cache/sources/machiavelli: Ricci's translation and the Wiktionary entries the annotation's lemmas need.
-// The CoNLL-U is checked into data/ and is not fetched.
+// Downloads the pinned sources (sources.ts), checks every download's SHA-256 and leaves what the build reads in
+// .cache/sources/machiavelli: Ricci's translation of the Prince, Liber Liber's text of the Arte della guerra decoded to
+// UTF-8, and the Wiktionary entries the annotation's lemmas need. The CoNLL-U and Farneworth's English are checked into
+// data/ and are not fetched.
 import { exists, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { looseKey } from "../../packs/ita/spelling";
 import { redirects, type WiktEntry } from "../../packs/ita/build/wiktionary";
 import { ROOT } from "../../scripts/core/outputs";
-import { DERIVED, GUTENBERG, KAIKKI, UNITS } from "./sources";
-import { DATA } from "./lib/align";
+import { ARTE_UNITS, DERIVED, GUTENBERG, KAIKKI, LIBERLIBER, PRINCE_UNITS } from "./sources";
+import { ARTE_DATA, DATA } from "./lib/align";
+import { sha256 } from "./lib/pins";
+import { zipMember } from "./lib/zip";
 
 export const CACHE = join(ROOT, ".cache", "sources", "machiavelli");
 
+/** A file fetch.ts left in the cache. */
+export const readCached = (rel: string): Promise<string> => Bun.file(join(CACHE, rel)).text();
+
 const HEADERS = { "User-Agent": "MachiavelliReader/1.0 (static parallel-text reader; build-time fetch)" };
-const sha256 = (bytes: Uint8Array): string => new Bun.CryptoHasher("sha256").update(bytes).digest("hex");
 
 async function download(url: string, sha: string): Promise<Uint8Array> {
   const response = await fetch(url, { headers: HEADERS });
@@ -38,8 +43,12 @@ const cached = async (rel: string): Promise<boolean> => {
 /** Every lemma of the annotation, as looseKey() gives it, and a verb's pronominal infinitive (accorgere: accorgersi). */
 async function lemmaKeys(): Promise<Set<string>> {
   const keys = new Set<string>();
-  for (const unit of UNITS) {
-    for (const line of (await Bun.file(join(DATA, `${unit}.conllu`)).text()).split("\n")) {
+  const files = [
+    ...PRINCE_UNITS.map((unit) => join(DATA, `${unit}.conllu`)),
+    ...ARTE_UNITS.map((unit) => join(ARTE_DATA, "conllu", `${unit}.conllu`)),
+  ];
+  for (const file of files) {
+    for (const line of (await Bun.file(file).text()).split("\n")) {
       if (!line || line.startsWith("#")) continue;
       const lemma = line.split("\t")[2] ?? "_";
       if (lemma === "_") continue;
@@ -69,12 +78,12 @@ function reduce(entry: RawEntry): WiktEntry {
 }
 
 /**
- * Streams the dump through the hash. Keeps the entries whose headword has an annotation lemma's loose key, and the
- * entries those name as their standard or base form (two steps), which the build follows.
+ * Streams the dump through the hash. Keeps the entries whose headword has one of the `wanted` loose keys, and the
+ * entries those name as their standard or base form (two steps), which the build follows. The keys are saved beside
+ * the entries, so that a later fetch can tell whether they still cover the annotation.
  */
-async function fetchWiktionary(): Promise<void> {
+async function fetchWiktionary(wanted: ReadonlySet<string>): Promise<void> {
   const [url, sha] = KAIKKI;
-  const wanted = await lemmaKeys();
   const response = await fetch(url, { headers: HEADERS });
   if (!response.ok || !response.body) throw new Error(`${url}: HTTP ${response.status}`);
   const hasher = new Bun.CryptoHasher("sha256");
@@ -116,11 +125,36 @@ async function fetchWiktionary(): Promise<void> {
   const out = [...kept.values()].flat();
   console.log(`Wiktionary dump: ${lines.toLocaleString()} entries, ${out.length.toLocaleString()} kept (${added} headwords as redirect targets)`);
   await save(DERIVED.wiktionary, out.map((entry) => JSON.stringify(entry)).join("\n") + "\n");
+  await save(DERIVED.wiktionaryKeys, [...wanted].sort().join("\n") + "\n");
+}
+
+/**
+ * Whether the saved Wiktionary entries were extracted for every lemma the annotation has now. A new reviewed
+ * annotation that only drops or respells lemmas keeps them; one that adds a lemma fetches again, for the old keys and the new.
+ */
+async function wiktionaryKeys(wanted: ReadonlySet<string>): Promise<{ fresh: boolean; keys: Set<string> }> {
+  const saved = await exists(join(CACHE, DERIVED.wiktionaryKeys)) && await exists(join(CACHE, DERIVED.wiktionary))
+    ? new Set((await readCached(DERIVED.wiktionaryKeys)).split("\n").filter(Boolean))
+    : new Set<string>();
+  return { fresh: saved.size > 0 && [...wanted].every((key) => saved.has(key)), keys: saved };
+}
+
+/** Liber Liber's ZIP, checked against its pin; the text file inside, decoded to UTF-8 and checked again. */
+async function fetchLiberLiber(): Promise<string> {
+  const zip = await download(LIBERLIBER.url, LIBERLIBER.zipSha);
+  const text = new TextDecoder(LIBERLIBER.encoding).decode(zipMember(zip, LIBERLIBER.member));
+  const actual = sha256(text);
+  if (actual !== LIBERLIBER.textSha) throw new Error(`${LIBERLIBER.url}: ${LIBERLIBER.member} decodes to SHA-256 ${actual}, expected ${LIBERLIBER.textSha}`);
+  return text;
 }
 
 if (import.meta.main) {
   const force = process.argv.includes("--force");
   const [url, sha] = GUTENBERG;
   if (force || !await cached("ricci.txt")) await save("ricci.txt", await download(url, sha));
-  if (force || !await cached(DERIVED.wiktionary)) await fetchWiktionary();
+  if (force || !await cached(DERIVED.arteText)) await save(DERIVED.arteText, await fetchLiberLiber());
+  const wanted = await lemmaKeys();
+  const { fresh, keys } = await wiktionaryKeys(wanted);
+  if (!force && fresh) console.log(`cached  machiavelli/${DERIVED.wiktionary}`);
+  else await fetchWiktionary(force ? wanted : new Set([...wanted, ...keys]));
 }
