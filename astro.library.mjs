@@ -8,5 +8,5 @@ export default defineConfig({
   publicDir: "generated/library/public",
   outDir: "dist/site",
   trailingSlash: "always",
-  build: { format: "directory" },
+  build: { format: "directory", inlineStylesheets: "never" },
 });

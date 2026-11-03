@@ -114,6 +114,24 @@ export interface ConcordanceOptions {
    * which is wrong for a script without spaces, where one character recurs within a line.
    */
   markPosition?: boolean;
+  /**
+   * Keep at most this many characters of the line on each side of the word, cut back to a space and marked with an
+   * ellipsis, and mark the word at its own place. For prose whose line is a whole paragraph: without it every
+   * concordance entry repeats its paragraph, so a lexicon page grows with paragraph length times occurrences.
+   */
+  context?: number;
+}
+
+/** The line around [start, end) with the word marked, cut to `context` characters a side at spaces. */
+function excerpt(line: string, start: number, end: number, context: number): string {
+  let left = line.slice(Math.max(0, start - context), start);
+  if (start > context) left = `… ${left.slice(left.indexOf(" ") + 1)}`;
+  let right = line.slice(end, end + context);
+  if (end + context < line.length) {
+    const cut = right.lastIndexOf(" ");
+    right = `${cut > 0 ? right.slice(0, cut) : right} …`;
+  }
+  return `${left}⟦${line.slice(start, end)}⟧${right}`;
 }
 
 /** Full-text search rows and the lexicon's frequencies and concordance lines. Source sides supply the words. */
@@ -169,9 +187,12 @@ export class Concordance {
               st.count++;
               st.works[slug] = (st.works[slug] ?? 0) + 1;
               if (st.occ.length < 400) {
-                const marked = this.options.markPosition
-                  ? `${lineText.slice(0, start)}⟦${p[0]}⟧${lineText.slice(start + p[0].length)}`
-                  : lineText.replace(p[0], `⟦${p[0]}⟧`);
+                const end = start + p[0].length;
+                const marked = this.options.context !== undefined
+                  ? excerpt(lineText, start, end, this.options.context)
+                  : this.options.markPosition
+                    ? `${lineText.slice(0, start)}⟦${p[0]}⟧${lineText.slice(end)}`
+                    : lineText.replace(p[0], `⟦${p[0]}⟧`);
                 st.occ.push([slug, cite, marked, probable, this.occurrence]);
               }
               this.occurrence++;

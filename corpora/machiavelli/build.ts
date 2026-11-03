@@ -72,7 +72,8 @@ for (const [slug, tally] of an.tallies) {
 
 const outputs = new Outputs(site.id);
 await outputs.reset();
-const concordance = new Concordance(site.sides, { markPosition: true });
+// A row is a whole paragraph, so a concordance entry shows only the 120 characters each side of its word.
+const concordance = new Concordance(site.sides, { context: 120 });
 for (const work of works) {
   await outputs.writeWork(work);
   console.log(statsLine(work.slug, work.rows.length, concordance.addWork(work.slug, work.rows, work.analyses)));

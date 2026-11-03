@@ -17,7 +17,9 @@ export default defineConfig({
   trailingSlash: "always",
   publicDir: `generated/${reader}/public`,
   outDir: base === undefined ? `dist/${reader}` : `dist/site${base}`,
-  build: { format: "directory" },
+  // Stylesheets are linked, not inlined: inlined, the shared page styles were repeated in every one of the lexicon's
+  // thousands of pages (about 30–60% of each), while a linked file is fetched once and cached.
+  build: { format: "directory", inlineStylesheets: "never" },
   vite: {
     define: {
       "import.meta.env.PUBLIC_READER": JSON.stringify(reader),
